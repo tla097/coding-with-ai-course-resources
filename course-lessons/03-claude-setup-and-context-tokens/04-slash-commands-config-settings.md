@@ -20,17 +20,17 @@ The **Status** tab will show you the version, login method, location, model, etc
 
 The **Config** tab is where you can specify certain things.
 
-**Auto Compact**: Auto-compact is when Claude Code automatically compresses your conversation when you're running low on context space - you don't have to manually trigger it. I like to keep this off and run the `/compact` command manually if needed.
-**Show tips** - Shows helpful tips and suggestions in the interface as you work.
-**Rewind code** (checkpoints) - Enables the **/rewind** command which lets you go back to a previous point in the conversation and undo changes. Creates checkpoints as you go.
-**Verbose output** - When true, shows more detailed output about what Claude is doing behind the scenes. Useful for debugging, but can be noisy.
-**Default permission mode** - Controls how Claude asks for permission to edit files. "Default" means it asks each time. You can set it to be more or less permissive.
-**Respect .gitignore in file picker** - When true, Claude won't show or suggest files that are in your .gitignore (like node_modules, .env files, etc.).
+**Auto Compact**: Auto-compact is when Claude Code automatically compresses your conversation when you're running low on context space - you don't have to manually trigger it. I like to keep this off and run the `/compact` command manually if needed.  
+**Show tips** - Shows helpful tips and suggestions in the interface as you work.  
+**Rewind code** (checkpoints) - Enables the **/rewind** command which lets you go back to a previous point in the conversation and undo changes. Creates checkpoints as you go.      
+**Verbose output** - When true, shows more detailed output about what Claude is doing behind the scenes. Useful for debugging, but can be noisy.  
+**Default permission mode** - Controls how Claude asks for permission to edit files. "Default" means it asks each time. You can set it to be more or less permissive.  
+**Respect .gitignore in file picker** - When true, Claude won't show or suggest files that are in your .gitignore (like node_modules, .env files, etc.).  
 **Theme** - Dark mode or light mode for the interface.
-**Notifications** - Controls system notifications. "Auto" means it decides based on context.
-**Output style** - How Claude formats its responses. "Default" is standard, but you can change it to be more concise or detailed.
+**Notifications** - Controls system notifications. "Auto" means it decides based on context.  
+**Output style** - How Claude formats its responses. "Default" is standard, but you can change it to be more concise or detailed.    
 **Editor mode** - "Normal" is standard. There's also a vim mode if you're into that.
-**Model** - Which Claude model to use. "Default (recommended)" lets Claude Code pick the best one automatically.
+**Model** - Which Claude model to use. "Default (recommended)" lets Claude Code pick the best one automatically.  
 **Auto-connect to IDE (external terminal)** - When true, Claude Code running in an external terminal will automatically connect to your IDE (like VS Code).
 
 I usually leave all of these on the defaults.
