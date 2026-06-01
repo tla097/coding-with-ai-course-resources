@@ -1,0 +1,1681 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verdant — Plant-Based Nutrition Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green-50: #e8f5e0;
+    --green-100: #c5e8ad;
+    --green-200: #9ed676;
+    --green-400: #5cb52e;
+    --green-600: #3a8018;
+    --green-800: #1e4a08;
+    --green-900: #0f2803;
+    --sage-50: #f0f4ec;
+    --sage-200: #c2d4b4;
+    --sage-400: #8aaa76;
+    --sage-600: #5a7a48;
+    --amber-400: #d4a030;
+    --amber-200: #e8c878;
+
+    --bg: #0a1208;
+    --bg-2: #111a0e;
+    --bg-3: #182415;
+    --surface: #1c2b18;
+    --surface-2: #243620;
+    --border: rgba(90,160,60,0.18);
+    --border-2: rgba(90,160,60,0.32);
+    --text-1: #e8f2e0;
+    --text-2: #a8c896;
+    --text-3: #6a9458;
+    --accent: #7ecb4a;
+    --accent-dim: rgba(126,203,74,0.15);
+    --accent-glow: rgba(126,203,74,0.08);
+    --hero-overlay: rgba(10,18,8,0.65);
+    --card-bg: rgba(24,36,21,0.9);
+    --side-bg: #0e1a0b;
+  }
+  [data-theme="light"] {
+    --bg: #f5f9f0;
+    --bg-2: #eef5e6;
+    --bg-3: #e4f0d8;
+    --surface: #ffffff;
+    --surface-2: #f0f7e8;
+    --border: rgba(60,120,30,0.15);
+    --border-2: rgba(60,120,30,0.28);
+    --text-1: #1a2e10;
+    --text-2: #3a6020;
+    --text-3: #6a9450;
+    --accent: #4a9e20;
+    --accent-dim: rgba(74,158,32,0.12);
+    --accent-glow: rgba(74,158,32,0.06);
+    --hero-overlay: rgba(245,249,240,0.5);
+    --card-bg: rgba(255,255,255,0.92);
+    --side-bg: #f0f7e8;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text-1);
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
+
+  /* ===== PLANT BORDER SYSTEM ===== */
+  .plant-border {
+    position: fixed;
+    pointer-events: none;
+    z-index: 0;
+    top: 0; left: 0; right: 0; bottom: 0;
+  }
+  .plant-svg {
+    position: fixed;
+    pointer-events: all;
+    z-index: 1;
+  }
+  .plant-leaf {
+    transition: transform 0.6s cubic-bezier(0.34,1.56,0.64,1);
+    transform-origin: center bottom;
+    cursor: default;
+  }
+  .plant-leaf:hover { transform: rotate(8deg) scale(1.08); }
+  .plant-leaf:hover ~ .plant-leaf { transform: rotate(-5deg) scale(1.04); }
+
+  /* ===== SCROLLABLE CONTENT ===== */
+  .page-content {
+    position: relative;
+    z-index: 10;
+  }
+
+  /* ===== TOP NAV ===== */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2rem;
+    height: 64px;
+    background: rgba(10,18,8,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    transition: background 0.3s;
+  }
+  [data-theme="light"] nav {
+    background: rgba(245,249,240,0.9);
+  }
+  .nav-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    color: var(--accent);
+    letter-spacing: -0.02em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+  }
+  .nav-logo span { color: var(--text-1); }
+  .nav-right { display: flex; align-items: center; gap: 12px; }
+
+  .btn-icon {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    border: 1px solid var(--border-2);
+    background: var(--surface);
+    color: var(--text-2);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem;
+    transition: all 0.2s;
+  }
+  .btn-icon:hover {
+    background: var(--accent-dim);
+    border-color: var(--accent);
+    color: var(--accent);
+    transform: scale(1.08);
+  }
+  .btn-primary {
+    padding: 8px 20px;
+    border-radius: 100px;
+    border: none;
+    background: var(--accent);
+    color: #0a1208;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    display: inline-block;
+  }
+  .btn-primary:hover { opacity: 0.88; transform: translateY(-1px); }
+
+  /* ===== SIDE MENU ===== */
+  .side-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 199;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+  }
+  .side-overlay.open { opacity: 1; pointer-events: all; }
+
+  .side-menu {
+    position: fixed;
+    top: 0; left: 0;
+    width: 280px;
+    height: 100vh;
+    background: var(--side-bg);
+    border-right: 1px solid var(--border-2);
+    z-index: 200;
+    transform: translateX(-100%);
+    transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem;
+    overflow-y: auto;
+  }
+  .side-menu.open { transform: translateX(0); }
+
+  .side-menu-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+  }
+  .side-menu-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    color: var(--accent);
+  }
+  .side-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: 10px;
+    text-decoration: none;
+    color: var(--text-2);
+    font-size: 0.9rem;
+    font-weight: 400;
+    transition: all 0.2s;
+    margin-bottom: 4px;
+    cursor: pointer;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+  }
+  .side-nav-item:hover, .side-nav-item.active {
+    background: var(--accent-dim);
+    color: var(--accent);
+  }
+  .side-nav-item .icon { font-size: 1.2rem; width: 24px; }
+  .side-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 1rem 0;
+  }
+  .side-section-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--text-3);
+    padding: 0 16px;
+    margin-bottom: 6px;
+    margin-top: 8px;
+  }
+  .side-profile {
+    margin-top: auto;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .side-avatar {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: var(--accent-dim);
+    border: 1.5px solid var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--accent);
+    font-weight: 500;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+  }
+  .side-profile-info { flex: 1; min-width: 0; }
+  .side-profile-name { font-size: 0.875rem; font-weight: 500; color: var(--text-1); }
+  .side-profile-tag { font-size: 0.75rem; color: var(--text-3); }
+
+  /* ===== HERO ===== */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 100px 2rem 6rem;
+    position: relative;
+  }
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 16px;
+    border-radius: 100px;
+    border: 1px solid var(--border-2);
+    background: var(--accent-dim);
+    color: var(--accent);
+    font-size: 0.8rem;
+    font-weight: 500;
+    margin-bottom: 2rem;
+    animation: fadeUp 0.6s both;
+  }
+  .hero-badge .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%,100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.8rem, 7vw, 5.5rem);
+    line-height: 1.08;
+    letter-spacing: -0.03em;
+    color: var(--text-1);
+    margin-bottom: 1.5rem;
+    animation: fadeUp 0.6s 0.1s both;
+  }
+  .hero h1 em {
+    font-style: italic;
+    color: var(--accent);
+  }
+  .hero-sub {
+    font-size: 1.1rem;
+    color: var(--text-2);
+    max-width: 520px;
+    line-height: 1.7;
+    margin: 0 auto 2.5rem;
+    font-weight: 300;
+    animation: fadeUp 0.6s 0.2s both;
+  }
+  .hero-cta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+    animation: fadeUp 0.6s 0.3s both;
+  }
+  .btn-outline {
+    padding: 10px 22px;
+    border-radius: 100px;
+    border: 1px solid var(--border-2);
+    background: transparent;
+    color: var(--text-2);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+  }
+  .btn-outline:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-dim);
+  }
+  .btn-primary-lg {
+    padding: 12px 28px;
+    border-radius: 100px;
+    border: none;
+    background: var(--accent);
+    color: #0a1208;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.25s;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .btn-primary-lg:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(126,203,74,0.25); }
+  .hero-stats {
+    display: flex;
+    gap: 2.5rem;
+    margin-top: 4rem;
+    animation: fadeUp 0.6s 0.4s both;
+  }
+  .hero-stat { text-align: center; }
+  .hero-stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .hero-stat-label { font-size: 0.75rem; color: var(--text-3); margin-top: 4px; }
+
+  /* ===== SECTIONS GENERAL ===== */
+  section {
+    padding: 5rem 2rem;
+    position: relative;
+  }
+  .container { max-width: 1100px; margin: 0 auto; }
+  .section-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--accent);
+    margin-bottom: 0.75rem;
+    font-weight: 500;
+  }
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 4vw, 2.8rem);
+    line-height: 1.15;
+    color: var(--text-1);
+    margin-bottom: 1rem;
+  }
+  .section-desc {
+    font-size: 1rem;
+    color: var(--text-2);
+    line-height: 1.7;
+    max-width: 520px;
+    font-weight: 300;
+  }
+
+  /* ===== PHOTO UPLOAD ===== */
+  .upload-section { background: var(--bg-2); }
+  .upload-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: center;
+    margin-top: 3rem;
+  }
+  .upload-zone {
+    border: 2px dashed var(--border-2);
+    border-radius: 20px;
+    padding: 3rem 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    background: var(--surface);
+    position: relative;
+    overflow: hidden;
+  }
+  .upload-zone::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--accent-glow);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .upload-zone:hover { border-color: var(--accent); }
+  .upload-zone:hover::before { opacity: 1; }
+  .upload-zone.drag-over {
+    border-color: var(--accent);
+    transform: scale(1.01);
+  }
+  .upload-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    display: block;
+    filter: drop-shadow(0 0 8px rgba(126,203,74,0.3));
+  }
+  .upload-zone h3 {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--text-1);
+    margin-bottom: 0.5rem;
+  }
+  .upload-zone p { font-size: 0.875rem; color: var(--text-3); }
+  .upload-methods {
+    display: flex;
+    gap: 8px;
+    margin-top: 1.5rem;
+    justify-content: center;
+  }
+  .upload-method-btn {
+    padding: 7px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text-2);
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .upload-method-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+  .upload-preview {
+    background: var(--surface);
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    min-height: 300px;
+    display: flex;
+    flex-direction: column;
+  }
+  .upload-preview-header {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .upload-preview-title { font-size: 0.85rem; font-weight: 500; color: var(--text-1); }
+  .status-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--accent);
+    animation: pulse 2s infinite;
+  }
+  .detected-foods {
+    padding: 1rem;
+    flex: 1;
+  }
+  .food-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border-radius: 100px;
+    background: var(--accent-dim);
+    border: 1px solid var(--border-2);
+    font-size: 0.8rem;
+    color: var(--accent);
+    margin: 4px;
+    animation: popIn 0.3s both;
+  }
+  @keyframes popIn {
+    from { transform: scale(0.8); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  .macro-bars { padding: 1rem; border-top: 1px solid var(--border); }
+  .macro-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    font-size: 0.8rem;
+  }
+  .macro-label { width: 70px; color: var(--text-3); }
+  .macro-track {
+    flex: 1;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--border);
+    overflow: hidden;
+  }
+  .macro-fill {
+    height: 100%;
+    border-radius: 3px;
+    background: var(--accent);
+    transition: width 1s cubic-bezier(0.4,0,0.2,1);
+  }
+  .macro-val { width: 40px; text-align: right; color: var(--text-2); }
+
+  /* ===== NUTRITION SECTION ===== */
+  .nutrition-section { background: var(--bg-3); }
+  .nutrition-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+    margin-top: 2.5rem;
+  }
+  .nutrient-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.25rem;
+    cursor: pointer;
+    transition: all 0.25s;
+    text-decoration: none;
+    display: block;
+    position: relative;
+    overflow: hidden;
+  }
+  .nutrient-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transition: transform 0.3s;
+    transform-origin: left;
+  }
+  .nutrient-card:hover { transform: translateY(-3px); border-color: var(--border-2); }
+  .nutrient-card:hover::after { transform: scaleX(1); }
+  .nutrient-icon { font-size: 1.8rem; margin-bottom: 0.75rem; }
+  .nutrient-name { font-size: 0.9rem; font-weight: 500; color: var(--text-1); margin-bottom: 4px; }
+  .nutrient-desc { font-size: 0.75rem; color: var(--text-3); line-height: 1.5; }
+  .nutrient-sources {
+    display: flex;
+    gap: 4px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+  }
+  .source-tag {
+    font-size: 0.68rem;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: var(--accent-dim);
+    color: var(--accent);
+    border: 1px solid var(--border-2);
+  }
+  .nutrition-goals {
+    margin-top: 2.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2rem;
+  }
+  .nutrition-goals h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    margin-bottom: 1.5rem;
+    color: var(--text-1);
+  }
+  .goals-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
+  }
+  .goal-option {
+    padding: 14px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+  }
+  .goal-option:hover, .goal-option.selected {
+    border-color: var(--accent);
+    background: var(--accent-dim);
+  }
+  .goal-option .goal-icon { font-size: 1.6rem; margin-bottom: 6px; }
+  .goal-option .goal-label { font-size: 0.8rem; color: var(--text-1); font-weight: 500; }
+
+  /* ===== CALENDAR ===== */
+  .calendar-section { background: var(--bg-2); }
+  .calendar-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    overflow: hidden;
+    margin-top: 2.5rem;
+  }
+  .calendar-header {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .calendar-nav { display: flex; align-items: center; gap: 12px; }
+  .cal-month {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    color: var(--text-1);
+  }
+  .cal-nav-btn {
+    width: 30px; height: 30px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: none;
+    color: var(--text-2);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+    font-size: 0.9rem;
+  }
+  .cal-nav-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+  .calendar-legend {
+    display: flex;
+    gap: 16px;
+    font-size: 0.78rem;
+    color: var(--text-3);
+  }
+  .legend-dot {
+    width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 4px;
+  }
+  .calendar-days-header {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-3);
+    padding: 10px 1.5rem;
+    background: var(--surface-2);
+  }
+  .calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+    padding: 1rem 1.5rem;
+  }
+  .cal-day {
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.875rem;
+    color: var(--text-2);
+    position: relative;
+    padding: 4px;
+  }
+  .cal-day:hover { background: var(--accent-dim); color: var(--accent); }
+  .cal-day.today {
+    background: var(--accent);
+    color: #0a1208;
+    font-weight: 600;
+  }
+  .cal-day.has-log::after {
+    content: '';
+    position: absolute;
+    bottom: 3px;
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+  .cal-day.today.has-log::after { background: #0a1208; }
+  .cal-day.other-month { color: var(--text-3); opacity: 0.4; }
+  .cal-day.good-day { border: 1px solid rgba(126,203,74,0.3); }
+  .cal-day-num { font-size: 0.8rem; line-height: 1; }
+  .cal-day-score { font-size: 0.6rem; color: var(--accent); }
+  .cal-day.today .cal-day-score { color: #0a1208; }
+
+  /* ===== RECIPE SECTION ===== */
+  .recipe-section { background: var(--bg-3); }
+  .recipe-builder {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    overflow: hidden;
+    margin-top: 2.5rem;
+  }
+  .recipe-builder-header {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .recipe-tabs {
+    display: flex;
+    gap: 4px;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-2);
+  }
+  .recipe-tab {
+    padding: 7px 16px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    background: none;
+    color: var(--text-3);
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .recipe-tab.active, .recipe-tab:hover {
+    background: var(--accent-dim);
+    color: var(--accent);
+    border-color: var(--border-2);
+  }
+  .recipe-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 340px;
+  }
+  .recipe-ingredients {
+    padding: 1.5rem;
+    border-right: 1px solid var(--border);
+  }
+  .recipe-ingredients h4 {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-3);
+    margin-bottom: 1rem;
+  }
+  .ingredient-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    animation: slideIn 0.3s both;
+  }
+  @keyframes slideIn {
+    from { transform: translateX(-8px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+  .ingredient-input {
+    flex: 1;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text-1);
+    font-size: 0.85rem;
+    font-family: 'DM Sans', sans-serif;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .ingredient-input:focus { border-color: var(--accent); }
+  .qty-input {
+    width: 60px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text-1);
+    font-size: 0.85rem;
+    font-family: 'DM Sans', sans-serif;
+    outline: none;
+    text-align: center;
+    transition: border-color 0.2s;
+  }
+  .qty-input:focus { border-color: var(--accent); }
+  .remove-btn {
+    width: 26px; height: 26px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: none;
+    color: var(--text-3);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+  .remove-btn:hover { border-color: #e24b4a; color: #e24b4a; background: rgba(226,75,74,0.1); }
+  .add-ingredient-btn {
+    width: 100%;
+    padding: 8px;
+    border-radius: 8px;
+    border: 1px dashed var(--border-2);
+    background: none;
+    color: var(--text-3);
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 4px;
+    font-family: 'DM Sans', sans-serif;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .add-ingredient-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+  .recipe-preview {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+  }
+  .recipe-preview h4 {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-3);
+    margin-bottom: 1rem;
+  }
+  .recipe-name-input {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text-1);
+    font-size: 1rem;
+    font-family: 'Playfair Display', serif;
+    outline: none;
+    margin-bottom: 1rem;
+    transition: border-color 0.2s;
+  }
+  .recipe-name-input:focus { border-color: var(--accent); }
+  .recipe-totals {
+    background: var(--surface-2);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-top: auto;
+  }
+  .recipe-total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.82rem;
+    padding: 4px 0;
+    color: var(--text-2);
+    border-bottom: 1px solid var(--border);
+  }
+  .recipe-total-row:last-child { border-bottom: none; }
+  .recipe-total-row strong { color: var(--accent); font-weight: 500; }
+  .recipe-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    background: var(--surface-2);
+  }
+
+  /* ===== MODAL ===== */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(4px);
+    z-index: 300;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+    padding: 1rem;
+  }
+  .modal-backdrop.open { opacity: 1; pointer-events: all; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border-2);
+    border-radius: 20px;
+    width: 100%;
+    max-width: 560px;
+    max-height: 80vh;
+    overflow-y: auto;
+    transform: translateY(12px) scale(0.98);
+    transition: transform 0.3s;
+  }
+  .modal-backdrop.open .modal { transform: translateY(0) scale(1); }
+  .modal-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    position: sticky; top: 0;
+    background: var(--surface);
+    z-index: 1;
+    border-radius: 20px 20px 0 0;
+  }
+  .modal-icon { font-size: 2rem; margin-bottom: 8px; }
+  .modal-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    color: var(--text-1);
+  }
+  .modal-subtitle { font-size: 0.85rem; color: var(--text-3); margin-top: 4px; }
+  .modal-body { padding: 1.5rem; }
+  .modal-info-block {
+    background: var(--surface-2);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1rem;
+    border: 1px solid var(--border);
+  }
+  .modal-info-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-3);
+    margin-bottom: 6px;
+  }
+  .modal-info-text { font-size: 0.88rem; color: var(--text-2); line-height: 1.6; }
+  .modal-sources {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+  }
+  .modal-source-tag {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 12px;
+    border-radius: 8px;
+    background: var(--accent-dim);
+    border: 1px solid var(--border-2);
+    font-size: 0.78rem;
+    color: var(--accent);
+  }
+  .rda-bar-wrap { margin-top: 0.75rem; }
+  .rda-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+    font-size: 0.78rem;
+  }
+  .rda-label { width: 100px; color: var(--text-2); }
+  .rda-track { flex: 1; height: 6px; border-radius: 3px; background: var(--border); overflow: hidden; }
+  .rda-fill { height: 100%; border-radius: 3px; background: var(--accent); }
+  .rda-val { width: 50px; text-align: right; color: var(--text-3); }
+
+  /* ===== THEME TOGGLE ===== */
+  .theme-toggle {
+    width: 52px; height: 28px;
+    border-radius: 14px;
+    border: 1px solid var(--border-2);
+    background: var(--surface);
+    cursor: pointer;
+    position: relative;
+    transition: background 0.3s;
+    flex-shrink: 0;
+  }
+  .theme-toggle::after {
+    content: '';
+    position: absolute;
+    top: 3px; left: 3px;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: var(--accent);
+    transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+  }
+  [data-theme="light"] .theme-toggle::after { transform: translateX(24px); }
+  .theme-icon { font-size: 0.85rem; }
+
+  /* ===== FOOTER ===== */
+  footer {
+    padding: 3rem 2rem;
+    background: var(--bg);
+    border-top: 1px solid var(--border);
+    text-align: center;
+  }
+  .footer-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+  }
+  .footer-tagline { font-size: 0.82rem; color: var(--text-3); }
+  .footer-links {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+    margin-top: 1.5rem;
+  }
+  .footer-links a {
+    font-size: 0.82rem;
+    color: var(--text-3);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .footer-links a:hover { color: var(--accent); }
+
+  /* ===== ANIMATIONS ===== */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s, transform 0.5s;
+  }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  /* ===== SCROLLBAR ===== */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 768px) {
+    .upload-grid, .recipe-body { grid-template-columns: 1fr; }
+    .nutrition-grid { grid-template-columns: repeat(2, 1fr); }
+    .hero-stats { gap: 1.5rem; }
+    nav { padding: 0 1rem; }
+    .btn-primary-lg { padding: 10px 20px; font-size: 0.875rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== PLANT BORDERS ===== -->
+<svg class="plant-svg" style="position:fixed;left:0;top:0;width:180px;height:100vh;pointer-events:none;z-index:1;" viewBox="0 0 180 900" preserveAspectRatio="xMinYMin meet">
+  <g style="pointer-events:all;">
+    <g class="plant-leaf" style="transform-origin:30px 820px;">
+      <path d="M10 820 Q-10 780 20 740 Q50 700 70 730 Q80 760 40 780 Q60 760 10 820Z" fill="rgba(90,160,40,0.25)" stroke="rgba(90,160,40,0.4)" stroke-width="1"/>
+    </g>
+    <g class="plant-leaf" style="transform-origin:20px 760px;">
+      <path d="M5 760 Q-20 720 10 680 Q40 640 65 670 Q70 700 35 720 Q55 700 5 760Z" fill="rgba(60,130,30,0.2)" stroke="rgba(60,130,30,0.35)" stroke-width="1"/>
+    </g>
+    <g class="plant-leaf" style="transform-origin:40px 700px;">
+      <path d="M20 700 Q0 660 35 620 Q70 580 85 615 Q88 648 55 665 Q72 645 20 700Z" fill="rgba(100,180,50,0.22)" stroke="rgba(100,180,50,0.38)" stroke-width="1"/>
+    </g>
+    <g class="plant-leaf" style="transform-origin:15px 640px;">
+      <path d="M5 640 Q-15 590 25 560 Q55 528 75 558 Q72 590 42 600 Q60 582 5 640Z" fill="rgba(70,150,35,0.18)" stroke="rgba(70,150,35,0.32)" stroke-width="1"/>
+    </g>
+    <g class="plant-leaf" style="transform-origin:50px 580px;">
+      <path d="M25 580 Q5 535 45 505 Q82 475 95 510 Q95 545 62 558 Q80 538 25 580Z" fill="rgba(120,200,60,0.2)" stroke="rgba(120,200,60,0.35)" stroke-width="1"/>
+    </g>
+    <g class="plant-leaf" style="transform-origin:10px 520px;">
+      <path d="M0 520 Q-20 470 20 445 Q52 418 70 448 Q68 482 38 492 Q55 474 0 520Z" fill="rgba(80,160,40,0.22)" stroke="rgba(80,160,40,0.38)" stroke-width="1"/>
+    </g>
+    <g class="plant-leaf" style="transform-origin:60px 460px;">
+      <path d="M30 460 Q15 415 55 390 Q92 362 102 398 Q98 432 68 442 Q85 424 30 460Z" fill="rgba(110,185,55,0.19)" stroke="rgba(110,185,55,0.34)" stroke-width="1"/>
+    </g>
+    <g class="plant-leaf" style="transform-origin:20px 400px;">
+      <path d="M8 400 Q-10 355 28 330 Q62 303 78 336 Q75 370 45 380 Q62 362 8 400Z" fill="rgba(75,155,38,0.21)" stroke="rgba(75,155,38,0.36)" stroke-width="1"/>
+    </g>
+    <g class="plant-leaf" style="transform-origin:45px 330px;">
+      <path d="M22 330 Q5 284 42 260 Q78 234 90 268 Q88 303 58 313 Q75 295 22 330Z" fill="rgba(95,175,48,0.2)" stroke="rgba(95,175,48,0.35)" stroke-width="1"/>
+    </g>
+    <g class="plant-leaf" style="transform-origin:15px 265px;">
+      <path d="M4 265 Q-14 220 24 196 Q58 170 72 203 Q69 237 40 247 Q56 229 4 265Z" fill="rgba(65,145,33,0.22)" stroke="rgba(65,145,33,0.37)" stroke-width="1"/>
+    </g>
+  </g>
+</svg>
+
+<svg class="plant-svg" style="position:fixed;right:0;top:0;width:180px;height:100vh;pointer-events:none;z-index:1;transform:scaleX(-1);" viewBox="0 0 180 900" preserveAspectRatio="xMinYMin meet">
+  <g style="pointer-events:all;">
+    <g class="plant-leaf" style="transform-origin:30px 820px;">
+      <path d="M10 820 Q-10 780 20 740 Q50 700 70 730 Q80 760 40 780 Q60 760 10 820Z" fill="rgba(90,160,40,0.22)" stroke="rgba(90,160,40,0.38)" stroke-width="1"/>
+    </g>
+    <g class="plant-leaf" style="transform-origin:20px 750px;">
+      <path d="M5 750 Q-20 710 10 670 Q42 632 65 660 Q70 692 35 710 Q55 692 5 750Z" fill="rgba(60,130,30,0.18)" stroke="rgba(60,130,30,0.32)" stroke-width="1"/>
+    </g>
+    <g class="plant-leaf" style="transform-origin:50px 690px;">
+      <path d="M25 690 Q8 644 48 618 Q84 590 95 625 Q92 659 62 670 Q78 652 25 690Z" fill="rgba(110,185,55,0.2)" stroke="rgba(110,185,55,0.36)" stroke-width="1"/>
+    </g>
+    <g class="plant-leaf" style="transform-origin:12px 625px;">
+      <path d="M3 625 Q-16 580 22 555 Q56 528 72 558 Q70 593 40 603 Q58 585 3 625Z" fill="rgba(80,160,40,0.21)" stroke="rgba(80,160,40,0.37)" stroke-width="1"/>
+    </g>
+    <g class="plant-leaf" style="transform-origin:55px 560px;">
+      <path d="M28 560 Q10 514 50 488 Q86 460 98 496 Q96 530 66 542 Q83 524 28 560Z" fill="rgba(100,178,50,0.2)" stroke="rgba(100,178,50,0.35)" stroke-width="1"/>
+    </g>
+    <g class="plant-leaf" style="transform-origin:18px 498px;">
+      <path d="M5 498 Q-14 452 26 428 Q60 402 76 432 Q74 466 44 477 Q61 459 5 498Z" fill="rgba(72,152,36,0.22)" stroke="rgba(72,152,36,0.38)" stroke-width="1"/>
+    </g>
+    <g class="plant-leaf" style="transform-origin:48px 436px;">
+      <path d="M24 436 Q8 390 46 366 Q82 340 94 374 Q92 408 62 419 Q78 401 24 436Z" fill="rgba(115,192,58,0.19)" stroke="rgba(115,192,58,0.34)" stroke-width="1"/>
+    </g>
+    <g class="plant-leaf" style="transform-origin:14px 372px;">
+      <path d="M4 372 Q-14 328 24 304 Q58 278 74 310 Q72 344 42 355 Q59 337 4 372Z" fill="rgba(82,162,41,0.2)" stroke="rgba(82,162,41,0.35)" stroke-width="1"/>
+    </g>
+    <g class="plant-leaf" style="transform-origin:44px 308px;">
+      <path d="M21 308 Q4 263 42 240 Q78 214 90 248 Q88 282 58 292 Q74 274 21 308Z" fill="rgba(98,175,49,0.21)" stroke="rgba(98,175,49,0.37)" stroke-width="1"/>
+    </g>
+    <g class="plant-leaf" style="transform-origin:16px 244px;">
+      <path d="M4 244 Q-14 200 24 176 Q58 150 74 182 Q72 216 42 226 Q59 208 4 244Z" fill="rgba(68,148,34,0.22)" stroke="rgba(68,148,34,0.38)" stroke-width="1"/>
+    </g>
+  </g>
+</svg>
+
+<!-- ===== SIDE MENU OVERLAY ===== -->
+<div class="side-overlay" id="sideOverlay" onclick="toggleSideMenu()"></div>
+<aside class="side-menu" id="sideMenu" aria-label="Navigation menu">
+  <div class="side-menu-header">
+    <div class="side-menu-logo">🌿 Verdant</div>
+    <button class="btn-icon" onclick="toggleSideMenu()" aria-label="Close menu">✕</button>
+  </div>
+  <div class="side-section-label">Main</div>
+  <button class="side-nav-item active" onclick="scrollToSection('hero'); toggleSideMenu()">
+    <span class="icon">🏠</span> Dashboard
+  </button>
+  <button class="side-nav-item" onclick="scrollToSection('upload-section'); toggleSideMenu()">
+    <span class="icon">📸</span> Log Meal
+  </button>
+  <button class="side-nav-item" onclick="scrollToSection('nutrition-section'); toggleSideMenu()">
+    <span class="icon">🧪</span> Nutrition Guide
+  </button>
+  <button class="side-nav-item" onclick="scrollToSection('calendar-section'); toggleSideMenu()">
+    <span class="icon">📅</span> Food Calendar
+  </button>
+  <button class="side-nav-item" onclick="scrollToSection('recipe-section'); toggleSideMenu()">
+    <span class="icon">🥗</span> Recipes
+  </button>
+  <div class="side-divider"></div>
+  <div class="side-section-label">Goals</div>
+  <button class="side-nav-item"><span class="icon">🎯</span> My Nutrition Goals</button>
+  <button class="side-nav-item"><span class="icon">📊</span> Weekly Reports</button>
+  <button class="side-nav-item"><span class="icon">⚖️</span> Weight Tracker</button>
+  <div class="side-divider"></div>
+  <div class="side-section-label">Settings</div>
+  <button class="side-nav-item"><span class="icon">🔔</span> Reminders</button>
+  <button class="side-nav-item"><span class="icon">🌍</span> Units & Region</button>
+  <button class="side-nav-item"><span class="icon">⚙️</span> Account Settings</button>
+  <div class="side-profile">
+    <div class="side-avatar">AK</div>
+    <div class="side-profile-info">
+      <div class="side-profile-name">Alex Kim</div>
+      <div class="side-profile-tag">Plant-based · 1 year</div>
+    </div>
+  </div>
+</aside>
+
+<!-- ===== NAVIGATION ===== -->
+<nav>
+  <button class="btn-icon" onclick="toggleSideMenu()" aria-label="Open menu" style="border-radius:8px;">
+    ☰
+  </button>
+  <a href="#" class="nav-logo">🌿 <span>Verdant</span></a>
+  <div class="nav-right">
+    <span style="font-size:0.8rem;color:var(--text-3);">☀️</span>
+    <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark/light mode"></button>
+    <span style="font-size:0.8rem;color:var(--text-3);">🌙</span>
+    <a href="#" class="btn-primary" style="margin-left:8px;">Get Started</a>
+  </div>
+</nav>
+
+<!-- ===== MAIN CONTENT ===== -->
+<main class="page-content">
+
+  <!-- HERO -->
+  <section class="hero" id="hero">
+    <div class="hero-badge">
+      <span class="dot"></span>
+      AI-Powered Plant Nutrition · Now in Beta
+    </div>
+    <h1>Nourish your body,<br><em>naturally</em></h1>
+    <p class="hero-sub">Track every vitamin, mineral and macro in your plant-based diet. Snap a photo, scan a barcode, or build a recipe — Verdant does the rest.</p>
+    <div class="hero-cta">
+      <a href="#" class="btn-primary-lg">Start tracking free <span>→</span></a>
+      <a href="#upload-section" class="btn-outline">See how it works</a>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="hero-stat-num">47</div>
+        <div class="hero-stat-label">nutrients tracked</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num">1.2M+</div>
+        <div class="hero-stat-label">foods in database</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num">98%</div>
+        <div class="hero-stat-label">scan accuracy</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PHOTO UPLOAD -->
+  <section class="upload-section reveal" id="upload-section">
+    <div class="container">
+      <p class="section-label">Log Meals</p>
+      <h2 class="section-title">Snap, scan, or search</h2>
+      <p class="section-desc">Use your camera to photograph a meal and our AI estimates every ingredient. Add a label or barcode for precision.</p>
+      <div class="upload-grid">
+        <div>
+          <div class="upload-zone" id="uploadZone" onclick="triggerUpload()" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+            <span class="upload-icon">📷</span>
+            <h3>Drop a food photo here</h3>
+            <p>or tap to choose from your device</p>
+            <div class="upload-methods">
+              <button class="upload-method-btn" onclick="event.stopPropagation(); simulateScan()">📱 Barcode scan</button>
+              <button class="upload-method-btn" onclick="event.stopPropagation(); simulateSearch()">🔍 Search food</button>
+              <button class="upload-method-btn" onclick="event.stopPropagation(); simulateCamera()">🤳 Camera</button>
+            </div>
+          </div>
+          <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="handleFileSelect(event)">
+        </div>
+        <div class="upload-preview" id="uploadPreview">
+          <div class="upload-preview-header">
+            <span class="upload-preview-title">AI Food Analysis</span>
+            <div class="status-dot" id="statusDot" style="opacity:0.3"></div>
+          </div>
+          <div class="detected-foods" id="detectedFoods">
+            <p style="font-size:0.82rem;color:var(--text-3);text-align:center;margin-top:2rem;">Upload a photo to detect ingredients automatically</p>
+          </div>
+          <div class="macro-bars" id="macroBars" style="display:none">
+            <div class="macro-row">
+              <span class="macro-label">Calories</span>
+              <div class="macro-track"><div class="macro-fill" id="calFill" style="width:0%;background:#e8c878"></div></div>
+              <span class="macro-val" id="calVal">0</span>
+            </div>
+            <div class="macro-row">
+              <span class="macro-label">Protein</span>
+              <div class="macro-track"><div class="macro-fill" id="protFill" style="width:0%"></div></div>
+              <span class="macro-val" id="protVal">0g</span>
+            </div>
+            <div class="macro-row">
+              <span class="macro-label">Carbs</span>
+              <div class="macro-track"><div class="macro-fill" id="carbFill" style="width:0%;background:#5cb52e"></div></div>
+              <span class="macro-val" id="carbVal">0g</span>
+            </div>
+            <div class="macro-row">
+              <span class="macro-label">Fat</span>
+              <div class="macro-track"><div class="macro-fill" id="fatFill" style="width:0%;background:#d4a030"></div></div>
+              <span class="macro-val" id="fatVal">0g</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- NUTRITION GUIDANCE -->
+  <section class="nutrition-section reveal" id="nutrition-section">
+    <div class="container">
+      <p class="section-label">Nutrition Guide</p>
+      <h2 class="section-title">Everything your body needs — from plants</h2>
+      <p class="section-desc">Tap any nutrient to explore vegan sources, recommended daily amounts, and set personal goals based on your life stage.</p>
+      <div class="nutrition-grid">
+        <!-- Nutrient cards generated by JS -->
+      </div>
+      <div class="nutrition-goals reveal">
+        <h3>Set your personal nutrition goals</h3>
+        <div class="goals-grid" id="goalsGrid">
+          <!-- Goals generated by JS -->
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOD CALENDAR -->
+  <section class="calendar-section reveal" id="calendar-section">
+    <div class="container">
+      <p class="section-label">Food Calendar</p>
+      <h2 class="section-title">Your daily nutrition journey</h2>
+      <p class="section-desc">Click any day to view or edit your logged meals. Green days mean you hit your nutrition targets.</p>
+      <div class="calendar-wrap">
+        <div class="calendar-header">
+          <div class="calendar-nav">
+            <button class="cal-nav-btn" onclick="changeMonth(-1)">‹</button>
+            <span class="cal-month" id="calMonth">June 2026</span>
+            <button class="cal-nav-btn" onclick="changeMonth(1)">›</button>
+          </div>
+          <div class="calendar-legend">
+            <span><span class="legend-dot" style="background:var(--accent)"></span>On track</span>
+            <span><span class="legend-dot" style="background:var(--amber-400)"></span>Partial</span>
+            <span><span class="legend-dot" style="background:var(--border-2)"></span>No log</span>
+          </div>
+        </div>
+        <div class="calendar-days-header">
+          <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+        </div>
+        <div class="calendar-grid" id="calendarGrid"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RECIPE BUILDER -->
+  <section class="recipe-section reveal" id="recipe-section">
+    <div class="container">
+      <p class="section-label">Recipe Builder</p>
+      <h2 class="section-title">Create your own foods & recipes</h2>
+      <p class="section-desc">Build custom recipes and save them to your personal library. All nutrition values are calculated automatically.</p>
+      <div class="recipe-builder">
+        <div class="recipe-builder-header">
+          <span style="font-size:1.5rem">🥗</span>
+          <div>
+            <div style="font-weight:500;color:var(--text-1);">Recipe Builder</div>
+            <div style="font-size:0.78rem;color:var(--text-3);">Add ingredients to calculate nutrition automatically</div>
+          </div>
+        </div>
+        <div class="recipe-tabs">
+          <button class="recipe-tab active" onclick="switchTab(this,'ingredients')">Ingredients</button>
+          <button class="recipe-tab" onclick="switchTab(this,'instructions')">Instructions</button>
+          <button class="recipe-tab" onclick="switchTab(this,'saved')">Saved Recipes</button>
+        </div>
+        <div class="recipe-body">
+          <div class="recipe-ingredients">
+            <h4>Ingredients</h4>
+            <div id="ingredientList"></div>
+            <button class="add-ingredient-btn" onclick="addIngredient()">+ Add ingredient</button>
+          </div>
+          <div class="recipe-preview">
+            <h4>Recipe Details</h4>
+            <input type="text" class="recipe-name-input" placeholder="Recipe name..." id="recipeName" value="Green Power Bowl">
+            <div id="servingRow" style="display:flex;align-items:center;gap:8px;margin-bottom:1rem;">
+              <span style="font-size:0.82rem;color:var(--text-3);">Servings:</span>
+              <input type="number" class="qty-input" value="2" min="1" max="20" style="width:50px" id="servingCount" oninput="updateTotals()">
+            </div>
+            <div class="recipe-totals" id="recipeTotals">
+              <div class="recipe-total-row"><span>Calories</span><strong id="totalCal">0 kcal</strong></div>
+              <div class="recipe-total-row"><span>Protein</span><strong id="totalProt">0g</strong></div>
+              <div class="recipe-total-row"><span>Carbohydrates</span><strong id="totalCarb">0g</strong></div>
+              <div class="recipe-total-row"><span>Fat</span><strong id="totalFat">0g</strong></div>
+              <div class="recipe-total-row"><span>Fibre</span><strong id="totalFibre">0g</strong></div>
+              <div class="recipe-total-row"><span>Iron</span><strong id="totalIron">0mg</strong></div>
+              <div class="recipe-total-row"><span>Vitamin B12</span><strong id="totalB12">0μg</strong></div>
+            </div>
+          </div>
+        </div>
+        <div class="recipe-footer">
+          <button class="btn-outline" onclick="clearRecipe()">Clear</button>
+          <button class="btn-primary-lg" style="padding:10px 20px;font-size:0.85rem;" onclick="saveRecipe()">💾 Save Recipe</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ===== NUTRIENT MODAL ===== -->
+<div class="modal-backdrop" id="nutrientModal" onclick="closeModal()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <div>
+        <div class="modal-icon" id="modalIcon">🌿</div>
+        <div class="modal-title" id="modalTitle">Vitamin B12</div>
+        <div class="modal-subtitle" id="modalSubtitle">Essential · Requires supplementation on vegan diet</div>
+      </div>
+      <button class="btn-icon" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<!-- ===== FOOTER ===== -->
+<footer>
+  <div class="footer-logo">🌿 Verdant</div>
+  <div class="footer-tagline">Plant-powered nutrition tracking</div>
+  <div class="footer-links">
+    <a href="#">About</a>
+    <a href="#">Privacy</a>
+    <a href="#">Terms</a>
+    <a href="#">Contact</a>
+    <a href="#">Blog</a>
+  </div>
+</footer>
+
+<script>
+// ===== THEME =====
+function toggleTheme() {
+  const html = document.documentElement;
+  html.setAttribute('data-theme', html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+}
+
+// ===== SIDE MENU =====
+function toggleSideMenu() {
+  document.getElementById('sideMenu').classList.toggle('open');
+  document.getElementById('sideOverlay').classList.toggle('open');
+}
+function scrollToSection(id) {
+  const el = document.getElementById(id);
+  if (el) el.scrollIntoView({ behavior: 'smooth' });
+}
+
+// ===== REVEAL ON SCROLL =====
+const revealObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); revealObserver.unobserve(e.target); } });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+// ===== UPLOAD ZONE =====
+function triggerUpload() { document.getElementById('fileInput').click(); }
+function handleDragOver(e) { e.preventDefault(); document.getElementById('uploadZone').classList.add('drag-over'); }
+function handleDragLeave() { document.getElementById('uploadZone').classList.remove('drag-over'); }
+function handleDrop(e) { e.preventDefault(); document.getElementById('uploadZone').classList.remove('drag-over'); simulateAnalysis(); }
+function handleFileSelect() { simulateAnalysis(); }
+function simulateScan() { simulateAnalysis('barcode'); }
+function simulateSearch() { simulateAnalysis('search'); }
+function simulateCamera() { simulateAnalysis('camera'); }
+
+function simulateAnalysis(type) {
+  const dot = document.getElementById('statusDot');
+  const foods = document.getElementById('detectedFoods');
+  const macros = document.getElementById('macroBars');
+  dot.style.opacity = '1';
+  foods.innerHTML = '<p style="font-size:0.82rem;color:var(--text-3);text-align:center;margin-top:1rem;">🔍 Analysing…</p>';
+  macros.style.display = 'none';
+  const detected = type === 'barcode'
+    ? [{ name:'Oat Milk', cal:45 }, { name:'Fortified cereal', cal:180 }]
+    : [{ name:'Brown rice', cal:215 }, { name:'Chickpeas', cal:164 }, { name:'Kale', cal:33 }, { name:'Tahini dressing', cal:89 }];
+  setTimeout(() => {
+    foods.innerHTML = '<p style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-3);margin-bottom:8px;">Detected:</p>';
+    detected.forEach((f, i) => {
+      setTimeout(() => {
+        const chip = document.createElement('span');
+        chip.className = 'food-chip';
+        chip.style.animationDelay = `${i*80}ms`;
+        chip.innerHTML = `✓ ${f.name} <span style="color:var(--text-3);">${f.cal}cal</span>`;
+        foods.appendChild(chip);
+      }, i * 100);
+    });
+    setTimeout(() => {
+      macros.style.display = 'block';
+      const totalCal = detected.reduce((s,f) => s + f.cal, 0);
+      animateMacro('calFill', 'calVal', Math.round(totalCal/2000*100), totalCal, '');
+      animateMacro('protFill', 'protVal', 72, 18, 'g');
+      animateMacro('carbFill', 'carbVal', 60, 42, 'g');
+      animateMacro('fatFill', 'fatVal', 40, 12, 'g');
+      dot.style.opacity = '0.3';
+    }, detected.length * 100 + 200);
+  }, 900);
+}
+
+function animateMacro(fillId, valId, pct, val, unit) {
+  requestAnimationFrame(() => {
+    document.getElementById(fillId).style.width = Math.min(pct, 100) + '%';
+    document.getElementById(valId).textContent = val + unit;
+  });
+}
+
+// ===== NUTRIENTS DATA =====
+const nutrients = [
+  { icon:'🅱️', name:'Vitamin B12', desc:'Critical for nerve function and red blood cells', sources:['Fortified foods','Nutritional yeast','Supplements'], rda:[{l:'Adult',v:80},{l:'Pregnant',v:100},{l:'Senior 65+',v:95}], detail:'Vitamin B12 is not found naturally in plant foods. All vegans must supplement or rely on fortified foods. Deficiency causes irreversible nerve damage.' },
+  { icon:'☀️', name:'Vitamin D', desc:'Bone health and immune system support', sources:['Sunlight','Fortified milk','Mushrooms','D3 supplement'], rda:[{l:'Adult',v:60},{l:'Child',v:55},{l:'Senior 65+',v:90}], detail:'Vitamin D3 from lichen (vegan) is well-absorbed. Get 15-20 mins of sun daily on skin, or supplement 1000–2000 IU.' },
+  { icon:'🩸', name:'Iron', desc:'Oxygen transport in the blood', sources:['Lentils','Spinach','Tofu','Pumpkin seeds','Quinoa'], rda:[{l:'Adult ♀',v:85},{l:'Pregnant',v:55},{l:'Adult ♂',v:95}], detail:'Non-heme iron from plants is less absorbed. Eat with vitamin C to boost absorption. Avoid coffee/tea near meals. Pregnant people need significantly more.' },
+  { icon:'🦴', name:'Calcium', desc:'Bones, teeth, and muscle function', sources:['Fortified milk','Kale','Broccoli','Tofu (set)','Almonds'], rda:[{l:'Adult',v:75},{l:'Teen',v:65},{l:'Pregnant',v:85}], detail:'Aim for 1000mg/day. Calcium-set tofu is an excellent source. Dark leafy greens contain calcium but also oxalates — vary your sources.' },
+  { icon:'🫀', name:'Omega-3', desc:'Heart, brain, and anti-inflammatory', sources:['Flaxseed','Chia seeds','Walnuts','Hemp seeds','Algae oil'], rda:[{l:'Adult',v:50},{l:'Pregnant',v:70},{l:'Athlete',v:65}], detail:'ALA in plants converts poorly to EPA/DHA. Consider algae-based omega-3 oil for direct EPA+DHA.' },
+  { icon:'⚡', name:'Zinc', desc:'Immune function, wound healing', sources:['Legumes','Seeds','Nuts','Whole grains'], rda:[{l:'Adult',v:70},{l:'Teen',v:65},{l:'Pregnant',v:75}], detail:'Phytates in plants reduce absorption. Soaking, sprouting, and fermenting legumes helps. Vegans may need 50% more than RDA.' },
+  { icon:'🧠', name:'Choline', desc:'Brain health and cell membranes', sources:['Soybeans','Broccoli','Quinoa','Potatoes'], rda:[{l:'Adult',v:55},{l:'Pregnant',v:65},{l:'Breastfeeding',v:70}], detail:'Often overlooked, choline is critical during pregnancy. Lecithin supplements derived from sunflower are vegan.' },
+  { icon:'🔬', name:'Iodine', desc:'Thyroid hormone production', sources:['Sea vegetables','Iodised salt','Supplements'], rda:[{l:'Adult',v:60},{l:'Pregnant',v:80},{l:'Child',v:50}], detail:'Iodine is low in most plant foods unless grown in iodine-rich soil. Use iodised salt or take a supplement of ~150μg/day.' },
+];
+
+const goals = [
+  { icon:'🤰', label:'Pregnant' }, { icon:'🤱', label:'Breastfeeding' }, { icon:'🏃', label:'Athlete' },
+  { icon:'👶', label:'Child/Teen' }, { icon:'👴', label:'Senior 65+' }, { icon:'💪', label:'Build muscle' },
+  { icon:'🫀', label:'Heart health' }, { icon:'🌱', label:'New vegan' },
+];
+
+// render nutrients
+const nutritionGrid = document.querySelector('.nutrition-grid');
+nutrients.forEach((n, i) => {
+  const card = document.createElement('a');
+  card.className = 'nutrient-card';
+  card.href = '#';
+  card.innerHTML = `<div class="nutrient-icon">${n.icon}</div><div class="nutrient-name">${n.name}</div><div class="nutrient-desc">${n.desc}</div><div class="nutrient-sources">${n.sources.slice(0,3).map(s=>`<span class="source-tag">${s}</span>`).join('')}</div>`;
+  card.addEventListener('click', e => { e.preventDefault(); openNutrientModal(n); });
+  nutritionGrid.appendChild(card);
+});
+
+// render goals
+const goalsGrid = document.getElementById('goalsGrid');
+goals.forEach(g => {
+  const btn = document.createElement('div');
+  btn.className = 'goal-option';
+  btn.innerHTML = `<div class="goal-icon">${g.icon}</div><div class="goal-label">${g.label}</div>`;
+  btn.addEventListener('click', () => btn.classList.toggle('selected'));
+  goalsGrid.appendChild(btn);
+});
+
+// ===== NUTRIENT MODAL =====
+function openNutrientModal(n) {
+  document.getElementById('modalIcon').textContent = n.icon;
+  document.getElementById('modalTitle').textContent = n.name;
+  document.getElementById('modalSubtitle').textContent = n.desc;
+  const body = document.getElementById('modalBody');
+  body.innerHTML = `
+    <div class="modal-info-block">
+      <div class="modal-info-label">About</div>
+      <div class="modal-info-text">${n.detail}</div>
+    </div>
+    <div class="modal-info-block">
+      <div class="modal-info-label">Best vegan sources</div>
+      <div class="modal-sources">${n.sources.map(s=>`<span class="modal-source-tag">🌱 ${s}</span>`).join('')}</div>
+    </div>
+    <div class="modal-info-block">
+      <div class="modal-info-label">Recommended Daily Amount (% covered by food)</div>
+      <div class="rda-bar-wrap">${n.rda.map(r=>`<div class="rda-row"><span class="rda-label">${r.l}</span><div class="rda-track"><div class="rda-fill" style="width:${r.v}%"></div></div><span class="rda-val">${r.v}%</span></div>`).join('')}</div>
+    </div>
+  `;
+  document.getElementById('nutrientModal').classList.add('open');
+}
+function closeModal() { document.getElementById('nutrientModal').classList.remove('open'); }
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+// ===== CALENDAR =====
+let calDate = new Date(2026, 5, 1);
+const loggedDays = [1,2,3,4,5,8,9,10,11,14,15,18,20,22,25,26,27,28,29,30,31];
+const goodDays   = [1,2,3,4,5,9,10,11,14,18,22,26,27,28];
+const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+function renderCalendar() {
+  document.getElementById('calMonth').textContent = `${months[calDate.getMonth()]} ${calDate.getFullYear()}`;
+  const grid = document.getElementById('calendarGrid');
+  grid.innerHTML = '';
+  const first = new Date(calDate.getFullYear(), calDate.getMonth(), 1).getDay();
+  const days = new Date(calDate.getFullYear(), calDate.getMonth()+1, 0).getDate();
+  const prevDays = new Date(calDate.getFullYear(), calDate.getMonth(), 0).getDate();
+  const today = new Date(2026, 5, 1);
+  for (let i = 0; i < first; i++) {
+    const d = document.createElement('div');
+    d.className = 'cal-day other-month';
+    d.innerHTML = `<span class="cal-day-num">${prevDays - first + i + 1}</span>`;
+    grid.appendChild(d);
+  }
+  for (let d = 1; d <= days; d++) {
+    const el = document.createElement('div');
+    const isToday = d === today.getDate() && calDate.getMonth() === today.getMonth() && calDate.getFullYear() === today.getFullYear();
+    const hasLog = loggedDays.includes(d);
+    const isGood = goodDays.includes(d);
+    el.className = `cal-day${isToday?' today':''}${hasLog?' has-log':''}${isGood?' good-day':''}`;
+    const score = isGood ? '92%' : hasLog ? '68%' : '';
+    el.innerHTML = `<span class="cal-day-num">${d}</span>${score?`<span class="cal-day-score">${score}</span>`:''}`;
+    el.addEventListener('click', () => alert(`Day ${d}: ${hasLog ? (isGood ? '✅ Great day! 92% nutrition score.' : '⚠️ Partial logging — missing some meals.') : '📝 No meals logged yet.'}`));
+    grid.appendChild(el);
+  }
+}
+function changeMonth(dir) {
+  calDate = new Date(calDate.getFullYear(), calDate.getMonth() + dir, 1);
+  renderCalendar();
+}
+renderCalendar();
+
+// ===== RECIPE BUILDER =====
+const foodDB = {
+  'brown rice': { cal:215, prot:4.5, carb:44.8, fat:1.8, fibre:3.5, iron:1.0, b12:0 },
+  'chickpeas': { cal:164, prot:8.9, carb:27.4, fat:2.6, fibre:7.6, iron:2.9, b12:0 },
+  'kale': { cal:33, prot:2.9, carb:6.7, fat:0.5, fibre:1.3, iron:1.5, b12:0 },
+  'lentils': { cal:230, prot:17.9, carb:39.9, fat:0.8, fibre:15.6, iron:6.6, b12:0 },
+  'tofu': { cal:76, prot:8.1, carb:1.9, fat:4.2, fibre:0.3, iron:5.4, b12:0 },
+  'quinoa': { cal:222, prot:8.1, carb:39.4, fat:3.6, fibre:5.2, iron:2.8, b12:0 },
+  'spinach': { cal:23, prot:2.9, carb:3.6, fat:0.4, fibre:2.2, iron:2.7, b12:0 },
+  'nutritional yeast': { cal:45, prot:8.0, carb:5.0, fat:0.5, fibre:3.0, iron:4.0, b12:8.0 },
+  'almonds': { cal:164, prot:6.0, carb:6.1, fat:14.2, fibre:3.5, iron:1.1, b12:0 },
+  'oats': { cal:389, prot:16.9, carb:66.3, fat:6.9, fibre:10.6, iron:4.7, b12:0 },
+  'avocado': { cal:160, prot:2.0, carb:8.5, fat:14.7, fibre:6.7, iron:0.6, b12:0 },
+  'tempeh': { cal:193, prot:20.3, carb:9.4, fat:10.8, fibre:0.0, iron:2.7, b12:0.1 },
+};
+const units = ['g','ml','cup','tbsp','tsp','oz','piece'];
+
+let ingredients = [];
+function createIngredientRow(ing = { name:'', qty: 100, unit:'g' }) {
+  const row = document.createElement('div');
+  row.className = 'ingredient-row';
+  row.innerHTML = `
+    <input type="text" class="ingredient-input" placeholder="e.g. lentils, tofu, kale…" value="${ing.name}" list="foodSuggestions" oninput="updateTotals()">
+    <input type="number" class="qty-input" value="${ing.qty}" min="1" max="999" oninput="updateTotals()">
+    <select class="qty-input" style="width:52px;padding:6px 4px;" oninput="updateTotals()">
+      ${units.map(u => `<option${u===ing.unit?' selected':''}>${u}</option>`).join('')}
+    </select>
+    <button class="remove-btn" onclick="removeIngredient(this)">✕</button>
+  `;
+  return row;
+}
+function addIngredient(ing) {
+  const list = document.getElementById('ingredientList');
+  list.appendChild(createIngredientRow(ing));
+  updateTotals();
+}
+function removeIngredient(btn) { btn.closest('.ingredient-row').remove(); updateTotals(); }
+function updateTotals() {
+  const rows = document.querySelectorAll('#ingredientList .ingredient-row');
+  let totals = { cal:0, prot:0, carb:0, fat:0, fibre:0, iron:0, b12:0 };
+  rows.forEach(row => {
+    const name = row.querySelector('.ingredient-input').value.toLowerCase().trim();
+    const qty = parseFloat(row.querySelector('input[type=number]').value) || 0;
+    const food = foodDB[name];
+    if (food) {
+      const factor = qty / 100;
+      totals.cal += food.cal * factor;
+      totals.prot += food.prot * factor;
+      totals.carb += food.carb * factor;
+      totals.fat += food.fat * factor;
+      totals.fibre += food.fibre * factor;
+      totals.iron += food.iron * factor;
+      totals.b12 += food.b12 * factor;
+    }
+  });
+  const s = parseInt(document.getElementById('servingCount').value) || 1;
+  document.getElementById('totalCal').textContent = Math.round(totals.cal/s) + ' kcal';
+  document.getElementById('totalProt').textContent = (totals.prot/s).toFixed(1) + 'g';
+  document.getElementById('totalCarb').textContent = (totals.carb/s).toFixed(1) + 'g';
+  document.getElementById('totalFat').textContent = (totals.fat/s).toFixed(1) + 'g';
+  document.getElementById('totalFibre').textContent = (totals.fibre/s).toFixed(1) + 'g';
+  document.getElementById('totalIron').textContent = (totals.iron/s).toFixed(1) + 'mg';
+  document.getElementById('totalB12').textContent = (totals.b12/s).toFixed(1) + 'μg';
+}
+function clearRecipe() {
+  document.getElementById('ingredientList').innerHTML = '';
+  document.getElementById('recipeName').value = '';
+  updateTotals();
+}
+function saveRecipe() {
+  const name = document.getElementById('recipeName').value || 'My Recipe';
+  alert(`✅ "${name}" saved to your recipe library!`);
+}
+function switchTab(btn, tab) {
+  document.querySelectorAll('.recipe-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  if (tab === 'saved') { alert('📚 Your saved recipes will appear here.'); }
+}
+
+// Datalist for autocomplete
+const dl = document.createElement('datalist');
+dl.id = 'foodSuggestions';
+Object.keys(foodDB).forEach(k => { const opt = document.createElement('option'); opt.value = k; dl.appendChild(opt); });
+document.body.appendChild(dl);
+
+// Seed initial ingredients
+[{name:'lentils',qty:100,unit:'g'},{name:'kale',qty:60,unit:'g'},{name:'quinoa',qty:80,unit:'g'}].forEach(addIngredient);
+
+// ===== PLANT RUSTLING =====
+document.querySelectorAll('.plant-leaf').forEach(leaf => {
+  leaf.addEventListener('mouseenter', () => {
+    const siblings = leaf.parentElement.querySelectorAll('.plant-leaf');
+    siblings.forEach((s, i) => {
+      if (s !== leaf) {
+        const offset = (Math.random() - 0.5) * 4;
+        s.style.transform = `rotate(${offset}deg)`;
+        setTimeout(() => { s.style.transform = ''; }, 600 + i * 80);
+      }
+    });
+  });
+});
+</script>
+</body>
+</html>
