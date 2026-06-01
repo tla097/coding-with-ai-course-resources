@@ -12,4 +12,5 @@
 
 ## History
 <!-- Keep this updated. Earliest to Latest -->
-01/06/2026 - Updated tailwindfiles
+01/06/2026 - Updated tailwind files
+01/06/2026 - Created src/lib/mock-data.ts with mockUser, mockItemTypes, mockCollections, and mockItems for dashboard UI development

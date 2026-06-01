@@ -451,6 +451,12 @@ Browser → Next.js App Router
 - Clean typography, generous whitespace, subtle borders and shadows
 - Syntax highlighting on all code blocks (snippet, command types)
 
+### Screenshots
+Refer to screenshots below as a base for the dasboard design. It does not need to be exact - use as a reference.
+
+devstash\context\screenshots\dashboard-ui-main.png  
+devstash\context\screenshots\dashboard-ui-drawer.png
+
 ### Micro-interactions
 
 - Smooth drawer open/close transitions
