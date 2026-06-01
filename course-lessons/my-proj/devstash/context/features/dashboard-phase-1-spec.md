@@ -4,6 +4,8 @@
 
 This is phase 1 of 3 for the dashboard UI layout. Use the screenshot referenced below for how it should look.
 
+/context/screenshots/dashboard-ui-main and dashboard-ui-drawer
+
 ## Requirements for phase 1
 
 - ShadCN UI initialization and components
