@@ -15,7 +15,7 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { mockUser, mockItemTypes, mockCollections, mockItems } from '@/lib/mock-data'
+import { type SidebarData } from '@/lib/db/sidebar'
 
 const ICON_MAP: Record<string, LucideIcon> = {
   Code,
@@ -30,26 +30,12 @@ const ICON_MAP: Record<string, LucideIcon> = {
 interface SidebarProps {
   isOpen: boolean
   onClose: () => void
+  sidebarData: SidebarData
 }
 
-export default function Sidebar({ isOpen, onClose }: SidebarProps) {
+export default function Sidebar({ isOpen, onClose, sidebarData }: SidebarProps) {
   const pathname = usePathname()
-
-  const countsByType = mockItems.reduce<Record<string, number>>((acc, item) => {
-    acc[item.itemTypeId] = (acc[item.itemTypeId] ?? 0) + 1
-    return acc
-  }, {})
-
-  const favoriteCollections = mockCollections.filter(c => c.isFavorite)
-  const recentCollections = mockCollections
-    .filter(c => !c.isFavorite)
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-
-  const initials = mockUser.name
-    .split(' ')
-    .map(n => n[0])
-    .join('')
-    .toUpperCase()
+  const { itemTypes, favoriteCollections, recentCollections } = sidebarData
 
   return (
     <>
@@ -77,9 +63,8 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                 Types
               </p>
               <nav className="space-y-0.5">
-                {mockItemTypes.map(type => {
+                {itemTypes.map(type => {
                   const Icon = ICON_MAP[type.icon]
-                  const count = countsByType[type.id] ?? 0
                   const href = `/items/${type.name}s`
                   const isActive = pathname === href
 
@@ -98,9 +83,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                         {Icon && <Icon className="h-4 w-4 shrink-0" style={{ color: type.color }} />}
                         <span className="capitalize">{type.name}s</span>
                       </span>
-                      {count > 0 && (
-                        <span className="text-xs tabular-nums">{count}</span>
-                      )}
+                      <span className="text-xs tabular-nums">{type.count}</span>
                     </Link>
                   )
                 })}
@@ -134,7 +117,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                 </div>
               )}
 
-              {/* Recent / all non-favorite collections */}
+              {/* Recent collections */}
               {recentCollections.length > 0 && (
                 <div>
                   <p className="px-2 pb-1 text-xs uppercase tracking-wider text-muted-foreground/60">
@@ -145,14 +128,26 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                       <Link
                         key={col.id}
                         href={`/collections/${col.id}`}
-                        className="flex items-center rounded-md px-2 py-1.5 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+                        className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
                       >
+                        <span
+                          className="h-2 w-2 shrink-0 rounded-full"
+                          style={{ backgroundColor: col.dominantColor ?? '#6b7280' }}
+                        />
                         <span className="truncate">{col.name}</span>
                       </Link>
                     ))}
                   </nav>
                 </div>
               )}
+
+              {/* View all collections link */}
+              <Link
+                href="/collections"
+                className="mt-2 flex items-center rounded-md px-2 py-1.5 text-xs text-muted-foreground/60 hover:text-muted-foreground transition-colors"
+              >
+                View all collections
+              </Link>
             </div>
           </div>
 
@@ -160,11 +155,11 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           <div className="shrink-0 border-t border-border p-3">
             <div className="flex items-center gap-3 rounded-md px-2 py-2 hover:bg-accent transition-colors cursor-pointer">
               <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
-                {initials}
+                DS
               </div>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium">{mockUser.name}</p>
-                <p className="truncate text-xs text-muted-foreground">{mockUser.email}</p>
+                <p className="truncate text-sm font-medium">DevStash</p>
+                <p className="truncate text-xs text-muted-foreground">demo@devstash.app</p>
               </div>
               <Settings className="h-4 w-4 shrink-0 text-muted-foreground" />
             </div>

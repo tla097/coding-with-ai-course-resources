@@ -1,23 +1,25 @@
 # Current Feature
-Dashboard Items — Replace mock data with real DB data
+Stats & Sidebar — Replace mock data with real DB data
 
 ## Status
-Completed
+In Progress
 
 ## Goals
-- Create src/lib/db/items.ts with data fetching functions
-- Fetch items directly in server component
-- Item card icon/border derived from the item type
-- Display item type tags and anything else currently there
-- If there are no pinned items, nothing should display there
-- Update collection stats display
+- Display stats pertaining to database data, keeping the current design/layout
+- Display item types in sidebar with their icons, linking to /items/[typename]
+- Add "View all collections" link under the collections list that goes to /collections
+- Keep the star icons for favorite collections but for recents, each collection should show a colored circle based on the most-used item type in that collection
+- Create src/lib/db/stats.ts and add the database functions
 
 ## Notes
-- Spec: context/features/dashboard-items-spec.md
-- Reference screenshot: context/screenshots/dashboard-ui-main.png
+- Spec: context/features/stats-sidebar-spec.md
+- Reference: src/lib/db/collections.ts
 
 ## History
 <!-- Keep this updated. Earliest to Latest. Format: DD/MM/YYYY HH:MM -->
+02/06/2026 13:00 - Started Stats & Sidebar: created feature/stats-sidebar branch
+02/06/2026 13:30 - Implemented: src/lib/db/sidebar.ts (getSidebarData), DashboardShell.tsx (client shell extracted from layout), updated layout.tsx (server component, fetches sidebar data), updated Sidebar.tsx (real DB item types + collections, colored circles for recents, "View all collections" link); build passing
+02/06/2026 13:35 - Fixed: sidebar item type counts now always display (show 0 when no items instead of hiding the count)
 01/06/2026 09:00 - Updated tailwind files
 01/06/2026 09:30 - Created src/lib/mock-data.ts with mockUser, mockItemTypes, mockCollections, and mockItems for dashboard UI development
 01/06/2026 10:00 - Started Dashboard UI Phase 1
