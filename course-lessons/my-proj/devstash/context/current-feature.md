@@ -1,25 +1,29 @@
 # Current Feature
-Database Setup — Prisma ORM + Neon PostgreSQL
+Seed Data — prisma/seed.ts
 
 ## Status
 Completed
 
 ## Goals
-- Install and configure Prisma 7 with Neon PostgreSQL (serverless)
-- Create initial schema based on data models in context/project-overview.md
-- Include NextAuth v5 models (Account, Session, VerificationToken)
-- Add appropriate indexes and cascade deletes
-- Create initial migration using `prisma migrate dev`
-- Set up Prisma client singleton in src/lib/prisma.ts
+- Create prisma/seed.ts script to populate the database with sample data
+- Create demo user (demo@devstash.io, bcryptjs-hashed password, 12 rounds)
+- Seed 7 system ItemTypes (snippet, prompt, command, note, file, image, link)
+- Seed 5 collections with realistic items:
+  - React Patterns (3 snippets)
+  - AI Workflows (3 prompts)
+  - DevOps (1 snippet, 1 command, 2 links)
+  - Terminal Commands (4 commands)
+  - Design Resources (4 links)
 
 ## Notes
-- Spec: context/features/database-spec.md
-- Prisma 7 breaking changes applied: generator uses `"prisma-client"`, output is mandatory, `url` removed from datasource block
-- Import path is `@/generated/prisma/client` (not `@prisma/client`)
-- `prisma.config.ts` at project root handles datasource URL and dotenv loading for CLI
-- Corporate firewall blocks port 5432 — initial migration applied via `@neondatabase/serverless` WebSocket (port 443)
-- For all Prisma CLI commands set `NODE_EXTRA_CA_CERTS` to `DorsetSoftware-Root-CA.crt`
-- Future migrations: use the same WebSocket approach (a `scripts/apply-migration.mjs` pattern)
+- Spec: context/features/seed-spec.md
+- Use bcryptjs (not bcrypt) — 12 salt rounds
+- Icons are Lucide React component names (strings stored in DB)
+- All system ItemTypes have isSystem: true and no userId
+- Links must use real URLs (not placeholder)
+- Run with: `NODE_EXTRA_CA_CERTS=DorsetSoftware-Root-CA.crt npx prisma db seed`
+- Seed command is configured in `prisma.config.ts` under `migrations.seed` (Prisma 7 — not package.json)
+- Set `NODE_EXTRA_CA_CERTS` to `DorsetSoftware-Root-CA.crt` for all Prisma CLI commands
 
 ## History
 <!-- Keep this updated. Earliest to Latest -->
@@ -33,3 +37,6 @@ Completed
 01/06/2026 - Completed Dashboard UI Phase 3: stats cards, recent collections grid, pinned items section, and 10 recent items section
 02/06/2026 - Started Database Setup: Prisma 7 + Neon PostgreSQL
 02/06/2026 - Completed Database Setup: schema, initial migration applied via Neon serverless WebSocket, Prisma client generated, build passing
+02/06/2026 - Started Seed Data: prisma/seed.ts
+02/06/2026 - Implemented seed script: demo user, 7 system item types, 5 collections, 14 items; installed bcryptjs + @prisma/adapter-neon + tsx; build passing
+02/06/2026 - Completed Seed Data: seed ran successfully (18 items), seed config moved to prisma.config.ts (Prisma 7 requirement)
