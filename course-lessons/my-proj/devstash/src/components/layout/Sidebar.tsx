@@ -16,6 +16,7 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { type SidebarData } from '@/lib/db/sidebar'
+import { Badge } from '@/components/ui/badge'
 
 const ICON_MAP: Record<string, LucideIcon> = {
   Code,
@@ -35,7 +36,13 @@ interface SidebarProps {
 
 export default function Sidebar({ isOpen, onClose, sidebarData }: SidebarProps) {
   const pathname = usePathname()
-  const { itemTypes, favoriteCollections, recentCollections } = sidebarData
+  const { favoriteCollections, recentCollections } = sidebarData
+  const PRO_TYPES = new Set(['file', 'image'])
+  const itemTypes = [...sidebarData.itemTypes].sort((a, b) => {
+    const aIsPro = PRO_TYPES.has(a.name) ? 1 : 0
+    const bIsPro = PRO_TYPES.has(b.name) ? 1 : 0
+    return aIsPro - bIsPro
+  })
 
   return (
     <>
@@ -82,6 +89,9 @@ export default function Sidebar({ isOpen, onClose, sidebarData }: SidebarProps) 
                       <span className="flex items-center gap-2">
                         {Icon && <Icon className="h-4 w-4 shrink-0" style={{ color: type.color }} />}
                         <span className="capitalize">{type.name}s</span>
+                        {(type.name === 'file' || type.name === 'image') && (
+                          <Badge variant="secondary" className="h-4 px-1 text-[10px] font-semibold tracking-wider">PRO</Badge>
+                        )}
                       </span>
                       <span className="text-xs tabular-nums">{type.count}</span>
                     </Link>

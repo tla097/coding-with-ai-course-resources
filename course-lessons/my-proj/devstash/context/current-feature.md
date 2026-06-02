@@ -1,25 +1,21 @@
-# Current Feature
-Stats & Sidebar — Replace mock data with real DB data
+# Current Feature: Add Pro Badge to Sidebar
 
 ## Status
 In Progress
 
 ## Goals
-- Display stats pertaining to database data, keeping the current design/layout
-- Display item types in sidebar with their icons, linking to /items/[typename]
-- Add "View all collections" link under the collections list that goes to /collections
-- Keep the star icons for favorite collections but for recents, each collection should show a colored circle based on the most-used item type in that collection
-- Create src/lib/db/stats.ts and add the database functions
+- Add a Pro badge next to the `file` and `image` item types in the sidebar
+- Use the ShadCN UI Badge component
+- Badge should be clean and subtle
+- Badge text must be all uppercase: "PRO"
 
 ## Notes
-- Spec: context/features/stats-sidebar-spec.md
-- Reference: src/lib/db/collections.ts
+- Spec: context/features/add-pro-badge-side-bar.md
+- Only `file` and `image` types are Pro-only (see project-overview.md item types table)
+- Reference sidebar component: src/components/layout/Sidebar.tsx
 
 ## History
 <!-- Keep this updated. Earliest to Latest. Format: DD/MM/YYYY HH:MM -->
-02/06/2026 13:00 - Started Stats & Sidebar: created feature/stats-sidebar branch
-02/06/2026 13:30 - Implemented: src/lib/db/sidebar.ts (getSidebarData), DashboardShell.tsx (client shell extracted from layout), updated layout.tsx (server component, fetches sidebar data), updated Sidebar.tsx (real DB item types + collections, colored circles for recents, "View all collections" link); build passing
-02/06/2026 13:35 - Fixed: sidebar item type counts now always display (show 0 when no items instead of hiding the count)
 01/06/2026 09:00 - Updated tailwind files
 01/06/2026 09:30 - Created src/lib/mock-data.ts with mockUser, mockItemTypes, mockCollections, and mockItems for dashboard UI development
 01/06/2026 10:00 - Started Dashboard UI Phase 1
@@ -39,3 +35,9 @@ In Progress
 02/06/2026 12:00 - Completed Dashboard Collections: real DB data showing in dashboard collections grid
 02/06/2026 12:10 - Started Dashboard Items: created feature/dashboard-items branch
 02/06/2026 12:20 - Completed Dashboard Items: created src/lib/db/items.ts, updated ItemCard.tsx (real DB types, tag objects), updated dashboard/page.tsx (parallel DB fetches, no mock data); build passing
+02/06/2026 13:00 - Started Stats & Sidebar: created feature/stats-sidebar branch
+02/06/2026 13:30 - Implemented: src/lib/db/sidebar.ts (getSidebarData), DashboardShell.tsx (client shell extracted from layout), updated layout.tsx (server component, fetches sidebar data), updated Sidebar.tsx (real DB item types + collections, colored circles for recents, "View all collections" link); build passing
+02/06/2026 13:35 - Fixed: sidebar item type counts now always display (show 0 when no items instead of hiding the count)
+02/06/2026 16:15 - Started Add Pro Badge to Sidebar: created feature/add-pro-badge-sidebar branch
+02/06/2026 16:20 - Implemented: installed ShadCN Badge component, updated Sidebar.tsx to show PRO badge on file and image types; build passing
+02/06/2026 16:30 - Updated Sidebar.tsx to sort pro types (file, image) to the bottom of the types list

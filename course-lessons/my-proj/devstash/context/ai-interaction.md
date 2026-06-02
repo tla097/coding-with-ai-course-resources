@@ -3,6 +3,8 @@
 ## Communication
 
 - Be concise and direct
+- No conversational tone — direct only
+- No first person ("I", "I'll", "I've", etc.)
 - Explain non-obvious decisions briefly
 - Ask before large refactors or architectural changes
 - Don't add features not in the project spec
