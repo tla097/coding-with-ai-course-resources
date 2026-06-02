@@ -10,8 +10,7 @@ import {
   Link as LinkIcon,
   type LucideIcon,
 } from 'lucide-react'
-import type { MockItem } from '@/lib/mock-data'
-import { mockItemTypes } from '@/lib/mock-data'
+import type { ItemWithType } from '@/lib/db/items'
 
 const ICON_MAP: Record<string, LucideIcon> = {
   Code,
@@ -24,12 +23,11 @@ const ICON_MAP: Record<string, LucideIcon> = {
 }
 
 interface ItemCardProps {
-  item: MockItem
+  item: ItemWithType
 }
 
 export default function ItemCard({ item }: ItemCardProps) {
-  const itemType = mockItemTypes.find(t => t.id === item.itemTypeId)
-  const Icon = itemType ? ICON_MAP[itemType.icon] : null
+  const Icon = ICON_MAP[item.itemType.icon] ?? null
 
   const formattedDate = new Date(item.createdAt).toLocaleDateString('en-US', {
     month: 'short',
@@ -38,12 +36,12 @@ export default function ItemCard({ item }: ItemCardProps) {
 
   return (
     <div className="flex gap-4 rounded-lg border border-border bg-card p-4 hover:bg-accent/20 transition-colors cursor-pointer">
-      {Icon && itemType && (
+      {Icon && (
         <div
           className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md"
-          style={{ backgroundColor: `${itemType.color}20` }}
+          style={{ backgroundColor: `${item.itemType.color}20` }}
         >
-          <Icon className="h-5 w-5" style={{ color: itemType.color }} />
+          <Icon className="h-5 w-5" style={{ color: item.itemType.color }} />
         </div>
       )}
       <div className="min-w-0 flex-1">
@@ -68,10 +66,10 @@ export default function ItemCard({ item }: ItemCardProps) {
           <div className="mt-2 flex flex-wrap gap-1">
             {item.tags.map(tag => (
               <span
-                key={tag}
+                key={tag.id}
                 className="rounded-full bg-accent px-2 py-0.5 text-xs text-muted-foreground"
               >
-                {tag}
+                {tag.name}
               </span>
             ))}
           </div>

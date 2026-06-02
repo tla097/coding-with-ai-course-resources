@@ -10,8 +10,7 @@ import {
   Link as LinkIcon,
   type LucideIcon,
 } from 'lucide-react'
-import type { MockCollection } from '@/lib/mock-data'
-import { mockItemTypes } from '@/lib/mock-data'
+import type { CollectionWithStats } from '@/lib/db/collections'
 
 const ICON_MAP: Record<string, LucideIcon> = {
   Code,
@@ -24,19 +23,19 @@ const ICON_MAP: Record<string, LucideIcon> = {
 }
 
 interface CollectionCardProps {
-  collection: MockCollection
+  collection: CollectionWithStats
 }
 
 export default function CollectionCard({ collection }: CollectionCardProps) {
-  const defaultType = collection.defaultTypeId
-    ? mockItemTypes.find(t => t.id === collection.defaultTypeId)
-    : null
-  const Icon = defaultType ? ICON_MAP[defaultType.icon] : null
+  const borderStyle = collection.dominantType
+    ? { borderLeftColor: collection.dominantType.color }
+    : undefined
 
   return (
     <Link
       href={`/collections/${collection.id}`}
-      className="flex flex-col gap-3 rounded-lg border border-border bg-card p-4 hover:bg-accent/30 transition-colors min-h-[110px]"
+      className="flex flex-col gap-3 rounded-lg border border-border border-l-[3px] bg-card p-4 hover:bg-accent/30 transition-colors min-h-[110px]"
+      style={borderStyle}
     >
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
@@ -50,9 +49,13 @@ export default function CollectionCard({ collection }: CollectionCardProps) {
       {collection.description && (
         <p className="text-xs text-muted-foreground line-clamp-2 flex-1">{collection.description}</p>
       )}
-      {Icon && defaultType && (
-        <div className="mt-auto">
-          <Icon className="h-4 w-4" style={{ color: defaultType.color }} />
+      {collection.types.length > 0 && (
+        <div className="mt-auto flex items-center gap-1.5">
+          {collection.types.map(type => {
+            const Icon = ICON_MAP[type.icon]
+            if (!Icon) return null
+            return <Icon key={type.id} className="h-3.5 w-3.5" style={{ color: type.color }} />
+          })}
         </div>
       )}
     </Link>

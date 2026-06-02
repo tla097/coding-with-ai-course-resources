@@ -225,6 +225,7 @@ async function main() {
       title: 'Code Review Prompt',
       description: 'Structured prompt for thorough AI-assisted code reviews',
       itemTypeId: prompt.id,
+      isPinned: true,
       content: [
         'You are an expert software engineer performing a thorough code review.',
         '',
@@ -389,6 +390,7 @@ async function main() {
       description: 'Soft-reset HEAD by one commit — your changes stay in the index',
       itemTypeId: command.id,
       content: 'git reset --soft HEAD~1',
+      isPinned: true,
     }),
     createItem({
       title: 'Docker: Prune stopped containers and dangling images',

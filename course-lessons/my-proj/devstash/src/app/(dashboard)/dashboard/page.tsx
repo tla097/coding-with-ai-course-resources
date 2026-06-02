@@ -1,47 +1,47 @@
+export const dynamic = 'force-dynamic'
+
 import Link from 'next/link'
 import { Package, FolderOpen, Star, Bookmark, Pin } from 'lucide-react'
-import { mockCollections, mockItems } from '@/lib/mock-data'
 import CollectionCard from '@/components/dashboard/CollectionCard'
 import ItemCard from '@/components/dashboard/ItemCard'
+import { getRecentCollections } from '@/lib/db/collections'
+import { getPinnedItems, getRecentItems, getItemStats } from '@/lib/db/items'
 
-const stats = [
-  {
-    label: 'Items',
-    value: mockItems.length,
-    icon: Package,
-    color: '#3b82f6',
-  },
-  {
-    label: 'Collections',
-    value: mockCollections.length,
-    icon: FolderOpen,
-    color: '#8b5cf6',
-  },
-  {
-    label: 'Favorite Items',
-    value: mockItems.filter(i => i.isFavorite).length,
-    icon: Star,
-    color: '#f97316',
-  },
-  {
-    label: 'Favorite Collections',
-    value: mockCollections.filter(c => c.isFavorite).length,
-    icon: Bookmark,
-    color: '#10b981',
-  },
-]
+export default async function DashboardPage() {
+  const [collections, pinnedItems, recentItems, itemStats] = await Promise.all([
+    getRecentCollections(),
+    getPinnedItems(),
+    getRecentItems(),
+    getItemStats(),
+  ])
 
-const recentCollections = [...mockCollections].sort(
-  (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-)
+  const stats = [
+    {
+      label: 'Items',
+      value: itemStats.total,
+      icon: Package,
+      color: '#3b82f6',
+    },
+    {
+      label: 'Collections',
+      value: collections.length,
+      icon: FolderOpen,
+      color: '#8b5cf6',
+    },
+    {
+      label: 'Favorite Items',
+      value: itemStats.favorites,
+      icon: Star,
+      color: '#f97316',
+    },
+    {
+      label: 'Favorite Collections',
+      value: collections.filter(c => c.isFavorite).length,
+      icon: Bookmark,
+      color: '#10b981',
+    },
+  ]
 
-const pinnedItems = mockItems.filter(i => i.isPinned)
-
-const recentItems = [...mockItems]
-  .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-  .slice(0, 10)
-
-export default function DashboardPage() {
   return (
     <div className="space-y-8 max-w-5xl">
       {/* Header */}
@@ -86,7 +86,7 @@ export default function DashboardPage() {
           </Link>
         </div>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {recentCollections.map(col => (
+          {collections.map(col => (
             <CollectionCard key={col.id} collection={col} />
           ))}
         </div>
