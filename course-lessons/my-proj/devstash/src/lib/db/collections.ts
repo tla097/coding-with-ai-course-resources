@@ -11,10 +11,11 @@ export interface CollectionWithStats {
   types: Array<{ id: string; name: string; icon: string; color: string }>
 }
 
-export async function getRecentCollections(userId?: string): Promise<CollectionWithStats[]> {
+export async function getRecentCollections(userId: string): Promise<CollectionWithStats[]> {
   const collections = await prisma.collection.findMany({
-    where: userId ? { userId } : undefined,
+    where: { userId },
     orderBy: { createdAt: 'desc' },
+    take: 20,
     include: {
       items: {
         include: {

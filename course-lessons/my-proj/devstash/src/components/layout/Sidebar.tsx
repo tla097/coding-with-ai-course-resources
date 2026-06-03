@@ -2,31 +2,11 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import {
-  Code,
-  Sparkles,
-  Terminal,
-  StickyNote,
-  File,
-  Image as ImageIcon,
-  Link as LinkIcon,
-  Star,
-  Settings,
-  type LucideIcon,
-} from 'lucide-react'
+import { Star, Settings } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { type SidebarData } from '@/lib/db/sidebar'
 import { Badge } from '@/components/ui/badge'
-
-const ICON_MAP: Record<string, LucideIcon> = {
-  Code,
-  Sparkles,
-  Terminal,
-  StickyNote,
-  File,
-  Image: ImageIcon,
-  Link: LinkIcon,
-}
+import { ICON_MAP } from '@/lib/icon-map'
 
 interface SidebarProps {
   isOpen: boolean
@@ -72,7 +52,7 @@ export default function Sidebar({ isOpen, onClose, sidebarData }: SidebarProps) 
               <nav className="space-y-0.5">
                 {itemTypes.map(type => {
                   const Icon = ICON_MAP[type.icon]
-                  const href = `/items/${type.name}s`
+                  const href = `/items/${encodeURIComponent(type.name)}s`
                   const isActive = pathname === href
 
                   return (

@@ -1,26 +1,7 @@
 import Link from 'next/link'
-import {
-  Star,
-  Code,
-  Sparkles,
-  Terminal,
-  StickyNote,
-  File,
-  Image as ImageIcon,
-  Link as LinkIcon,
-  type LucideIcon,
-} from 'lucide-react'
+import { Star } from 'lucide-react'
 import type { CollectionWithStats } from '@/lib/db/collections'
-
-const ICON_MAP: Record<string, LucideIcon> = {
-  Code,
-  Sparkles,
-  Terminal,
-  StickyNote,
-  File,
-  Image: ImageIcon,
-  Link: LinkIcon,
-}
+import { ICON_MAP } from '@/lib/icon-map'
 
 interface CollectionCardProps {
   collection: CollectionWithStats

@@ -30,27 +30,27 @@ const itemSelect = {
   },
 } as const
 
-export async function getPinnedItems(userId?: string): Promise<ItemWithType[]> {
+export async function getPinnedItems(userId: string): Promise<ItemWithType[]> {
   return prisma.item.findMany({
-    where: { isPinned: true, ...(userId ? { userId } : {}) },
+    where: { isPinned: true, userId },
     orderBy: { createdAt: 'desc' },
     select: itemSelect,
   })
 }
 
-export async function getRecentItems(userId?: string, limit = 10): Promise<ItemWithType[]> {
+export async function getRecentItems(userId: string, limit = 10): Promise<ItemWithType[]> {
   return prisma.item.findMany({
-    where: userId ? { userId } : undefined,
+    where: { userId },
     orderBy: { createdAt: 'desc' },
     take: limit,
     select: itemSelect,
   })
 }
 
-export async function getItemStats(userId?: string) {
+export async function getItemStats(userId: string) {
   const [total, favorites] = await Promise.all([
-    prisma.item.count({ where: userId ? { userId } : undefined }),
-    prisma.item.count({ where: { isFavorite: true, ...(userId ? { userId } : {}) } }),
+    prisma.item.count({ where: { userId } }),
+    prisma.item.count({ where: { isFavorite: true, userId } }),
   ])
   return { total, favorites }
 }
