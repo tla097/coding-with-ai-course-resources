@@ -5,12 +5,20 @@ import TopBar from '@/components/layout/TopBar'
 import Sidebar from '@/components/layout/Sidebar'
 import { type SidebarData } from '@/lib/db/sidebar'
 
+type User = {
+  id?: string
+  name?: string | null
+  email?: string | null
+  image?: string | null
+}
+
 interface Props {
   children: React.ReactNode
   sidebarData: SidebarData
+  user: User | null
 }
 
-export default function DashboardShell({ children, sidebarData }: Props) {
+export default function DashboardShell({ children, sidebarData, user }: Props) {
   const [sidebarOpen, setSidebarOpen] = useState(true)
 
   useEffect(() => {
@@ -39,6 +47,7 @@ export default function DashboardShell({ children, sidebarData }: Props) {
           isOpen={sidebarOpen}
           onClose={handleClose}
           sidebarData={sidebarData}
+          user={user}
         />
         <main className="flex-1 overflow-auto p-6">{children}</main>
       </div>
