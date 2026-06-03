@@ -1,4 +1,6 @@
 import { auth } from '@/auth'
+import { redirect } from 'next/navigation'
+import { prisma } from '@/lib/prisma'
 import DashboardShell from '@/components/layout/DashboardShell'
 import { getSidebarData } from '@/lib/db/sidebar'
 
@@ -7,8 +9,19 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode
 }) {
+  const session = await auth()
+
+  if (session?.user?.id) {
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { emailVerified: true },
+    })
+    if (!user?.emailVerified) {
+      redirect('/verify-email')
+    }
+  }
+
   try {
-    const session = await auth()
     const sidebarData = await getSidebarData(session?.user?.id ?? '')
     return (
       <DashboardShell sidebarData={sidebarData} user={session?.user ?? null}>
