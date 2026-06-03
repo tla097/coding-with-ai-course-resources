@@ -1,13 +1,22 @@
-# Current Feature
+# Current Feature: Email Verification Toggle
 
 ## Status
-Not Started
+In Progress
 
 ## Goals
-<!-- Bullet points of what success looks like -->
+- Add `DISABLE_EMAIL_VERIFICATION` env variable that bypasses the email verification requirement when set to `true`
+- When disabled: registration completes without sending a verification email, user is immediately marked as verified
+- When disabled: dashboard access is granted without the "verify your email" block
+- When enabled (default): existing behaviour is preserved — verification email sent, dashboard blocked until verified
+- `.env.example` (or equivalent) updated to document the new variable
+- No code changes required to toggle — purely environment-driven
 
 ## Notes
-<!-- Additional context, constraints, or details from spec -->
+- Resend has no custom domain configured yet, so only `Tom.Armstrong@dorsetsoftware.com` (the Resend account email) can receive verification emails; all other registrations are blocked at the email step
+- An env variable is the correct approach — this is a deployment/environment concern, not a user-facing setting
+- Variable name: `DISABLE_EMAIL_VERIFICATION` (set to `"true"` to disable)
+- Check should be server-side only — never expose this flag to the client
+- Affects two places: (1) the registration flow where the email is sent and (2) the dashboard middleware/guard that checks `emailVerified`
 
 ## History
 <!-- Keep this updated. Earliest to Latest. Format: DD/MM/YYYY HH:MM -->

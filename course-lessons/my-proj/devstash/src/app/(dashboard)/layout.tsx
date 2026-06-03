@@ -11,7 +11,7 @@ export default async function DashboardLayout({
 }) {
   const session = await auth()
 
-  if (session?.user?.id) {
+  if (session?.user?.id && process.env.DISABLE_EMAIL_VERIFICATION !== "true") {
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
       select: { emailVerified: true },

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { toast } from 'sonner'
+import { signIn } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 
@@ -45,6 +46,13 @@ export default function RegisterPage() {
 
     if (!res.ok) {
       setError(data.error ?? 'Registration failed')
+      return
+    }
+
+    if (data.verified) {
+      await signIn('credentials', { email, password, redirect: false })
+      toast.success('Welcome to DevStash!')
+      router.push('/dashboard')
       return
     }
 

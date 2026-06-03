@@ -21,24 +21,33 @@ export async function POST(req: NextRequest) {
   }
 
   const hashedPassword = await bcrypt.hash(password, 12)
+  const emailVerificationDisabled = process.env.DISABLE_EMAIL_VERIFICATION === "true"
+
   await prisma.user.create({
-    data: { name, email, password: hashedPassword },
+    data: {
+      name,
+      email,
+      password: hashedPassword,
+      ...(emailVerificationDisabled && { emailVerified: new Date() }),
+    },
   })
 
-  const token = randomBytes(32).toString("hex")
-  const expires = new Date(Date.now() + 24 * 60 * 60 * 1000)
-  await prisma.verificationToken.create({
-    data: { identifier: email, token, expires },
-  })
+  if (!emailVerificationDisabled) {
+    const token = randomBytes(32).toString("hex")
+    const expires = new Date(Date.now() + 24 * 60 * 60 * 1000)
+    await prisma.verificationToken.create({
+      data: { identifier: email, token, expires },
+    })
 
-  const baseUrl = new URL(req.url).origin
-  const verifyUrl = `${baseUrl}/verify-email?token=${token}`
+    const baseUrl = new URL(req.url).origin
+    const verifyUrl = `${baseUrl}/verify-email?token=${token}`
 
-  if (process.env.NODE_ENV === "development") {
-    console.log(`\n[verify-email] ${verifyUrl}\n`)
+    if (process.env.NODE_ENV === "development") {
+      console.log(`\n[verify-email] ${verifyUrl}\n`)
+    }
+
+    await sendVerificationEmail(email, name, verifyUrl)
   }
 
-  await sendVerificationEmail(email, name, verifyUrl)
-
-  return Response.json({ success: true }, { status: 201 })
+  return Response.json({ success: true, verified: emailVerificationDisabled }, { status: 201 })
 }
