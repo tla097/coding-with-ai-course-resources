@@ -1,23 +1,13 @@
-# Current Feature: Forgot Password
+# Current Feature
 
 ## Status
-In Progress
+Not Started
 
 ## Goals
-- "Forgot password?" link appears on the sign-in page below the password field
-- `/forgot-password` page: user enters email and submits; a reset email is sent via Resend
-- Reset email contains a time-limited link to `/reset-password?token=<token>`
-- Token stored in existing `VerificationToken` table (identifier = email, expires = 1 hour)
-- `/reset-password` page: user enters and confirms new password; token is validated, password is updated, token is deleted
-- Expired or invalid tokens show a clear error on the reset page
-- On success, user is redirected to sign-in with a confirmation message
+<!-- Bullet points of what success looks like -->
 
 ## Notes
-- Use the existing `VerificationToken` model — no schema changes required
-- Use existing Resend/email infrastructure (`src/lib/resend.ts`, `src/lib/email.ts`)
-- Use Server Actions for form submissions (forgot-password and reset-password forms)
-- Token identifier uses a `password-reset:` prefix (e.g. `password-reset:user@example.com`) to avoid collisions with email verification tokens
-- Only credentials users can reset passwords (GitHub OAuth users have no password field)
+<!-- Additional context, constraints, or details from spec -->
 
 ## History
 <!-- Keep this updated. Earliest to Latest. Format: DD/MM/YYYY HH:MM -->
@@ -58,3 +48,4 @@ In Progress
 03/06/2026 14:20 - Completed Auth UI: custom /sign-in and /register pages, UserAvatar component (image or initials), sidebar user area with real session data and sign-out dropdown, auto sign-in after registration with welcome toast; merged to main
 03/06/2026 16:20 - Completed Email Verification: Resend integration, 24h token stored in VerificationToken table, /verify-email page, dashboard blocks unverified users, sign-in shows verified banner; merged to main
 03/06/2026 16:35 - Completed Email Verification Toggle: DISABLE_EMAIL_VERIFICATION env variable bypasses verification — registration auto-signs user in and redirects to dashboard; dashboard guard skipped; merged to main
+03/06/2026 17:00 - Completed Forgot Password: /forgot-password and /reset-password pages, Server Actions for request/reset, tokens stored in VerificationToken with password-reset: prefix and 1-hour expiry, Resend email, "Forgot password?" link on sign-in page; merged to main
