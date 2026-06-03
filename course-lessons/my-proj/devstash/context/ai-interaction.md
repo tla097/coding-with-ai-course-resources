@@ -19,7 +19,7 @@ This is the common workflow that we will use for every single feature/fix:
 3. **Implement** - Implement the feature/fix that I create in @context/current-feature.md
 4. **Test** - Verify it works in the browser. Implement unit testing later. Run `npm run build` and fix any errors
 5. **Iterate** - Iterate and change things if needed
-6. **Commit** - Only after build passes and everything works
+6. **Commit** - Only after build passes and everything works. Don't add an "co-authorded by claude section"
 7. **Merge** - Merge to main
 8. **Delete Branch** - Delete branch after merge
 9. **Review** - Review AI-generated code periodically and on demand.
