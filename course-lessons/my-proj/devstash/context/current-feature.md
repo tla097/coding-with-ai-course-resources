@@ -1,30 +1,13 @@
-# Current Feature: Auth Credentials - Email/Password Provider
+# Current Feature
 
 ## Status
-In Progress
+Not Started
 
 ## Goals
-- `password` field exists on `User` model (via migration if not already present)
-- `auth.config.ts` updated with Credentials provider using `authorize: () => null` placeholder
-- `auth.ts` overrides Credentials provider with bcrypt validation logic
-- `POST /api/auth/register` route created — accepts name, email, password, confirmPassword; validates passwords match; checks for existing user; hashes with bcryptjs; creates user; returns success/error
-- User can register via `/api/auth/register` and sign in with email/password at `/api/auth/signin`
-- Successful sign-in redirects to `/dashboard`
-- GitHub OAuth still works after changes
+<!-- Bullet points of what success looks like -->
 
 ## Notes
-### Credentials Provider Split Pattern
-- `auth.config.ts`: Add Credentials provider with `authorize: () => null` placeholder (edge-compatible config)
-- `auth.ts`: Override the Credentials provider with actual bcrypt validation logic (Node.js runtime)
-
-### bcryptjs
-Already installed — use it directly, no need to install.
-
-### Testing Steps
-1. Register via curl: `curl -X POST http://localhost:3000/api/auth/register -H "Content-Type: application/json" -d '{"name":"Test","email":"test@test.com","password":"password123","confirmPassword":"password123"}'`
-2. Go to `/api/auth/signin`, sign in with email/password
-3. Verify redirect to `/dashboard`
-4. Verify GitHub OAuth still works
+<!-- Additional context, constraints, or details from spec -->
 
 ## History
 <!-- Keep this updated. Earliest to Latest. Format: DD/MM/YYYY HH:MM -->
@@ -59,3 +42,5 @@ Already installed — use it directly, no need to install.
 03/06/2026 12:00 - Started Auth Setup: created feature/auth-setup-nextauth-github branch
 03/06/2026 12:15 - Implemented: installed next-auth@beta + @auth/prisma-adapter; created src/auth.config.ts (edge config), src/auth.ts (Prisma adapter + JWT), src/app/api/auth/[...nextauth]/route.ts, src/proxy.ts (dashboard protection), src/types/next-auth.d.ts (Session type); build passing
 03/06/2026 12:25 - Completed Auth Setup: NextAuth v5 + GitHub OAuth wired, /dashboard/* protected by proxy redirect; merged to main
+03/06/2026 13:00 - Started Auth Credentials: created feature/auth-credentials-email-password branch
+03/06/2026 13:30 - Completed Auth Credentials: Credentials provider added (split pattern), POST /api/auth/register with bcrypt hashing, email/password sign-in working; merged to main
