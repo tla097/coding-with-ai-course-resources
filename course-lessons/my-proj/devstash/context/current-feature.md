@@ -1,22 +1,13 @@
-# Current Feature: Profile Page
+# Current Feature
 
 ## Status
-In Progress
+Not Started
 
 ## Goals
-- `/profile` route exists and is protected (requires authentication)
-- Displays user info: name, email, avatar (GitHub image or initials fallback), account creation date
-- Shows usage stats: total items, total collections, item count per type
-- Change password form visible for email/password users only (hidden for GitHub OAuth users)
-- Delete account button with confirmation dialog to prevent accidental deletion
+<!-- Bullet points of what success looks like -->
 
 ## Notes
-- Avatar: use `user.image` (GitHub OAuth) if available, otherwise generate initials from name or email
-- Change password: only shown when `user.password` is set (credentials users); uses the existing bcrypt hashing pattern
-- Delete account: confirmation dialog required before deletion; cascades via Prisma `onDelete: Cascade` on related records
-- Item type breakdown: show count for each of the 7 system types (snippet, prompt, note, command, link, file, image)
-- Fetch data server-side (server component) using Prisma directly; follow existing dashboard data-fetching pattern
-- Route protection: follow the existing proxy/middleware pattern used by `/dashboard`
+<!-- Additional context, constraints, or details from spec -->
 
 ## History
 <!-- Keep this updated. Earliest to Latest. Format: DD/MM/YYYY HH:MM -->
@@ -58,3 +49,4 @@ In Progress
 03/06/2026 16:20 - Completed Email Verification: Resend integration, 24h token stored in VerificationToken table, /verify-email page, dashboard blocks unverified users, sign-in shows verified banner; merged to main
 03/06/2026 16:35 - Completed Email Verification Toggle: DISABLE_EMAIL_VERIFICATION env variable bypasses verification — registration auto-signs user in and redirects to dashboard; dashboard guard skipped; merged to main
 03/06/2026 17:00 - Completed Forgot Password: /forgot-password and /reset-password pages, Server Actions for request/reset, tokens stored in VerificationToken with password-reset: prefix and 1-hour expiry, Resend email, "Forgot password?" link on sign-in page; merged to main
+03/06/2026 17:00 - Completed Profile Page: /profile route with user info, usage stats (total items, collections, per-type breakdown), change password form (credentials users only), delete account with two-step confirmation; merged to main
