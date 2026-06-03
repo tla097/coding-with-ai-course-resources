@@ -1,13 +1,22 @@
-# Current Feature
+# Current Feature: Profile Page
 
 ## Status
-Not Started
+In Progress
 
 ## Goals
-<!-- Bullet points of what success looks like -->
+- `/profile` route exists and is protected (requires authentication)
+- Displays user info: name, email, avatar (GitHub image or initials fallback), account creation date
+- Shows usage stats: total items, total collections, item count per type
+- Change password form visible for email/password users only (hidden for GitHub OAuth users)
+- Delete account button with confirmation dialog to prevent accidental deletion
 
 ## Notes
-<!-- Additional context, constraints, or details from spec -->
+- Avatar: use `user.image` (GitHub OAuth) if available, otherwise generate initials from name or email
+- Change password: only shown when `user.password` is set (credentials users); uses the existing bcrypt hashing pattern
+- Delete account: confirmation dialog required before deletion; cascades via Prisma `onDelete: Cascade` on related records
+- Item type breakdown: show count for each of the 7 system types (snippet, prompt, note, command, link, file, image)
+- Fetch data server-side (server component) using Prisma directly; follow existing dashboard data-fetching pattern
+- Route protection: follow the existing proxy/middleware pattern used by `/dashboard`
 
 ## History
 <!-- Keep this updated. Earliest to Latest. Format: DD/MM/YYYY HH:MM -->
