@@ -1,24 +1,13 @@
-# Current Feature: Codebase Scan Fixes
+# Current Feature
 
 ## Status
-In Progress
+Not Started
 
 ## Goals
-- [HIGH] Make userId required in all DB query functions — no fallback to all-rows
-- [HIGH] Add DATABASE_URL existence guard in prisma.ts
-- [HIGH] Wrap all server-component DB calls in try/catch with graceful fallback
-- [MEDIUM] Add take: 20/10 row limits to uncapped collection queries
-- [MEDIUM] Sanitise type.name before interpolating into sidebar href
-- [MEDIUM] Add production environment guard to seed script
-- [LOW] Extract shared ICON_MAP constant to src/lib/icon-map.ts
-- [LOW] Persist sidebar open/closed state to localStorage
-- [LOW] Move export const dynamic after imports in dashboard page
-- [LOW] Add NODE_EXTRA_CA_CERTS to start script in package.json
+<!-- Bullet points of what success looks like -->
 
 ## Notes
-Findings from codebase-scanner agent run. HIGH fixes address data safety before auth lands.
-userId lookup in server components uses prisma.user.findFirst() as a dev placeholder;
-replace with session.user.id when NextAuth is wired.
+<!-- Additional context, constraints, or details from spec -->
 
 ## History
 <!-- Keep this updated. Earliest to Latest. Format: DD/MM/YYYY HH:MM -->
@@ -49,3 +38,4 @@ replace with session.user.id when NextAuth is wired.
 02/06/2026 16:20 - Updated Sidebar.tsx to sort pro types (file, image) to the bottom of the types list
 02/06/2026 16:25 - Completed Add Pro Badge to Sidebar: PRO badge on file and image types, pro types sorted to bottom; merged to main
 03/06/2026 10:00 - Started Codebase Scan Fixes: created fix/codebase-scan-fixes branch
+03/06/2026 10:30 - Completed Codebase Scan Fixes: 10 findings addressed (3 HIGH, 3 MEDIUM, 4 LOW); build passing; merged to main
