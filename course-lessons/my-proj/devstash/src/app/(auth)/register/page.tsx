@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { toast } from 'sonner'
@@ -42,23 +41,15 @@ export default function RegisterPage() {
 
     const data = await res.json()
 
+    setLoading(false)
+
     if (!res.ok) {
-      setLoading(false)
       setError(data.error ?? 'Registration failed')
       return
     }
 
-    const result = await signIn('credentials', { email, password, redirect: false })
-
-    setLoading(false)
-
-    if (result?.error) {
-      router.push('/sign-in')
-      return
-    }
-
-    toast.success('Account created — Welcome to DevStash!')
-    router.push('/dashboard')
+    toast.success('Account created — check your email to verify!')
+    router.push('/verify-email?pending=true')
   }
 
   return (

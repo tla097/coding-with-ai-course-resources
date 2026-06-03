@@ -1,13 +1,29 @@
-# Current Feature
+# Current Feature: Email Verification
 
 ## Status
-Not Started
+In Progress
 
 ## Goals
-<!-- Bullet points of what success looks like -->
+- After a user registers with email/password, send a verification email via Resend
+- Email contains a unique, time-limited verification link (`/verify-email?token=...`)
+- Clicking the link marks the user's `emailVerified` field in the database
+- Unverified users are redirected to a `/verify-email` pending page when they try to access `/dashboard`
+- Already-verified users and OAuth users are unaffected
+- Show a toast/message on the register page confirming the email was sent
+- Show a success message on the verify page after the token is confirmed
 
 ## Notes
-<!-- Additional context, constraints, or details from spec -->
+- Resend API key is in `.env` as `RESEND_AI_KEY`
+- Use the existing `VerificationToken` model (`identifier`, `token`, `expires`) — already in schema and migrated
+- Use the existing `emailVerified` field on the `User` model
+- Token should expire after 24 hours
+- After successful verification, redirect user to `/dashboard`
+- OAuth users (GitHub) have `emailVerified` set by NextAuth automatically — skip verification for them
+- Use Resend's Node.js SDK (`resend` package)
+- Send from a sensible from address (e.g. `noreply@devstash.app` or configure via Resend dashboard)
+- The `/api/auth/register` route must create the token and trigger the email after creating the user
+- New route needed: `GET /api/auth/verify-email?token=...` to validate the token and update the user
+- New page needed: `/verify-email` — shows pending message or success/error state based on query params
 
 ## History
 <!-- Keep this updated. Earliest to Latest. Format: DD/MM/YYYY HH:MM -->
