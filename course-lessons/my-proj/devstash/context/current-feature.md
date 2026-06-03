@@ -1,13 +1,30 @@
-# Current Feature
+# Current Feature: Auth Credentials - Email/Password Provider
 
 ## Status
-Not Started
+In Progress
 
 ## Goals
-<!-- Bullet points of what success looks like -->
+- `password` field exists on `User` model (via migration if not already present)
+- `auth.config.ts` updated with Credentials provider using `authorize: () => null` placeholder
+- `auth.ts` overrides Credentials provider with bcrypt validation logic
+- `POST /api/auth/register` route created — accepts name, email, password, confirmPassword; validates passwords match; checks for existing user; hashes with bcryptjs; creates user; returns success/error
+- User can register via `/api/auth/register` and sign in with email/password at `/api/auth/signin`
+- Successful sign-in redirects to `/dashboard`
+- GitHub OAuth still works after changes
 
 ## Notes
-<!-- Additional context, constraints, or details from spec -->
+### Credentials Provider Split Pattern
+- `auth.config.ts`: Add Credentials provider with `authorize: () => null` placeholder (edge-compatible config)
+- `auth.ts`: Override the Credentials provider with actual bcrypt validation logic (Node.js runtime)
+
+### bcryptjs
+Already installed — use it directly, no need to install.
+
+### Testing Steps
+1. Register via curl: `curl -X POST http://localhost:3000/api/auth/register -H "Content-Type: application/json" -d '{"name":"Test","email":"test@test.com","password":"password123","confirmPassword":"password123"}'`
+2. Go to `/api/auth/signin`, sign in with email/password
+3. Verify redirect to `/dashboard`
+4. Verify GitHub OAuth still works
 
 ## History
 <!-- Keep this updated. Earliest to Latest. Format: DD/MM/YYYY HH:MM -->
