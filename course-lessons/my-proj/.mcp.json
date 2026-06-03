@@ -1,0 +1,23 @@
+{
+  "mcpServers": {
+    "neon": {
+      "type": "http",
+      "url": "https://mcp.neon.tech/mcp"
+    },
+    "context7": {
+      "type": "http",
+      "url": "https://mcp.context7.com/mcp",
+      "headers": {
+        "CONTEXT7_API_KEY": "ctx7sk-7b94faa3-4bdd-400f-af0c-8dbfff2ab18a"
+      }
+    },
+    "playwright": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "@playwright/mcp@latest"
+      ],
+      "env": {}
+    }
+  }
+}
