@@ -1,22 +1,13 @@
-# Current Feature: Email Verification Toggle
+# Current Feature
 
 ## Status
-In Progress
+Not Started
 
 ## Goals
-- Add `DISABLE_EMAIL_VERIFICATION` env variable that bypasses the email verification requirement when set to `true`
-- When disabled: registration completes without sending a verification email, user is immediately marked as verified
-- When disabled: dashboard access is granted without the "verify your email" block
-- When enabled (default): existing behaviour is preserved — verification email sent, dashboard blocked until verified
-- `.env.example` (or equivalent) updated to document the new variable
-- No code changes required to toggle — purely environment-driven
+<!-- Bullet points of what success looks like -->
 
 ## Notes
-- Resend has no custom domain configured yet, so only `Tom.Armstrong@dorsetsoftware.com` (the Resend account email) can receive verification emails; all other registrations are blocked at the email step
-- An env variable is the correct approach — this is a deployment/environment concern, not a user-facing setting
-- Variable name: `DISABLE_EMAIL_VERIFICATION` (set to `"true"` to disable)
-- Check should be server-side only — never expose this flag to the client
-- Affects two places: (1) the registration flow where the email is sent and (2) the dashboard middleware/guard that checks `emailVerified`
+<!-- Additional context, constraints, or details from spec -->
 
 ## History
 <!-- Keep this updated. Earliest to Latest. Format: DD/MM/YYYY HH:MM -->
@@ -56,3 +47,4 @@ In Progress
 03/06/2026 14:00 - Started Auth UI: created feature/auth-ui-signin-register-signout branch
 03/06/2026 14:20 - Completed Auth UI: custom /sign-in and /register pages, UserAvatar component (image or initials), sidebar user area with real session data and sign-out dropdown, auto sign-in after registration with welcome toast; merged to main
 03/06/2026 16:20 - Completed Email Verification: Resend integration, 24h token stored in VerificationToken table, /verify-email page, dashboard blocks unverified users, sign-in shows verified banner; merged to main
+03/06/2026 16:35 - Completed Email Verification Toggle: DISABLE_EMAIL_VERIFICATION env variable bypasses verification — registration auto-signs user in and redirects to dashboard; dashboard guard skipped; merged to main
