@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma'
+import { auth } from '@/auth'
 import DashboardShell from '@/components/layout/DashboardShell'
 import { getSidebarData } from '@/lib/db/sidebar'
 
@@ -8,10 +8,13 @@ export default async function DashboardLayout({
   children: React.ReactNode
 }) {
   try {
-    // TODO: replace with session.user.id when NextAuth is wired
-    const devUser = await prisma.user.findFirst({ select: { id: true } })
-    const sidebarData = await getSidebarData(devUser?.id ?? '')
-    return <DashboardShell sidebarData={sidebarData}>{children}</DashboardShell>
+    const session = await auth()
+    const sidebarData = await getSidebarData(session?.user?.id ?? '')
+    return (
+      <DashboardShell sidebarData={sidebarData} user={session?.user ?? null}>
+        {children}
+      </DashboardShell>
+    )
   } catch {
     return (
       <div className="flex h-screen items-center justify-center">

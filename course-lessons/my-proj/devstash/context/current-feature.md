@@ -1,13 +1,20 @@
-# Current Feature
+# Current Feature: Auth UI - Sign In, Register & Sign Out
 
 ## Status
-Not Started
+In Progress
 
 ## Goals
-<!-- Bullet points of what success looks like -->
+- `/sign-in` page renders with email/password fields, "Sign in with GitHub" button, link to register, and form validation/error display
+- `/register` page renders with name, email, password, confirm password fields, validates passwords match and email format, submits to `/api/auth/register`, redirects to sign-in on success
+- Sidebar bottom shows user avatar (GitHub image or initials fallback) and user name
+- Clicking avatar opens a dropdown with a "Sign out" link
+- Clicking the avatar icon navigates to `/profile`
 
 ## Notes
-<!-- Additional context, constraints, or details from spec -->
+- Avatar logic: use `image` from session if present (GitHub OAuth); otherwise generate initials from name (e.g. "Brad Traversy" → "BT")
+- Create a reusable avatar component that handles both image and initials cases
+- NextAuth custom pages: set `pages.signIn = '/sign-in'` in auth config
+- Register API already exists at `POST /api/auth/register` from Auth Credentials phase
 
 ## History
 <!-- Keep this updated. Earliest to Latest. Format: DD/MM/YYYY HH:MM -->
@@ -44,3 +51,6 @@ Not Started
 03/06/2026 12:25 - Completed Auth Setup: NextAuth v5 + GitHub OAuth wired, /dashboard/* protected by proxy redirect; merged to main
 03/06/2026 13:00 - Started Auth Credentials: created feature/auth-credentials-email-password branch
 03/06/2026 13:30 - Completed Auth Credentials: Credentials provider added (split pattern), POST /api/auth/register with bcrypt hashing, email/password sign-in working; merged to main
+
+03/06/2026 14:00 - Started Auth UI: created feature/auth-ui-signin-register-signout branch
+03/06/2026 14:30 - Implemented: (auth)/sign-in/page.tsx (email/password form + GitHub OAuth button), (auth)/register/page.tsx (name/email/password/confirm form), UserAvatar component (image or initials), Sidebar user area replaced with DropdownMenu (Profile + Sign out), DashboardShell + dashboard layout updated to pass real session user; auth.config.ts pages.signIn wired; proxy.ts redirect updated to /sign-in; build passing

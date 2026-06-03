@@ -1,21 +1,39 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { Star, Settings } from 'lucide-react'
+import { usePathname, useRouter } from 'next/navigation'
+import { Star, ChevronUp } from 'lucide-react'
+import { signOut } from 'next-auth/react'
 import { cn } from '@/lib/utils'
 import { type SidebarData } from '@/lib/db/sidebar'
 import { Badge } from '@/components/ui/badge'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import UserAvatar from '@/components/ui/user-avatar'
 import { ICON_MAP } from '@/lib/icon-map'
+
+type User = {
+  id?: string
+  name?: string | null
+  email?: string | null
+  image?: string | null
+}
 
 interface SidebarProps {
   isOpen: boolean
   onClose: () => void
   sidebarData: SidebarData
+  user: User | null
 }
 
-export default function Sidebar({ isOpen, onClose, sidebarData }: SidebarProps) {
+export default function Sidebar({ isOpen, onClose, sidebarData, user }: SidebarProps) {
   const pathname = usePathname()
+  const router = useRouter()
   const { favoriteCollections, recentCollections } = sidebarData
   const PRO_TYPES = new Set(['file', 'image'])
   const itemTypes = [...sidebarData.itemTypes].sort((a, b) => {
@@ -143,16 +161,28 @@ export default function Sidebar({ isOpen, onClose, sidebarData }: SidebarProps) 
 
           {/* User avatar area */}
           <div className="shrink-0 border-t border-border p-3">
-            <div className="flex items-center gap-3 rounded-md px-2 py-2 hover:bg-accent transition-colors cursor-pointer">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
-                DS
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium">DevStash</p>
-                <p className="truncate text-xs text-muted-foreground">demo@devstash.app</p>
-              </div>
-              <Settings className="h-4 w-4 shrink-0 text-muted-foreground" />
-            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger className="flex w-full items-center gap-3 rounded-md px-2 py-2 text-left outline-none hover:bg-accent transition-colors cursor-pointer">
+                <UserAvatar name={user?.name} image={user?.image} />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium">{user?.name ?? 'User'}</p>
+                  <p className="truncate text-xs text-muted-foreground">{user?.email ?? ''}</p>
+                </div>
+                <ChevronUp className="h-4 w-4 shrink-0 text-muted-foreground" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent side="top" align="start">
+                <DropdownMenuItem onClick={() => router.push('/profile')}>
+                  Profile
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  variant="destructive"
+                  onClick={() => signOut({ callbackUrl: '/sign-in' })}
+                >
+                  Sign out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </aside>

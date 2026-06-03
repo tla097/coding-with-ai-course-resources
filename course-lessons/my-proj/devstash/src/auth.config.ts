@@ -7,4 +7,7 @@ export default {
     GitHub,
     Credentials({ authorize: () => null }),
   ],
+  pages: {
+    signIn: '/sign-in',
+  },
 } satisfies NextAuthConfig
