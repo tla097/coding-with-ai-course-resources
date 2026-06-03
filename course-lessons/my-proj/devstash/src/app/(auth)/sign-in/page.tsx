@@ -27,6 +27,7 @@ function SignInForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const verified = searchParams.get('verified') === 'true'
+  const reset = searchParams.get('reset') === 'true'
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -80,6 +81,11 @@ function SignInForm() {
             Email verified! Sign in to continue.
           </p>
         )}
+        {reset && (
+          <p className="rounded-md bg-green-500/10 px-3 py-2 text-sm text-green-600 dark:text-green-400">
+            Password reset! Sign in with your new password.
+          </p>
+        )}
         {error && (
           <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
             {error}
@@ -102,6 +108,11 @@ function SignInForm() {
             required
             autoComplete="current-password"
           />
+          <div className="flex justify-end">
+            <Link href="/forgot-password" className="text-xs text-muted-foreground underline underline-offset-4 hover:text-foreground">
+              Forgot password?
+            </Link>
+          </div>
         </div>
         <Button type="submit" className="w-full" disabled={loading}>
           {loading ? 'Signing in…' : 'Sign in'}
