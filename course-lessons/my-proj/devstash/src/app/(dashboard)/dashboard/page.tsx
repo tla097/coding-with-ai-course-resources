@@ -4,15 +4,14 @@ import CollectionCard from '@/components/dashboard/CollectionCard'
 import ItemCard from '@/components/dashboard/ItemCard'
 import { getRecentCollections } from '@/lib/db/collections'
 import { getPinnedItems, getRecentItems, getItemStats } from '@/lib/db/items'
-import { prisma } from '@/lib/prisma'
+import { auth } from '@/auth'
 
 export const dynamic = 'force-dynamic'
 
 export default async function DashboardPage() {
   try {
-    // TODO: replace with session.user.id when NextAuth is wired
-    const devUser = await prisma.user.findFirst({ select: { id: true } })
-    const userId = devUser?.id ?? ''
+    const session = await auth()
+    const userId = session?.user?.id ?? ''
 
     const [collections, pinnedItems, recentItems, itemStats] = await Promise.all([
       getRecentCollections(userId),
