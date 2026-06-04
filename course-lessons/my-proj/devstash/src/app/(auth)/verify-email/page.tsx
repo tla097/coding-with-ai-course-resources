@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { buttonVariants } from '@/components/ui/button'
+import ResendVerificationForm from './ResendVerificationForm'
 
 interface Props {
   searchParams: Promise<{ token?: string; pending?: string }>
@@ -57,6 +58,7 @@ export default async function VerifyEmailPage({ searchParams }: Props) {
           : "A verification email has been sent to your address."}
       </p>
       <p className="text-xs text-muted-foreground">The link expires in 24 hours.</p>
+      <ResendVerificationForm />
       <Link href="/sign-in" className={buttonVariants({ variant: 'outline', className: 'w-full' })}>
         Back to sign in
       </Link>

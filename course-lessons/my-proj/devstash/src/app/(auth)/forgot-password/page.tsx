@@ -18,8 +18,12 @@ export default function ForgotPasswordPage() {
     setLoading(true)
 
     try {
-      await requestPasswordReset(email)
-      setSubmitted(true)
+      const result = await requestPasswordReset(email)
+      if (!result.success) {
+        setError(result.error ?? 'Something went wrong. Please try again.')
+      } else {
+        setSubmitted(true)
+      }
     } catch {
       setError('Something went wrong. Please try again.')
     } finally {
