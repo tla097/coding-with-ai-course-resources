@@ -1,12 +1,15 @@
+'use client'
+
 import { Star, Pin } from 'lucide-react'
 import type { ItemWithType } from '@/lib/db/items'
 import { ICON_MAP } from '@/lib/icon-map'
 
 interface ItemCardProps {
   item: ItemWithType
+  onClick?: () => void
 }
 
-export default function ItemCard({ item }: ItemCardProps) {
+export default function ItemCard({ item, onClick }: ItemCardProps) {
   const Icon = ICON_MAP[item.itemType.icon] ?? null
 
   const formattedDate = new Date(item.createdAt).toLocaleDateString('en-US', {
@@ -18,6 +21,7 @@ export default function ItemCard({ item }: ItemCardProps) {
     <div
       className="flex gap-4 rounded-lg border border-border border-l-[3px] bg-card p-4 hover:bg-accent/20 transition-colors cursor-pointer"
       style={{ borderLeftColor: item.itemType.color }}
+      onClick={onClick}
     >
       {Icon && (
         <div

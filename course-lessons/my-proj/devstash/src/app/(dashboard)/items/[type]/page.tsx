@@ -3,7 +3,7 @@ import { auth } from '@/auth'
 import { getItemsByType } from '@/lib/db/items'
 import { ICON_MAP } from '@/lib/icon-map'
 import { prisma } from '@/lib/prisma'
-import ItemCard from '@/components/dashboard/ItemCard'
+import ItemsWithDrawer from '@/components/items/ItemsWithDrawer'
 
 export const dynamic = 'force-dynamic'
 
@@ -50,11 +50,7 @@ export default async function ItemsTypePage({ params }: Props) {
           <p className="text-sm text-muted-foreground">No {type} yet.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
-          {items.map(item => (
-            <ItemCard key={item.id} item={item} />
-          ))}
-        </div>
+        <ItemsWithDrawer items={items} variant="grid" />
       )}
     </div>
   )
