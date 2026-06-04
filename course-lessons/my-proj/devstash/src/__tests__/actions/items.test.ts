@@ -1,13 +1,22 @@
 import { vi, describe, it, expect, beforeEach } from 'vitest'
 
 vi.mock('@/auth', () => ({ auth: vi.fn() }))
-vi.mock('@/lib/db/items', () => ({ updateItem: vi.fn(), deleteItem: vi.fn() }))
+vi.mock('@/lib/db/items', () => ({
+  createItem: vi.fn(),
+  updateItem: vi.fn(),
+  deleteItem: vi.fn(),
+}))
 
-import { updateItem, deleteItem } from '@/actions/items'
+import { createItem, updateItem, deleteItem } from '@/actions/items'
 import { auth } from '@/auth'
-import { updateItem as dbUpdateItem, deleteItem as dbDeleteItem } from '@/lib/db/items'
+import {
+  createItem as dbCreateItem,
+  updateItem as dbUpdateItem,
+  deleteItem as dbDeleteItem,
+} from '@/lib/db/items'
 
 const mockAuth = vi.mocked(auth)
+const mockDbCreate = vi.mocked(dbCreateItem)
 const mockDbUpdate = vi.mocked(dbUpdateItem)
 const mockDbDelete = vi.mocked(dbDeleteItem)
 
@@ -41,6 +50,167 @@ const mockItemDetail = {
   tags: [{ id: 'tag-1', name: 'react' }, { id: 'tag-2', name: 'hooks' }],
   collections: [],
 }
+
+const validCreateInput = {
+  title: 'My Snippet',
+  description: 'A useful snippet',
+  content: 'const x = 1',
+  url: null,
+  language: 'typescript',
+  tags: ['react'],
+  itemTypeId: 'type-snippet',
+  itemTypeName: 'snippet' as const,
+}
+
+const mockCreatedItem = {
+  id: 'item-new',
+  title: 'My Snippet',
+  description: 'A useful snippet',
+  language: 'typescript',
+  contentType: 'TEXT',
+  content: 'const x = 1',
+  url: null,
+  fileUrl: null,
+  fileName: null,
+  fileSize: null,
+  isFavorite: false,
+  isPinned: false,
+  createdAt: new Date('2026-06-04'),
+  updatedAt: new Date('2026-06-04'),
+  itemType: { id: 'type-snippet', name: 'snippet', icon: 'Code', color: '#3b82f6' },
+  tags: [{ id: 'tag-1', name: 'react' }],
+  collections: [],
+}
+
+describe('createItem server action', () => {
+  beforeEach(() => vi.clearAllMocks())
+
+  it('returns not authenticated when no session', async () => {
+    mockAuth.mockResolvedValue(null)
+    const result = await createItem(validCreateInput)
+    expect(result).toEqual({ success: false, error: 'Not authenticated.' })
+    expect(mockDbCreate).not.toHaveBeenCalled()
+  })
+
+  it('returns not authenticated when session has no user id', async () => {
+    mockAuth.mockResolvedValue({ user: {} } as never)
+    const result = await createItem(validCreateInput)
+    expect(result).toEqual({ success: false, error: 'Not authenticated.' })
+  })
+
+  it('returns validation error when title is empty', async () => {
+    mockAuth.mockResolvedValue(mockSession as never)
+    const result = await createItem({ ...validCreateInput, title: '' })
+    expect(result.success).toBe(false)
+    if (!result.success && typeof result.error !== 'string') {
+      expect(result.error.title).toBeDefined()
+    }
+    expect(mockDbCreate).not.toHaveBeenCalled()
+  })
+
+  it('returns validation error when link type has no URL', async () => {
+    mockAuth.mockResolvedValue(mockSession as never)
+    const result = await createItem({
+      ...validCreateInput,
+      url: null,
+      itemTypeName: 'link',
+    })
+    expect(result.success).toBe(false)
+    if (!result.success && typeof result.error !== 'string') {
+      expect(result.error.url).toBeDefined()
+    }
+  })
+
+  it('returns validation error for invalid URL', async () => {
+    mockAuth.mockResolvedValue(mockSession as never)
+    const result = await createItem({
+      ...validCreateInput,
+      url: 'not-a-url',
+      itemTypeName: 'link',
+    })
+    expect(result.success).toBe(false)
+  })
+
+  it('returns success with created item on valid input', async () => {
+    mockAuth.mockResolvedValue(mockSession as never)
+    mockDbCreate.mockResolvedValue(mockCreatedItem)
+    const result = await createItem(validCreateInput)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.title).toBe('My Snippet')
+      expect(result.data.contentType).toBe('TEXT')
+    }
+  })
+
+  it('sets contentType TEXT for non-link types', async () => {
+    mockAuth.mockResolvedValue(mockSession as never)
+    mockDbCreate.mockResolvedValue(mockCreatedItem)
+    await createItem(validCreateInput)
+    expect(mockDbCreate).toHaveBeenCalledWith(
+      'user-1',
+      expect.objectContaining({ contentType: 'TEXT' }),
+    )
+  })
+
+  it('sets contentType URL for link type', async () => {
+    mockAuth.mockResolvedValue(mockSession as never)
+    mockDbCreate.mockResolvedValue({ ...mockCreatedItem, contentType: 'URL', url: 'https://example.com' })
+    await createItem({
+      ...validCreateInput,
+      url: 'https://example.com',
+      itemTypeName: 'link',
+    })
+    expect(mockDbCreate).toHaveBeenCalledWith(
+      'user-1',
+      expect.objectContaining({ contentType: 'URL' }),
+    )
+  })
+
+  it('passes userId from session to db', async () => {
+    mockAuth.mockResolvedValue(mockSession as never)
+    mockDbCreate.mockResolvedValue(mockCreatedItem)
+    await createItem(validCreateInput)
+    expect(mockDbCreate).toHaveBeenCalledWith('user-1', expect.any(Object))
+  })
+
+  it('passes itemTypeId to db', async () => {
+    mockAuth.mockResolvedValue(mockSession as never)
+    mockDbCreate.mockResolvedValue(mockCreatedItem)
+    await createItem(validCreateInput)
+    expect(mockDbCreate).toHaveBeenCalledWith(
+      'user-1',
+      expect.objectContaining({ itemTypeId: 'type-snippet' }),
+    )
+  })
+
+  it('returns error when db throws', async () => {
+    mockAuth.mockResolvedValue(mockSession as never)
+    mockDbCreate.mockRejectedValue(new Error('DB error'))
+    const result = await createItem(validCreateInput)
+    expect(result).toEqual({ success: false, error: 'Failed to create item.' })
+  })
+
+  it('trims whitespace from title', async () => {
+    mockAuth.mockResolvedValue(mockSession as never)
+    mockDbCreate.mockResolvedValue(mockCreatedItem)
+    await createItem({ ...validCreateInput, title: '  My Snippet  ' })
+    expect(mockDbCreate).toHaveBeenCalledWith(
+      'user-1',
+      expect.objectContaining({ title: 'My Snippet' }),
+    )
+  })
+
+  it('accepts valid URL for link type', async () => {
+    mockAuth.mockResolvedValue(mockSession as never)
+    mockDbCreate.mockResolvedValue({ ...mockCreatedItem, contentType: 'URL', url: 'https://example.com' })
+    const result = await createItem({
+      ...validCreateInput,
+      url: 'https://example.com',
+      itemTypeName: 'link',
+    })
+    expect(result.success).toBe(true)
+  })
+})
 
 describe('deleteItem server action', () => {
   beforeEach(() => vi.clearAllMocks())

@@ -41,7 +41,7 @@ export default function DashboardShell({ children, sidebarData, user }: Props) {
 
   return (
     <div className="flex h-screen flex-col">
-      <TopBar onMenuToggle={handleToggle} />
+      <TopBar onMenuToggle={handleToggle} itemTypes={sidebarData.itemTypes} />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar
           isOpen={sidebarOpen}

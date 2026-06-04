@@ -3,12 +3,15 @@
 import { PanelLeft, Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import NewItemDialog from '@/components/items/NewItemDialog'
+import type { SidebarItemType } from '@/lib/db/sidebar'
 
 interface TopBarProps {
   onMenuToggle: () => void
+  itemTypes: SidebarItemType[]
 }
 
-export default function TopBar({ onMenuToggle }: TopBarProps) {
+export default function TopBar({ onMenuToggle, itemTypes }: TopBarProps) {
   return (
     <header className="flex items-center gap-2 border-b border-border px-4 py-3">
       <Button variant="ghost" size="icon" onClick={onMenuToggle} className="shrink-0">
@@ -25,7 +28,7 @@ export default function TopBar({ onMenuToggle }: TopBarProps) {
         <Button variant="outline" size="sm">
           New Collection
         </Button>
-        <Button size="sm">New Item</Button>
+        <NewItemDialog itemTypes={itemTypes} />
       </div>
     </header>
   )
