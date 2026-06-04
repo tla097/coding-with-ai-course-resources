@@ -29,7 +29,7 @@ export default async function ItemsTypePage({ params }: Props) {
   const Icon = ICON_MAP[itemType.icon] ?? null
 
   return (
-    <div className="space-y-6 max-w-5xl">
+    <div className="space-y-6 max-w-6xl">
       <div className="flex items-center gap-3">
         {Icon && (
           <div
@@ -50,7 +50,7 @@ export default async function ItemsTypePage({ params }: Props) {
           <p className="text-sm text-muted-foreground">No {type} yet.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
           {items.map(item => (
             <ItemCard key={item.id} item={item} />
           ))}
