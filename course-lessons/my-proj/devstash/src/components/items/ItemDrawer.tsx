@@ -1,7 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Star, Pin, Copy, Pencil, Trash2, FolderOpen, Calendar } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { Star, Pin, Copy, Pencil, Trash2, FolderOpen, Calendar, Save, X } from 'lucide-react'
 import { toast } from 'sonner'
 import {
   Sheet,
@@ -10,12 +11,25 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { Label } from '@/components/ui/label'
 import { ICON_MAP } from '@/lib/icon-map'
 import type { ItemDetail } from '@/lib/db/items'
+import { updateItem } from '@/actions/items'
 
 interface ItemDetailResponse extends Omit<ItemDetail, 'createdAt' | 'updatedAt'> {
   createdAt: string
   updatedAt: string
+}
+
+interface EditForm {
+  title: string
+  description: string
+  content: string
+  url: string
+  language: string
+  tags: string
 }
 
 interface Props {
@@ -24,17 +38,33 @@ interface Props {
   onOpenChange: (open: boolean) => void
 }
 
+const CONTENT_TYPES = ['snippet', 'prompt', 'command', 'note']
+const LANGUAGE_TYPES = ['snippet', 'command']
+const URL_TYPES = ['link']
+
 export default function ItemDrawer({ itemId, open, onOpenChange }: Props) {
+  const router = useRouter()
   const [item, setItem] = useState<ItemDetailResponse | null>(null)
   const [loading, setLoading] = useState(false)
   const [isFavorite, setIsFavorite] = useState(false)
   const [isPinned, setIsPinned] = useState(false)
+  const [isEditing, setIsEditing] = useState(false)
+  const [editForm, setEditForm] = useState<EditForm>({
+    title: '',
+    description: '',
+    content: '',
+    url: '',
+    language: '',
+    tags: '',
+  })
+  const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     if (!itemId || !open) return
 
     setLoading(true)
     setItem(null)
+    setIsEditing(false)
 
     fetch(`/api/items/${itemId}`)
       .then(r => {
@@ -50,6 +80,64 @@ export default function ItemDrawer({ itemId, open, onOpenChange }: Props) {
       .finally(() => setLoading(false))
   }, [itemId, open])
 
+  function handleEditStart() {
+    if (!item) return
+    setEditForm({
+      title: item.title,
+      description: item.description ?? '',
+      content: item.content ?? '',
+      url: item.url ?? '',
+      language: item.language ?? '',
+      tags: item.tags.map(t => t.name).join(', '),
+    })
+    setIsEditing(true)
+  }
+
+  function handleCancelEdit() {
+    setIsEditing(false)
+  }
+
+  async function handleSave() {
+    if (!item || !itemId) return
+    setSaving(true)
+    try {
+      const tags = editForm.tags
+        .split(',')
+        .map(t => t.trim())
+        .filter(Boolean)
+
+      const result = await updateItem(itemId, {
+        title: editForm.title,
+        description: editForm.description || null,
+        content: editForm.content || null,
+        url: editForm.url || null,
+        language: editForm.language || null,
+        tags,
+      })
+
+      if (!result.success) {
+        const errorMsg =
+          typeof result.error === 'string'
+            ? result.error
+            : 'Validation failed. Please check your inputs.'
+        toast.error(errorMsg)
+        return
+      }
+
+      const updated = result.data
+      setItem({
+        ...updated,
+        createdAt: new Date(updated.createdAt).toISOString(),
+        updatedAt: new Date(updated.updatedAt).toISOString(),
+      })
+      setIsEditing(false)
+      toast.success('Item updated')
+      router.refresh()
+    } finally {
+      setSaving(false)
+    }
+  }
+
   function handleCopy() {
     if (!item) return
     const text = item.content ?? item.url ?? item.title
@@ -59,6 +147,10 @@ export default function ItemDrawer({ itemId, open, onOpenChange }: Props) {
   }
 
   const Icon = item ? (ICON_MAP[item.itemType.icon] ?? null) : null
+  const typeName = item?.itemType.name ?? ''
+  const showContent = CONTENT_TYPES.includes(typeName)
+  const showLanguage = LANGUAGE_TYPES.includes(typeName)
+  const showUrl = URL_TYPES.includes(typeName)
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -86,154 +178,254 @@ export default function ItemDrawer({ itemId, open, onOpenChange }: Props) {
                 >
                   {item.itemType.name}
                 </span>
-                {item.language && (
+                {!isEditing && item.language && (
                   <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
                     {item.language}
                   </span>
                 )}
               </div>
-              <SheetTitle className="text-lg pr-8 leading-snug">{item.title}</SheetTitle>
+              <SheetTitle className="text-lg pr-8 leading-snug">
+                {isEditing ? (editForm.title || 'Editing…') : item.title}
+              </SheetTitle>
             </SheetHeader>
 
             {/* Action bar */}
             <div className="flex items-center gap-1 px-4 py-2 border-b border-border">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsFavorite(f => !f)}
-                className={isFavorite ? 'text-yellow-500 hover:text-yellow-600' : ''}
-              >
-                <Star className={`h-4 w-4 ${isFavorite ? 'fill-yellow-500' : ''}`} />
-                Favorite
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsPinned(p => !p)}
-              >
-                <Pin className={`h-4 w-4 ${isPinned ? 'fill-foreground' : ''}`} />
-                Pin
-              </Button>
-              <Button variant="ghost" size="sm" onClick={handleCopy}>
-                <Copy className="h-4 w-4" />
-                Copy
-              </Button>
-              <div className="ml-auto flex items-center gap-0.5">
-                <Button variant="ghost" size="icon-sm">
-                  <Pencil className="h-4 w-4" />
-                  <span className="sr-only">Edit</span>
-                </Button>
-                <Button variant="ghost" size="icon-sm" className="text-destructive hover:text-destructive">
-                  <Trash2 className="h-4 w-4" />
-                  <span className="sr-only">Delete</span>
-                </Button>
-              </div>
+              {isEditing ? (
+                <>
+                  <Button
+                    size="sm"
+                    onClick={handleSave}
+                    disabled={saving || !editForm.title.trim()}
+                  >
+                    <Save className="h-4 w-4" />
+                    {saving ? 'Saving…' : 'Save'}
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={handleCancelEdit} disabled={saving}>
+                    <X className="h-4 w-4" />
+                    Cancel
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setIsFavorite(f => !f)}
+                    className={isFavorite ? 'text-yellow-500 hover:text-yellow-600' : ''}
+                  >
+                    <Star className={`h-4 w-4 ${isFavorite ? 'fill-yellow-500' : ''}`} />
+                    Favorite
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setIsPinned(p => !p)}
+                  >
+                    <Pin className={`h-4 w-4 ${isPinned ? 'fill-foreground' : ''}`} />
+                    Pin
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={handleCopy}>
+                    <Copy className="h-4 w-4" />
+                    Copy
+                  </Button>
+                  <div className="ml-auto flex items-center gap-0.5">
+                    <Button variant="ghost" size="icon-sm" onClick={handleEditStart}>
+                      <Pencil className="h-4 w-4" />
+                      <span className="sr-only">Edit</span>
+                    </Button>
+                    <Button variant="ghost" size="icon-sm" className="text-destructive hover:text-destructive">
+                      <Trash2 className="h-4 w-4" />
+                      <span className="sr-only">Delete</span>
+                    </Button>
+                  </div>
+                </>
+              )}
             </div>
 
-            {/* Detail sections */}
+            {/* Content */}
             <div className="flex-1 overflow-y-auto px-5 py-5 space-y-5">
-              {item.description && (
-                <section>
-                  <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
-                    Description
-                  </h3>
-                  <p className="text-sm">{item.description}</p>
-                </section>
-              )}
+              {isEditing ? (
+                <>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="edit-title">
+                      Title <span className="text-destructive">*</span>
+                    </Label>
+                    <Input
+                      id="edit-title"
+                      value={editForm.title}
+                      onChange={e => setEditForm(f => ({ ...f, title: e.target.value }))}
+                      placeholder="Title"
+                    />
+                  </div>
 
-              {item.content && (
-                <section>
-                  <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
-                    Content
-                  </h3>
-                  <pre className="text-xs bg-muted rounded-md p-3 overflow-x-auto whitespace-pre-wrap break-words font-mono leading-relaxed">
-                    {item.content}
-                  </pre>
-                </section>
-              )}
+                  <div className="space-y-1.5">
+                    <Label htmlFor="edit-description">Description</Label>
+                    <Textarea
+                      id="edit-description"
+                      value={editForm.description}
+                      onChange={e => setEditForm(f => ({ ...f, description: e.target.value }))}
+                      placeholder="Description (optional)"
+                      rows={3}
+                    />
+                  </div>
 
-              {item.url && (
-                <section>
-                  <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
-                    URL
-                  </h3>
-                  <a
-                    href={item.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm text-primary hover:underline break-all"
-                  >
-                    {item.url}
-                  </a>
-                </section>
-              )}
+                  {showContent && (
+                    <div className="space-y-1.5">
+                      <Label htmlFor="edit-content">Content</Label>
+                      <Textarea
+                        id="edit-content"
+                        value={editForm.content}
+                        onChange={e => setEditForm(f => ({ ...f, content: e.target.value }))}
+                        placeholder="Content"
+                        rows={8}
+                        className="font-mono text-sm"
+                      />
+                    </div>
+                  )}
 
-              {item.tags.length > 0 && (
-                <section>
-                  <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
-                    Tags
-                  </h3>
-                  <div className="flex flex-wrap gap-1.5">
-                    {item.tags.map(tag => (
-                      <span
-                        key={tag.id}
-                        className="rounded-full bg-accent px-2.5 py-0.5 text-xs text-muted-foreground"
+                  {showLanguage && (
+                    <div className="space-y-1.5">
+                      <Label htmlFor="edit-language">Language</Label>
+                      <Input
+                        id="edit-language"
+                        value={editForm.language}
+                        onChange={e => setEditForm(f => ({ ...f, language: e.target.value }))}
+                        placeholder="e.g. typescript, python"
+                      />
+                    </div>
+                  )}
+
+                  {showUrl && (
+                    <div className="space-y-1.5">
+                      <Label htmlFor="edit-url">URL</Label>
+                      <Input
+                        id="edit-url"
+                        type="url"
+                        value={editForm.url}
+                        onChange={e => setEditForm(f => ({ ...f, url: e.target.value }))}
+                        placeholder="https://…"
+                      />
+                    </div>
+                  )}
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="edit-tags">Tags</Label>
+                    <Input
+                      id="edit-tags"
+                      value={editForm.tags}
+                      onChange={e => setEditForm(f => ({ ...f, tags: e.target.value }))}
+                      placeholder="react, typescript, hooks"
+                    />
+                    <p className="text-xs text-muted-foreground">Comma-separated</p>
+                  </div>
+                </>
+              ) : (
+                <>
+                  {item.description && (
+                    <section>
+                      <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
+                        Description
+                      </h3>
+                      <p className="text-sm">{item.description}</p>
+                    </section>
+                  )}
+
+                  {item.content && (
+                    <section>
+                      <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
+                        Content
+                      </h3>
+                      <pre className="text-xs bg-muted rounded-md p-3 overflow-x-auto whitespace-pre-wrap break-words font-mono leading-relaxed">
+                        {item.content}
+                      </pre>
+                    </section>
+                  )}
+
+                  {item.url && (
+                    <section>
+                      <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
+                        URL
+                      </h3>
+                      <a
+                        href={item.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-primary hover:underline break-all"
                       >
-                        {tag.name}
-                      </span>
-                    ))}
-                  </div>
-                </section>
-              )}
+                        {item.url}
+                      </a>
+                    </section>
+                  )}
 
-              {item.collections.length > 0 && (
-                <section>
-                  <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
-                    Collections
-                  </h3>
-                  <div className="flex flex-wrap gap-1.5">
-                    {item.collections.map(({ collection }) => (
-                      <span
-                        key={collection.id}
-                        className="flex items-center gap-1 rounded-full bg-accent px-2.5 py-0.5 text-xs text-muted-foreground"
-                      >
-                        <FolderOpen className="h-3 w-3" />
-                        {collection.name}
-                      </span>
-                    ))}
-                  </div>
-                </section>
-              )}
+                  {item.tags.length > 0 && (
+                    <section>
+                      <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
+                        Tags
+                      </h3>
+                      <div className="flex flex-wrap gap-1.5">
+                        {item.tags.map(tag => (
+                          <span
+                            key={tag.id}
+                            className="rounded-full bg-accent px-2.5 py-0.5 text-xs text-muted-foreground"
+                          >
+                            {tag.name}
+                          </span>
+                        ))}
+                      </div>
+                    </section>
+                  )}
 
-              <section>
-                <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
-                  Details
-                </h3>
-                <div className="space-y-1.5 text-xs text-muted-foreground">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-3.5 w-3.5 shrink-0" />
-                    <span>
-                      Created{' '}
-                      {new Date(item.createdAt).toLocaleDateString('en-US', {
-                        month: 'long',
-                        day: 'numeric',
-                        year: 'numeric',
-                      })}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-3.5 w-3.5 shrink-0" />
-                    <span>
-                      Updated{' '}
-                      {new Date(item.updatedAt).toLocaleDateString('en-US', {
-                        month: 'long',
-                        day: 'numeric',
-                        year: 'numeric',
-                      })}
-                    </span>
-                  </div>
-                </div>
-              </section>
+                  {item.collections.length > 0 && (
+                    <section>
+                      <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
+                        Collections
+                      </h3>
+                      <div className="flex flex-wrap gap-1.5">
+                        {item.collections.map(({ collection }) => (
+                          <span
+                            key={collection.id}
+                            className="flex items-center gap-1 rounded-full bg-accent px-2.5 py-0.5 text-xs text-muted-foreground"
+                          >
+                            <FolderOpen className="h-3 w-3" />
+                            {collection.name}
+                          </span>
+                        ))}
+                      </div>
+                    </section>
+                  )}
+
+                  <section>
+                    <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
+                      Details
+                    </h3>
+                    <div className="space-y-1.5 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="h-3.5 w-3.5 shrink-0" />
+                        <span>
+                          Created{' '}
+                          {new Date(item.createdAt).toLocaleDateString('en-US', {
+                            month: 'long',
+                            day: 'numeric',
+                            year: 'numeric',
+                          })}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Calendar className="h-3.5 w-3.5 shrink-0" />
+                        <span>
+                          Updated{' '}
+                          {new Date(item.updatedAt).toLocaleDateString('en-US', {
+                            month: 'long',
+                            day: 'numeric',
+                            year: 'numeric',
+                          })}
+                        </span>
+                      </div>
+                    </div>
+                  </section>
+                </>
+              )}
             </div>
           </>
         )}
