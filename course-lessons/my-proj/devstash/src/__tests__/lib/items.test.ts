@@ -4,11 +4,12 @@ vi.mock('@/lib/prisma', () => ({
   prisma: {
     item: {
       findFirst: vi.fn(),
+      delete: vi.fn(),
     },
   },
 }))
 
-import { getItemById } from '@/lib/db/items'
+import { getItemById, deleteItem } from '@/lib/db/items'
 
 const mockItem = {
   id: 'item-1',
@@ -29,6 +30,40 @@ const mockItem = {
   tags: [{ id: 'tag-1', name: 'react' }],
   collections: [],
 }
+
+describe('deleteItem', () => {
+  beforeEach(() => vi.clearAllMocks())
+
+  it('returns false when item does not exist or belongs to another user', async () => {
+    const { prisma } = await import('@/lib/prisma')
+    vi.mocked(prisma.item.findFirst).mockResolvedValue(null)
+
+    const result = await deleteItem('item-1', 'user-1')
+    expect(result).toBe(false)
+    expect(prisma.item.delete).not.toHaveBeenCalled()
+  })
+
+  it('deletes the item and returns true when found for the correct user', async () => {
+    const { prisma } = await import('@/lib/prisma')
+    vi.mocked(prisma.item.findFirst).mockResolvedValue({ id: 'item-1' } as never)
+    vi.mocked(prisma.item.delete).mockResolvedValue({} as never)
+
+    const result = await deleteItem('item-1', 'user-1')
+    expect(result).toBe(true)
+    expect(prisma.item.delete).toHaveBeenCalledWith({ where: { id: 'item-1' } })
+  })
+
+  it('scopes ownership check to both id and userId', async () => {
+    const { prisma } = await import('@/lib/prisma')
+    vi.mocked(prisma.item.findFirst).mockResolvedValue(null)
+
+    await deleteItem('item-abc', 'user-xyz')
+
+    expect(prisma.item.findFirst).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { id: 'item-abc', userId: 'user-xyz' } })
+    )
+  })
+})
 
 describe('getItemById', () => {
   beforeEach(() => vi.clearAllMocks())

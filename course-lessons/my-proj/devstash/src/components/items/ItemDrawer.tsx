@@ -14,9 +14,20 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 import { ICON_MAP } from '@/lib/icon-map'
 import type { ItemDetail } from '@/lib/db/items'
-import { updateItem } from '@/actions/items'
+import { updateItem, deleteItem } from '@/actions/items'
 
 interface ItemDetailResponse extends Omit<ItemDetail, 'createdAt' | 'updatedAt'> {
   createdAt: string
@@ -58,6 +69,7 @@ export default function ItemDrawer({ itemId, open, onOpenChange }: Props) {
     tags: '',
   })
   const [saving, setSaving] = useState(false)
+  const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
     if (!itemId || !open) return
@@ -135,6 +147,23 @@ export default function ItemDrawer({ itemId, open, onOpenChange }: Props) {
       router.refresh()
     } finally {
       setSaving(false)
+    }
+  }
+
+  async function handleDelete() {
+    if (!itemId) return
+    setDeleting(true)
+    try {
+      const result = await deleteItem(itemId)
+      if (!result.success) {
+        toast.error(typeof result.error === 'string' ? result.error : 'Failed to delete item.')
+        return
+      }
+      toast.success('Item deleted')
+      onOpenChange(false)
+      router.refresh()
+    } finally {
+      setDeleting(false)
     }
   }
 
@@ -234,10 +263,38 @@ export default function ItemDrawer({ itemId, open, onOpenChange }: Props) {
                       <Pencil className="h-4 w-4" />
                       <span className="sr-only">Edit</span>
                     </Button>
-                    <Button variant="ghost" size="icon-sm" className="text-destructive hover:text-destructive">
-                      <Trash2 className="h-4 w-4" />
-                      <span className="sr-only">Delete</span>
-                    </Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger
+                        render={
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            className="text-destructive hover:text-destructive"
+                            disabled={deleting}
+                          />
+                        }
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        <span className="sr-only">Delete</span>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Delete item?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This action cannot be undone. The item will be permanently deleted.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={handleDelete}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          >
+                            Delete
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </div>
                 </>
               )}

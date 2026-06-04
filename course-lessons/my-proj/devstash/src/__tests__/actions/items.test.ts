@@ -1,14 +1,15 @@
 import { vi, describe, it, expect, beforeEach } from 'vitest'
 
 vi.mock('@/auth', () => ({ auth: vi.fn() }))
-vi.mock('@/lib/db/items', () => ({ updateItem: vi.fn() }))
+vi.mock('@/lib/db/items', () => ({ updateItem: vi.fn(), deleteItem: vi.fn() }))
 
-import { updateItem } from '@/actions/items'
+import { updateItem, deleteItem } from '@/actions/items'
 import { auth } from '@/auth'
-import { updateItem as dbUpdateItem } from '@/lib/db/items'
+import { updateItem as dbUpdateItem, deleteItem as dbDeleteItem } from '@/lib/db/items'
 
 const mockAuth = vi.mocked(auth)
 const mockDbUpdate = vi.mocked(dbUpdateItem)
+const mockDbDelete = vi.mocked(dbDeleteItem)
 
 const mockSession = { user: { id: 'user-1' } }
 
@@ -40,6 +41,51 @@ const mockItemDetail = {
   tags: [{ id: 'tag-1', name: 'react' }, { id: 'tag-2', name: 'hooks' }],
   collections: [],
 }
+
+describe('deleteItem server action', () => {
+  beforeEach(() => vi.clearAllMocks())
+
+  it('returns not authenticated when no session', async () => {
+    mockAuth.mockResolvedValue(null)
+    const result = await deleteItem('item-1')
+    expect(result).toEqual({ success: false, error: 'Not authenticated.' })
+    expect(mockDbDelete).not.toHaveBeenCalled()
+  })
+
+  it('returns not authenticated when session has no user id', async () => {
+    mockAuth.mockResolvedValue({ user: {} } as never)
+    const result = await deleteItem('item-1')
+    expect(result).toEqual({ success: false, error: 'Not authenticated.' })
+  })
+
+  it('returns item not found when db returns false (ownership mismatch)', async () => {
+    mockAuth.mockResolvedValue({ user: { id: 'user-1' } } as never)
+    mockDbDelete.mockResolvedValue(false)
+    const result = await deleteItem('item-1')
+    expect(result).toEqual({ success: false, error: 'Item not found.' })
+  })
+
+  it('returns success when item is deleted', async () => {
+    mockAuth.mockResolvedValue({ user: { id: 'user-1' } } as never)
+    mockDbDelete.mockResolvedValue(true)
+    const result = await deleteItem('item-1')
+    expect(result).toEqual({ success: true })
+  })
+
+  it('passes correct itemId and userId to db', async () => {
+    mockAuth.mockResolvedValue({ user: { id: 'user-1' } } as never)
+    mockDbDelete.mockResolvedValue(true)
+    await deleteItem('item-abc')
+    expect(mockDbDelete).toHaveBeenCalledWith('item-abc', 'user-1')
+  })
+
+  it('returns error when db throws', async () => {
+    mockAuth.mockResolvedValue({ user: { id: 'user-1' } } as never)
+    mockDbDelete.mockRejectedValue(new Error('DB error'))
+    const result = await deleteItem('item-1')
+    expect(result).toEqual({ success: false, error: 'Failed to delete item.' })
+  })
+})
 
 describe('updateItem server action', () => {
   beforeEach(() => {
