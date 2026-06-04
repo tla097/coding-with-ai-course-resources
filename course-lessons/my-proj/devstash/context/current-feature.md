@@ -1,13 +1,21 @@
-# Current Feature
+# Current Feature: Items List View
 
 ## Status
-Not Started
+In Progress
 
 ## Goals
-<!-- Bullet points of what success looks like -->
+- Dynamic route `/items/[type]` renders a filtered list of items by type (e.g. `/items/snippets`, `/items/notes`)
+- Items fetched from the database and filtered by the type slug in the URL
+- Responsive grid layout using `ItemCard` components — two columns on medium screens and up
+- Each `ItemCard` has a left border colored by its item type
+- Implementation follows existing codebase patterns (server component, Prisma fetch, Tailwind styling)
 
 ## Notes
-<!-- Additional context, constraints, or details from spec -->
+- Route lives at `src/app/(dashboard)/items/[type]/page.tsx`
+- Reuse existing `ItemCard` component; the left border coloring is already implemented
+- The `type` param in the URL is the type name slug (e.g. `snippets`, `notes`) — need to map to `ItemType.name` in the DB
+- Fetch via Prisma in a server component; no new server actions needed
+- Follow the same pattern as the dashboard page for data fetching
 
 ## History
 <!-- Keep this updated. Earliest to Latest. Format: DD/MM/YYYY HH:MM -->
