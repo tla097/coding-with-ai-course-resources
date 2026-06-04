@@ -1,23 +1,13 @@
-# Current Feature: Code Editor (Monaco)
+# Current Feature
 
 ## Status
-In Progress
+Not Started
 
 ## Goals
-- CodeEditor component built with Monaco Editor, dark theme
-- Replaces Textarea for snippet and command types only
-- Notes, prompts, and other non-code types keep Textarea
-- macOS-style window dots (red/yellow/green) in editor header
-- Quick copy button in editor header
-- Language label shown in editor header next to copy button
-- Supports readonly (display) mode and edit mode
-- Fluid height with 400px max and themed scrollbar
+<!-- Bullet points of what success looks like -->
 
 ## Notes
-- Monaco Editor requires `'use client'` — lazy-load with `next/dynamic` to avoid SSR issues
-- Check existing ItemDrawer and edit form to find where content Textarea is rendered
-- Language field already exists on Item model (`item.language`)
-- Spec file: devstash/context/features/code-editor-spec.md
+<!-- Additional context, constraints, or details from spec -->
 
 ## History
 <!-- Keep this updated. Earliest to Latest. Format: DD/MM/YYYY HH:MM -->
@@ -67,3 +57,4 @@ In Progress
 04/06/2026 16:25 - Completed Item Drawer: shadcn Sheet drawer opens on ItemCard click, fetches full item via GET /api/items/[id] with auth check; skeleton loading state; action bar (Favorite, Pin, Copy, Edit, Delete); detail sections (description, content, URL, tags, collections, dates); ItemsWithDrawer client wrapper manages state on server component pages; unit tests for getItemById; merged to main
 04/06/2026 16:40 - Completed Item Drawer Edit Mode: pencil button toggles inline edit form; title/description/tags for all types; content/language/URL shown per type; Save/Cancel replace action bar; updateItem server action (Zod v4 validated, ownership checked, { success, data, error } pattern); updateItem DB query (disconnect-all/connect-or-create tags); router.refresh() on save; 12 unit tests; merged to main
 04/06/2026 17:10 - Completed Item Create: Dialog UI component (base-ui/dialog), NewItemDialog with type selector (snippet/prompt/command/note/link) and conditional fields, createItem server action (Zod v4, auth check, URL/TEXT contentType), createItem DB query (connect-or-create tags); toast + close + router.refresh() on success; 12 unit tests; merged to main
+04/06/2026 17:30 - Completed Code Editor (Monaco): CodeEditor component (src/components/ui/CodeEditor.tsx) with macOS window dots, copy button, language label, fluid height (120-400px), themed scrollbar; replaces Textarea in ItemDrawer and NewItemDialog for snippet/command types; notes/prompts keep Textarea; merged to main
