@@ -13,6 +13,26 @@ export interface ItemWithType {
   tags: Array<{ id: string; name: string }>
 }
 
+export interface ItemDetail {
+  id: string
+  title: string
+  description: string | null
+  language: string | null
+  contentType: string
+  content: string | null
+  url: string | null
+  fileUrl: string | null
+  fileName: string | null
+  fileSize: number | null
+  isFavorite: boolean
+  isPinned: boolean
+  createdAt: Date
+  updatedAt: Date
+  itemType: { id: string; name: string; icon: string; color: string }
+  tags: Array<{ id: string; name: string }>
+  collections: Array<{ collection: { id: string; name: string } }>
+}
+
 const itemSelect = {
   id: true,
   title: true,
@@ -52,6 +72,33 @@ export async function getItemsByType(userId: string, typeName: string): Promise<
     where: { userId, itemType: { name: typeName } },
     orderBy: { createdAt: 'desc' },
     select: itemSelect,
+  })
+}
+
+export async function getItemById(id: string, userId: string): Promise<ItemDetail | null> {
+  return prisma.item.findFirst({
+    where: { id, userId },
+    select: {
+      id: true,
+      title: true,
+      description: true,
+      language: true,
+      contentType: true,
+      content: true,
+      url: true,
+      fileUrl: true,
+      fileName: true,
+      fileSize: true,
+      isFavorite: true,
+      isPinned: true,
+      createdAt: true,
+      updatedAt: true,
+      itemType: { select: { id: true, name: true, icon: true, color: true } },
+      tags: { select: { id: true, name: true } },
+      collections: {
+        select: { collection: { select: { id: true, name: true } } },
+      },
+    },
   })
 }
 

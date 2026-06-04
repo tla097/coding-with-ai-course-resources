@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { Package, FolderOpen, Star, Bookmark, Pin } from 'lucide-react'
 import CollectionCard from '@/components/dashboard/CollectionCard'
-import ItemCard from '@/components/dashboard/ItemCard'
+import ItemsWithDrawer from '@/components/items/ItemsWithDrawer'
 import { getRecentCollections } from '@/lib/db/collections'
 import { getPinnedItems, getRecentItems, getItemStats } from '@/lib/db/items'
 import { auth } from '@/auth'
@@ -104,11 +104,7 @@ export default async function DashboardPage() {
               <Pin className="h-4 w-4 text-muted-foreground" />
               <h2 className="text-base font-semibold">Pinned</h2>
             </div>
-            <div className="space-y-2">
-              {pinnedItems.map(item => (
-                <ItemCard key={item.id} item={item} />
-              ))}
-            </div>
+            <ItemsWithDrawer items={pinnedItems} />
           </section>
         )}
 
@@ -117,11 +113,7 @@ export default async function DashboardPage() {
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-base font-semibold">Recent Items</h2>
           </div>
-          <div className="space-y-2">
-            {recentItems.map(item => (
-              <ItemCard key={item.id} item={item} />
-            ))}
-          </div>
+          <ItemsWithDrawer items={recentItems} />
         </section>
       </div>
     )
