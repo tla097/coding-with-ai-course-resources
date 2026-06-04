@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
+import CodeEditor from '@/components/ui/CodeEditor'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -51,6 +52,7 @@ interface Props {
 
 const CONTENT_TYPES = ['snippet', 'prompt', 'command', 'note']
 const LANGUAGE_TYPES = ['snippet', 'command']
+const CODE_EDITOR_TYPES = ['snippet', 'command']
 const URL_TYPES = ['link']
 
 export default function ItemDrawer({ itemId, open, onOpenChange }: Props) {
@@ -179,6 +181,7 @@ export default function ItemDrawer({ itemId, open, onOpenChange }: Props) {
   const typeName = item?.itemType.name ?? ''
   const showContent = CONTENT_TYPES.includes(typeName)
   const showLanguage = LANGUAGE_TYPES.includes(typeName)
+  const showCodeEditor = CODE_EDITOR_TYPES.includes(typeName)
   const showUrl = URL_TYPES.includes(typeName)
 
   return (
@@ -329,15 +332,22 @@ export default function ItemDrawer({ itemId, open, onOpenChange }: Props) {
 
                   {showContent && (
                     <div className="space-y-1.5">
-                      <Label htmlFor="edit-content">Content</Label>
-                      <Textarea
-                        id="edit-content"
-                        value={editForm.content}
-                        onChange={e => setEditForm(f => ({ ...f, content: e.target.value }))}
-                        placeholder="Content"
-                        rows={8}
-                        className="font-mono text-sm"
-                      />
+                      <Label>Content</Label>
+                      {showCodeEditor ? (
+                        <CodeEditor
+                          value={editForm.content}
+                          onChange={v => setEditForm(f => ({ ...f, content: v }))}
+                          language={editForm.language || null}
+                        />
+                      ) : (
+                        <Textarea
+                          id="edit-content"
+                          value={editForm.content}
+                          onChange={e => setEditForm(f => ({ ...f, content: e.target.value }))}
+                          placeholder="Content"
+                          rows={8}
+                        />
+                      )}
                     </div>
                   )}
 
@@ -393,9 +403,17 @@ export default function ItemDrawer({ itemId, open, onOpenChange }: Props) {
                       <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
                         Content
                       </h3>
-                      <pre className="text-xs bg-muted rounded-md p-3 overflow-x-auto whitespace-pre-wrap break-words font-mono leading-relaxed">
-                        {item.content}
-                      </pre>
+                      {showCodeEditor ? (
+                        <CodeEditor
+                          value={item.content}
+                          language={item.language}
+                          readOnly
+                        />
+                      ) : (
+                        <pre className="text-xs bg-muted rounded-md p-3 overflow-x-auto whitespace-pre-wrap break-words font-mono leading-relaxed">
+                          {item.content}
+                        </pre>
+                      )}
                     </section>
                   )}
 
