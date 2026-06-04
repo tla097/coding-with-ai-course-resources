@@ -1,21 +1,13 @@
-# Current Feature: Items List View
+# Current Feature
 
 ## Status
-In Progress
+Not Started
 
 ## Goals
-- Dynamic route `/items/[type]` renders a filtered list of items by type (e.g. `/items/snippets`, `/items/notes`)
-- Items fetched from the database and filtered by the type slug in the URL
-- Responsive grid layout using `ItemCard` components — two columns on medium screens and up
-- Each `ItemCard` has a left border colored by its item type
-- Implementation follows existing codebase patterns (server component, Prisma fetch, Tailwind styling)
+<!-- Bullet points of what success looks like -->
 
 ## Notes
-- Route lives at `src/app/(dashboard)/items/[type]/page.tsx`
-- Reuse existing `ItemCard` component; the left border coloring is already implemented
-- The `type` param in the URL is the type name slug (e.g. `snippets`, `notes`) — need to map to `ItemType.name` in the DB
-- Fetch via Prisma in a server component; no new server actions needed
-- Follow the same pattern as the dashboard page for data fetching
+<!-- Additional context, constraints, or details from spec -->
 
 ## History
 <!-- Keep this updated. Earliest to Latest. Format: DD/MM/YYYY HH:MM -->
@@ -60,3 +52,4 @@ In Progress
 03/06/2026 17:00 - Completed Profile Page: /profile route with user info, usage stats (total items, collections, per-type breakdown), change password form (credentials users only), delete account with two-step confirmation; merged to main
 04/06/2026 13:00 - Started Rate Limiting for Auth: created feature/rate-limiting-auth branch
 04/06/2026 14:30 - Completed Rate Limiting for Auth: src/lib/rate-limit.ts (Upstash sliding window, fail-open), login rate limited in proxy (5/15min IP+email), register (3/1h IP), forgot-password (3/1h IP), reset-password (5/15min IP), resend-verification endpoint created (3/15min IP+email), resend button on verify-email page; merged to main
+04/06/2026 15:45 - Completed Items List View: src/app/(dashboard)/items/[type]/page.tsx (dynamic route, server component, notFound for unknown types, 2-col grid, empty state), getItemsByType added to src/lib/db/items.ts; merged to main
