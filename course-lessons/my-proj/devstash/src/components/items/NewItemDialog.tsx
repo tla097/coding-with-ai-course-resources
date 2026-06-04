@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
+import CodeEditor from '@/components/ui/CodeEditor'
 import { ICON_MAP } from '@/lib/icon-map'
 import { createItem } from '@/actions/items'
 import type { SidebarItemType } from '@/lib/db/sidebar'
@@ -22,6 +23,7 @@ import type { SidebarItemType } from '@/lib/db/sidebar'
 const CREATABLE_TYPES = ['snippet', 'prompt', 'command', 'note', 'link']
 const CONTENT_TYPES = ['snippet', 'prompt', 'command', 'note']
 const LANGUAGE_TYPES = ['snippet', 'command']
+const CODE_EDITOR_TYPES = ['snippet', 'command']
 
 interface Props {
   itemTypes: SidebarItemType[]
@@ -69,6 +71,7 @@ export default function NewItemDialog({ itemTypes }: Props) {
 
   const showContent = selectedType ? CONTENT_TYPES.includes(selectedType.name) : false
   const showLanguage = selectedType ? LANGUAGE_TYPES.includes(selectedType.name) : false
+  const showCodeEditor = selectedType ? CODE_EDITOR_TYPES.includes(selectedType.name) : false
   const showUrl = selectedType?.name === 'link'
 
   const canSubmit =
@@ -183,15 +186,22 @@ export default function NewItemDialog({ itemTypes }: Props) {
 
             {showContent && (
               <div className="space-y-1.5">
-                <Label htmlFor="new-content">Content</Label>
-                <Textarea
-                  id="new-content"
-                  value={form.content}
-                  onChange={e => setForm(f => ({ ...f, content: e.target.value }))}
-                  placeholder="Content"
-                  rows={6}
-                  className="font-mono text-sm"
-                />
+                <Label>Content</Label>
+                {showCodeEditor ? (
+                  <CodeEditor
+                    value={form.content}
+                    onChange={v => setForm(f => ({ ...f, content: v }))}
+                    language={form.language || null}
+                  />
+                ) : (
+                  <Textarea
+                    id="new-content"
+                    value={form.content}
+                    onChange={e => setForm(f => ({ ...f, content: e.target.value }))}
+                    placeholder="Content"
+                    rows={6}
+                  />
+                )}
               </div>
             )}
 

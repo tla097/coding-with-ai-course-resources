@@ -1,13 +1,23 @@
-# Current Feature
+# Current Feature: Code Editor (Monaco)
 
 ## Status
-Not Started
+In Progress
 
 ## Goals
-<!-- Bullet points of what success looks like -->
+- CodeEditor component built with Monaco Editor, dark theme
+- Replaces Textarea for snippet and command types only
+- Notes, prompts, and other non-code types keep Textarea
+- macOS-style window dots (red/yellow/green) in editor header
+- Quick copy button in editor header
+- Language label shown in editor header next to copy button
+- Supports readonly (display) mode and edit mode
+- Fluid height with 400px max and themed scrollbar
 
 ## Notes
-<!-- Additional context, constraints, or details from spec -->
+- Monaco Editor requires `'use client'` — lazy-load with `next/dynamic` to avoid SSR issues
+- Check existing ItemDrawer and edit form to find where content Textarea is rendered
+- Language field already exists on Item model (`item.language`)
+- Spec file: devstash/context/features/code-editor-spec.md
 
 ## History
 <!-- Keep this updated. Earliest to Latest. Format: DD/MM/YYYY HH:MM -->
