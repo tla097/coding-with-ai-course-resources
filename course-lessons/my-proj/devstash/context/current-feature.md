@@ -1,42 +1,13 @@
-# Current Feature: Rate Limiting for Auth
+# Current Feature
 
 ## Status
-In Progress
+Not Started
 
 ## Goals
-- Add rate limiting to all auth-related API routes to prevent brute force and credential stuffing
-- Create reusable `src/lib/rate-limit.ts` utility using Upstash Redis + `@upstash/ratelimit`
-- Protect 5 endpoints with appropriate limits and window sizes (see Notes)
-- Return 429 responses with `Retry-After` header and user-friendly error messages
-- Display rate limit errors via toast notifications on the frontend
-- Fail open if Upstash is unavailable (never block legitimate requests due to Redis outage)
+<!-- Bullet points of what success looks like -->
 
 ## Notes
-### Endpoints & Limits
-| Endpoint | Limit | Window | Key By |
-|----------|-------|--------|--------|
-| `/api/auth/callback/credentials` (login) | 5 attempts | 15 min | IP + email |
-| `/api/auth/register` | 3 attempts | 1 hour | IP |
-| `/api/auth/forgot-password` | 3 attempts | 1 hour | IP |
-| `/api/auth/reset-password` | 5 attempts | 15 min | IP |
-| `/api/auth/resend-verification` | 3 attempts | 15 min | IP + email |
-
-### Implementation Details
-- Use sliding window algorithm
-- Extract IP from `x-forwarded-for` header (Vercel) or request
-- Combine IP + email where applicable for tighter limits
-- Utility returns `{ success, remaining, reset }`
-- 429 response JSON: `{ error: "Too many attempts. Please try again in X minutes." }`
-- Login limiting with NextAuth credentials requires a custom sign-in handler
-
-### Environment Variables Required
-```
-UPSTASH_REDIS_REST_URL=
-UPSTASH_REDIS_REST_TOKEN=
-```
-
-### Infrastructure
-- Upstash free tier: 10k requests/day (sufficient for auth limiting)
+<!-- Additional context, constraints, or details from spec -->
 
 ## History
 <!-- Keep this updated. Earliest to Latest. Format: DD/MM/YYYY HH:MM -->
@@ -79,3 +50,5 @@ UPSTASH_REDIS_REST_TOKEN=
 03/06/2026 16:35 - Completed Email Verification Toggle: DISABLE_EMAIL_VERIFICATION env variable bypasses verification — registration auto-signs user in and redirects to dashboard; dashboard guard skipped; merged to main
 03/06/2026 17:00 - Completed Forgot Password: /forgot-password and /reset-password pages, Server Actions for request/reset, tokens stored in VerificationToken with password-reset: prefix and 1-hour expiry, Resend email, "Forgot password?" link on sign-in page; merged to main
 03/06/2026 17:00 - Completed Profile Page: /profile route with user info, usage stats (total items, collections, per-type breakdown), change password form (credentials users only), delete account with two-step confirmation; merged to main
+04/06/2026 13:00 - Started Rate Limiting for Auth: created feature/rate-limiting-auth branch
+04/06/2026 14:30 - Completed Rate Limiting for Auth: src/lib/rate-limit.ts (Upstash sliding window, fail-open), login rate limited in proxy (5/15min IP+email), register (3/1h IP), forgot-password (3/1h IP), reset-password (5/15min IP), resend-verification endpoint created (3/15min IP+email), resend button on verify-email page; merged to main
