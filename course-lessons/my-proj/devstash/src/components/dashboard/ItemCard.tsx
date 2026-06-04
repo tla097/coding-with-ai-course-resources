@@ -15,7 +15,10 @@ export default function ItemCard({ item }: ItemCardProps) {
   })
 
   return (
-    <div className="flex gap-4 rounded-lg border border-border bg-card p-4 hover:bg-accent/20 transition-colors cursor-pointer">
+    <div
+      className="flex gap-4 rounded-lg border border-border border-l-[3px] bg-card p-4 hover:bg-accent/20 transition-colors cursor-pointer"
+      style={{ borderLeftColor: item.itemType.color }}
+    >
       {Icon && (
         <div
           className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md"
