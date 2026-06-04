@@ -42,3 +42,6 @@ next-env.d.ts
 
 # certificate
 DorsetSoftware-Root-CA*
+
+
+/.playwright-mcp/
