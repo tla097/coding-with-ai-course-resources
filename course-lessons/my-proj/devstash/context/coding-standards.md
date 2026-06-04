@@ -95,3 +95,12 @@ Example v4 configuration:
 - No commented-out code unless specified
 - No unused imports or variables
 - Keep functions under 50 lines when possible
+
+## Testing
+
+- Framework: Vitest
+- Scope: server actions (src/actions/) and utilities (src/lib/) only — no component tests
+- Location: src/__tests__/lib/ and src/__tests__/actions/
+- Always mock: next/headers, @/lib/prisma, external services (@/lib/email, @/lib/rate-limit)
+- Use `vi.mock()` at the top of the test file, before imports
+- Commands: `npm test` (CI), `npm run test:watch` (development)

@@ -17,7 +17,7 @@ This is the common workflow that we will use for every single feature/fix:
 1. **Document** - Document the feature in @context/current-feature.md.
 2. **Branch** - Create new branch for feature, fix, etc
 3. **Implement** - Implement the feature/fix that I create in @context/current-feature.md
-4. **Test** - Verify it works in the browser. Implement unit testing later. Run `npm run build` and fix any errors
+4. **Test** - Run unit tests (`npm test`) for any server actions or utilities changed or added. Verify it works in the browser. Run `npm run build` and fix any errors
 5. **Iterate** - Iterate and change things if needed
 6. **Commit** - Only after build passes and everything works. Don't add an "co-authorded by claude section"
 7. **Merge** - Merge to main
@@ -59,3 +59,11 @@ Review AI-generated code periodically, especially for:
 - Performance (unnecessary re-renders, N+1 queries)
 - Logic errors (edge cases)
 - Patterns (matches existing codebase?)
+
+## Testing
+
+- Unit tests cover server actions and utilities only — not components
+- Test files live in src/__tests__/lib/ and src/__tests__/actions/
+- Run tests with `npm test` (single run) or `npm run test:watch` (watch mode)
+- Mock Next.js modules (next/headers, etc.) and external services with `vi.mock()`
+- Mock Prisma at `@/lib/prisma` — never hit the real DB in unit tests

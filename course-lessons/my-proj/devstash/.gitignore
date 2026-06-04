@@ -44,4 +44,4 @@ next-env.d.ts
 DorsetSoftware-Root-CA*
 
 
-/.playwright-mcp/
+/.playwright-mcp
