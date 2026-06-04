@@ -1,0 +1,128 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - button [ref=e4]:
+        - img
+      - generic [ref=e6]: DevStash
+      - generic [ref=e7]:
+        - img [ref=e8]
+        - textbox "Search items..." [ref=e11]
+      - generic [ref=e12]:
+        - button "New Collection" [ref=e13]
+        - button "New Item" [ref=e14]
+    - generic [ref=e15]:
+      - complementary [ref=e16]:
+        - generic [ref=e17]:
+          - generic [ref=e18]:
+            - generic [ref=e19]:
+              - paragraph [ref=e20]: Types
+              - navigation [ref=e21]:
+                - link "commands 8" [ref=e22] [cursor=pointer]:
+                  - /url: /items/commands
+                  - generic [ref=e23]:
+                    - img [ref=e24]
+                    - generic [ref=e26]: commands
+                  - generic [ref=e27]: "8"
+                - link "links 8" [ref=e28] [cursor=pointer]:
+                  - /url: /items/links
+                  - generic [ref=e29]:
+                    - img [ref=e30]
+                    - generic [ref=e33]: links
+                  - generic [ref=e34]: "8"
+                - link "notes 1" [ref=e35] [cursor=pointer]:
+                  - /url: /items/notes
+                  - generic [ref=e36]:
+                    - img [ref=e37]
+                    - generic [ref=e40]: notes
+                  - generic [ref=e41]: "1"
+                - link "prompts 5" [ref=e42] [cursor=pointer]:
+                  - /url: /items/prompts
+                  - generic [ref=e43]:
+                    - img [ref=e44]
+                    - generic [ref=e47]: prompts
+                  - generic [ref=e48]: "5"
+                - link "snippets 6" [ref=e49] [cursor=pointer]:
+                  - /url: /items/snippets
+                  - generic [ref=e50]:
+                    - img [ref=e51]
+                    - generic [ref=e54]: snippets
+                  - generic [ref=e55]: "6"
+                - link "files PRO 0" [ref=e56] [cursor=pointer]:
+                  - /url: /items/files
+                  - generic [ref=e57]:
+                    - img [ref=e58]
+                    - generic [ref=e61]: files
+                    - generic [ref=e62]: PRO
+                  - generic [ref=e63]: "0"
+                - link "images PRO 0" [ref=e64] [cursor=pointer]:
+                  - /url: /items/images
+                  - generic [ref=e65]:
+                    - img [ref=e66]
+                    - generic [ref=e70]: images
+                    - generic [ref=e71]: PRO
+                  - generic [ref=e72]: "0"
+            - generic [ref=e73]:
+              - paragraph [ref=e74]: Collections
+              - generic [ref=e75]:
+                - paragraph [ref=e76]: Recent
+                - navigation [ref=e77]:
+                  - link "Design Resources" [ref=e78] [cursor=pointer]:
+                    - /url: /collections/cmpwjp41c000q0ojoy4xdtt96
+                    - generic [ref=e80]: Design Resources
+                  - link "Terminal Commands" [ref=e81] [cursor=pointer]:
+                    - /url: /collections/cmpwjp3lt000l0ojohh0t6rre
+                    - generic [ref=e83]: Terminal Commands
+                  - link "DevOps" [ref=e84] [cursor=pointer]:
+                    - /url: /collections/cmpwjp36k000g0ojogvctrsar
+                    - generic [ref=e86]: DevOps
+                  - link "AI Workflows" [ref=e87] [cursor=pointer]:
+                    - /url: /collections/cmpwjp2tc000c0ojozupfdw1t
+                    - generic [ref=e89]: AI Workflows
+                  - link "React Patterns" [ref=e90] [cursor=pointer]:
+                    - /url: /collections/cmpwjp2ce00080ojohctp42bl
+                    - generic [ref=e92]: React Patterns
+              - link "View all collections" [ref=e93] [cursor=pointer]:
+                - /url: /collections
+          - button "DU Demo User demo@devstash.io" [ref=e95] [cursor=pointer]:
+            - generic [ref=e96]: DU
+            - generic [ref=e97]:
+              - paragraph [ref=e98]: Demo User
+              - paragraph [ref=e99]: demo@devstash.io
+            - img [ref=e100]
+      - main [ref=e102]:
+        - generic [ref=e103]:
+          - generic [ref=e104]:
+            - img [ref=e106]
+            - generic [ref=e109]:
+              - heading "snippets" [level=1] [ref=e110]
+              - paragraph [ref=e111]: 4 items
+          - generic [ref=e112]:
+            - generic [ref=e113] [cursor=pointer]:
+              - img [ref=e115]
+              - generic [ref=e118]:
+                - generic [ref=e119]:
+                  - generic [ref=e121]: Multi-stage Dockerfile (Node.js)
+                  - generic [ref=e122]: Jun 2
+                - paragraph [ref=e123]: Production-optimised multi-stage Docker build for Next.js apps
+            - generic [ref=e124] [cursor=pointer]:
+              - img [ref=e126]
+              - generic [ref=e129]:
+                - generic [ref=e130]:
+                  - generic [ref=e132]: Context Provider + Compound Components
+                  - generic [ref=e133]: Jun 2
+                - paragraph [ref=e134]: Pattern for building flexible compound components using React Context
+            - generic [ref=e135] [cursor=pointer]:
+              - img [ref=e137]
+              - generic [ref=e140]:
+                - generic [ref=e141]:
+                  - generic [ref=e143]: TypeScript Utility Functions
+                  - generic [ref=e144]: Jun 2
+                - paragraph [ref=e145]: "Common utilities: cn, formatDate, truncate, groupBy"
+            - generic [ref=e146] [cursor=pointer]:
+              - img [ref=e148]
+              - generic [ref=e151]:
+                - generic [ref=e152]:
+                  - generic [ref=e154]: "Custom Hooks: useDebounce & useLocalStorage"
+                  - generic [ref=e155]: Jun 2
+                - paragraph [ref=e156]: Production-ready custom hooks for debouncing values and persisting state
+  - region "Notifications alt+T"
