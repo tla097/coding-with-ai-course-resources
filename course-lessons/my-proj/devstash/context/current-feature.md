@@ -1,25 +1,13 @@
-# Current Feature: Markdown Editor
+# Current Feature
 
 ## Status
-In Progress
+Not Started
 
 ## Goals
-- Create `MarkdownEditor` component with Write/Preview tabbed interface
-- Replace `Textarea` with `MarkdownEditor` for notes and prompts only (snippets/commands keep `CodeEditor`)
-- Support readonly mode (Preview tab only) and edit mode (Write tab default, Preview available)
-- Add copy button in header matching `CodeEditor` style
-- Render GitHub Flavored Markdown via `react-markdown` + `remark-gfm`
-- Integrate into `NewItemDialog` (create) and `ItemDrawer` (edit + readonly view) for note and prompt types
+<!-- Bullet points of what success looks like -->
 
 ## Notes
-- Match existing dark theme: `bg-[#1e1e1e]` container, `bg-[#2d2d2d]` header
-- Fluid height with max 400px, matching `CodeEditor` behavior
-- Use custom CSS class `.markdown-preview` for reliable dark mode styling
-- Styling requirements for rendered markdown: h1-h6 sizing, code blocks with dark bg + monospace, inline code highlight, ordered/unordered lists with indentation, blockquotes with left border, blue links with hover, tables with borders + header background
-- Integration points:
-  - `NewItemDialog`: content field for note and prompt types
-  - `ItemDrawer` edit mode: content field for note and prompt types
-  - `ItemDrawer` view mode: readonly mode for note and prompt content
+<!-- Additional context, constraints, or details from spec -->
 
 ## History
 <!-- Keep this updated. Earliest to Latest. Format: DD/MM/YYYY HH:MM -->
@@ -70,3 +58,4 @@ In Progress
 04/06/2026 16:40 - Completed Item Drawer Edit Mode: pencil button toggles inline edit form; title/description/tags for all types; content/language/URL shown per type; Save/Cancel replace action bar; updateItem server action (Zod v4 validated, ownership checked, { success, data, error } pattern); updateItem DB query (disconnect-all/connect-or-create tags); router.refresh() on save; 12 unit tests; merged to main
 04/06/2026 17:10 - Completed Item Create: Dialog UI component (base-ui/dialog), NewItemDialog with type selector (snippet/prompt/command/note/link) and conditional fields, createItem server action (Zod v4, auth check, URL/TEXT contentType), createItem DB query (connect-or-create tags); toast + close + router.refresh() on success; 12 unit tests; merged to main
 04/06/2026 17:30 - Completed Code Editor (Monaco): CodeEditor component (src/components/ui/CodeEditor.tsx) with macOS window dots, copy button, language label, fluid height (120-400px), themed scrollbar; replaces Textarea in ItemDrawer and NewItemDialog for snippet/command types; notes/prompts keep Textarea; merged to main
+05/06/2026 13:20 - Completed Markdown Editor: MarkdownEditor component (src/components/ui/MarkdownEditor.tsx) with Write/Preview tabs, copy button, readonly mode, GFM rendering via react-markdown + remark-gfm; inline styles used for markdown elements (Tailwind v4 drops non-@layer CSS from globals.css); replaces Textarea in ItemDrawer and NewItemDialog for note/prompt types; merged to main
