@@ -1,21 +1,13 @@
-# Current Feature: Pagination
+# Current Feature
 
 ## Status
-In Progress
+Not Started
 
 ## Goals
-- Add pagination to `/items/[type]` pages with numbered page links and prev/next controls
-- Add pagination to `/collections/[id]` pages with numbered page links and prev/next controls
-- Prev/next links are disabled (greyed out) when not available
-- Only fetch the items required for the current page — no fetching all records at once
-- Use constants: `ITEMS_PER_PAGE = 21`, `COLLECTIONS_PER_PAGE = 21`
-- Dashboard limits remain: `DASHBOARD_COLLECTIONS_LIMIT = 6`, `DASHBOARD_RECENT_ITEMS_LIMIT = 10`
+<!-- Bullet points of what success looks like -->
 
 ## Notes
-- Constants defined in a shared location (e.g. `src/lib/constants.ts`)
-- Pagination controls sit at the bottom of the list
-- Dashboard page is NOT paginated — it uses the separate limit constants
-- Only fetch what a page requires — use `skip`/`take` in Prisma queries
+<!-- Additional context, constraints, or details from spec -->
 
 ## History
 <!-- Keep this updated. Earliest to Latest. Format: DD/MM/YYYY HH:MM -->
@@ -74,3 +66,4 @@ In Progress
 05/06/2026 15:15 - Completed Collection Actions & Card Dropdowns: CollectionActions component (Edit/Delete/Favorite buttons) on /collections/[id], EditCollectionDialog (name/description, updateCollection server action), DeleteCollectionDialog (confirmation, deletes collection only — items kept via cascade join cleanup), CollectionCard converted to client component with 3-dots dropdown (Edit/Delete/Favorite), card click navigates; updateCollection and deleteCollection added to actions and DB layer; 16 unit tests; merged to main
 05/06/2026 15:35 - Fixed Delete Collection Redirect: CollectionActions.tsx redirectAfterDelete changed from /collections to /dashboard; merged to main
 05/06/2026 15:50 - Completed Global Search / Command Palette: cmdk palette opens on Ctrl+K/Cmd+K and TopBar click; fuzzy search across items and collections; grouped results with type icon and item count; item selection opens ItemDrawer; collection selection navigates to /collections/[id]; search data pre-fetched in layout; 10 unit tests; merged to main
+05/06/2026 16:15 - Completed Pagination: src/lib/constants.ts (ITEMS_PER_PAGE=21, COLLECTIONS_PER_PAGE=21, DASHBOARD_COLLECTIONS_LIMIT=6, DASHBOARD_RECENT_ITEMS_LIMIT=10); getItemsByTypePaginated and getItemsByCollectionPaginated (skip/take); Pagination component (numbered links, prev/next, ellipsis); /items/[type] and /collections/[id] paginated via searchParams; dashboard uses limit constants with accurate collection count stat; 10 unit tests; merged to main
