@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import DashboardShell from '@/components/layout/DashboardShell'
 import { getSidebarData } from '@/lib/db/sidebar'
+import { getSearchData } from '@/lib/db/search'
 
 export default async function DashboardLayout({
   children,
@@ -22,9 +23,13 @@ export default async function DashboardLayout({
   }
 
   try {
-    const sidebarData = await getSidebarData(session?.user?.id ?? '')
+    const userId = session?.user?.id ?? ''
+    const [sidebarData, searchData] = await Promise.all([
+      getSidebarData(userId),
+      getSearchData(userId),
+    ])
     return (
-      <DashboardShell sidebarData={sidebarData} user={session?.user ?? null}>
+      <DashboardShell sidebarData={sidebarData} searchData={searchData} user={session?.user ?? null}>
         {children}
       </DashboardShell>
     )
