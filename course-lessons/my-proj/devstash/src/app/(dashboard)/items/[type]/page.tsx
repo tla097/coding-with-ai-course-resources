@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import { auth } from '@/auth'
 import { getItemsByType } from '@/lib/db/items'
+import { getCollectionList } from '@/lib/db/collections'
 import { ICON_MAP } from '@/lib/icon-map'
 import { prisma } from '@/lib/prisma'
 import ItemsWithDrawer from '@/components/items/ItemsWithDrawer'
@@ -24,7 +25,10 @@ export default async function ItemsTypePage({ params }: Props) {
   const session = await auth()
   const userId = session?.user?.id ?? ''
 
-  const items = await getItemsByType(userId, typeName)
+  const [items, collectionList] = await Promise.all([
+    getItemsByType(userId, typeName),
+    getCollectionList(userId),
+  ])
 
   const Icon = ICON_MAP[itemType.icon] ?? null
 
@@ -50,7 +54,7 @@ export default async function ItemsTypePage({ params }: Props) {
           <p className="text-sm text-muted-foreground">No {type} yet.</p>
         </div>
       ) : (
-        <ItemsWithDrawer items={items} variant="grid" />
+        <ItemsWithDrawer items={items} collections={collectionList} variant="grid" />
       )}
     </div>
   )

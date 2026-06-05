@@ -19,6 +19,7 @@ import CodeEditor from '@/components/ui/CodeEditor'
 import MarkdownEditor from '@/components/ui/MarkdownEditor'
 import { ICON_MAP } from '@/lib/icon-map'
 import { createItem } from '@/actions/items'
+import CollectionPicker from '@/components/items/CollectionPicker'
 import type { SidebarItemType } from '@/lib/db/sidebar'
 
 const CREATABLE_TYPES = ['snippet', 'prompt', 'command', 'note', 'link']
@@ -29,6 +30,7 @@ const MARKDOWN_EDITOR_TYPES = ['note', 'prompt']
 
 interface Props {
   itemTypes: SidebarItemType[]
+  collections: { id: string; name: string }[]
 }
 
 interface FormState {
@@ -49,12 +51,13 @@ const EMPTY_FORM: FormState = {
   tags: '',
 }
 
-export default function NewItemDialog({ itemTypes }: Props) {
+export default function NewItemDialog({ itemTypes, collections }: Props) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [saving, setSaving] = useState(false)
   const [selectedTypeId, setSelectedTypeId] = useState<string | null>(null)
   const [form, setForm] = useState<FormState>(EMPTY_FORM)
+  const [selectedCollectionIds, setSelectedCollectionIds] = useState<string[]>([])
 
   const creatableTypes = itemTypes.filter(t => CREATABLE_TYPES.includes(t.name))
   const selectedType = creatableTypes.find(t => t.id === selectedTypeId) ?? null
@@ -63,6 +66,7 @@ export default function NewItemDialog({ itemTypes }: Props) {
     const defaultType = creatableTypes[0] ?? null
     setSelectedTypeId(defaultType?.id ?? null)
     setForm(EMPTY_FORM)
+    setSelectedCollectionIds([])
     setSaving(false)
     setOpen(true)
   }
@@ -98,6 +102,7 @@ export default function NewItemDialog({ itemTypes }: Props) {
       url: form.url || null,
       language: form.language || null,
       tags,
+      collectionIds: selectedCollectionIds,
       itemTypeId: selectedType.id,
       itemTypeName: selectedType.name as 'snippet' | 'prompt' | 'command' | 'note' | 'link',
     })
@@ -250,6 +255,17 @@ export default function NewItemDialog({ itemTypes }: Props) {
               />
               <p className="text-xs text-muted-foreground">Comma-separated</p>
             </div>
+
+            {collections.length > 0 && (
+              <div className="space-y-1.5">
+                <Label>Collections</Label>
+                <CollectionPicker
+                  collections={collections}
+                  selected={selectedCollectionIds}
+                  onChange={setSelectedCollectionIds}
+                />
+              </div>
+            )}
           </div>
 
           <DialogFooter>

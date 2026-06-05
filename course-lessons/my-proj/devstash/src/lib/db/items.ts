@@ -109,6 +109,7 @@ export interface UpdateItemData {
   url: string | null
   language: string | null
   tags: string[]
+  collectionIds: string[]
 }
 
 export async function updateItem(
@@ -133,6 +134,12 @@ export async function updateItem(
           where: { name },
           create: { name },
         })),
+      },
+      collections: {
+        deleteMany: {},
+        createMany: {
+          data: data.collectionIds.map(collectionId => ({ collectionId })),
+        },
       },
     },
     select: {
@@ -166,6 +173,7 @@ export interface CreateItemData {
   url: string | null
   language: string | null
   tags: string[]
+  collectionIds: string[]
   itemTypeId: string
   contentType: 'TEXT' | 'URL'
 }
@@ -186,6 +194,12 @@ export async function createItem(userId: string, data: CreateItemData): Promise<
           where: { name },
           create: { name },
         })),
+      },
+      collections: {
+        createMany: {
+          data: data.collectionIds.map(collectionId => ({ collectionId })),
+          skipDuplicates: true,
+        },
       },
     },
     select: {

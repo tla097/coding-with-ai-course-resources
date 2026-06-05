@@ -10,9 +10,10 @@ import type { SidebarItemType } from '@/lib/db/sidebar'
 interface TopBarProps {
   onMenuToggle: () => void
   itemTypes: SidebarItemType[]
+  collections: { id: string; name: string }[]
 }
 
-export default function TopBar({ onMenuToggle, itemTypes }: TopBarProps) {
+export default function TopBar({ onMenuToggle, itemTypes, collections }: TopBarProps) {
   return (
     <header className="flex items-center gap-2 border-b border-border px-4 py-3">
       <Button variant="ghost" size="icon" onClick={onMenuToggle} className="shrink-0">
@@ -27,7 +28,7 @@ export default function TopBar({ onMenuToggle, itemTypes }: TopBarProps) {
       </div>
       <div className="flex flex-1 items-center justify-end gap-2">
         <NewCollectionDialog />
-        <NewItemDialog itemTypes={itemTypes} />
+        <NewItemDialog itemTypes={itemTypes} collections={collections} />
       </div>
     </header>
   )
