@@ -1,21 +1,13 @@
-# Current Feature: Collection Create
+# Current Feature
 
 ## Status
-In Progress
+Not Started
 
 ## Goals
-- "New Collection" button visible in the top bar on dashboard pages
-- Button opens a modal/dialog with name (required) and description (optional) fields
-- `createCollection` server action in `src/actions/collections.ts` (Zod v4 validated, auth check, `{ success, data, error }` pattern)
-- `createCollection` DB query in `src/lib/db/collections.ts` — collection is user-scoped (linked to session user)
-- Toast shown on success; toast shown on failure
-- UI updates immediately after save (`router.refresh()`) so the new collection appears in the dashboard grid and sidebar
+<!-- Bullet points of what success looks like -->
 
 ## Notes
-- Follow item create patterns: server action in `src/actions/`, DB query in `src/lib/db/`, dialog component in `src/components/collections/`
-- Collections are user-scoped — always attach `userId` from session
-- Prefer server action for the create mutation; no API route needed
-- Keep the dialog simple: name + description fields only
+<!-- Additional context, constraints, or details from spec -->
 
 ## History
 <!-- Keep this updated. Earliest to Latest. Format: DD/MM/YYYY HH:MM -->
@@ -67,3 +59,4 @@ In Progress
 04/06/2026 17:10 - Completed Item Create: Dialog UI component (base-ui/dialog), NewItemDialog with type selector (snippet/prompt/command/note/link) and conditional fields, createItem server action (Zod v4, auth check, URL/TEXT contentType), createItem DB query (connect-or-create tags); toast + close + router.refresh() on success; 12 unit tests; merged to main
 04/06/2026 17:30 - Completed Code Editor (Monaco): CodeEditor component (src/components/ui/CodeEditor.tsx) with macOS window dots, copy button, language label, fluid height (120-400px), themed scrollbar; replaces Textarea in ItemDrawer and NewItemDialog for snippet/command types; notes/prompts keep Textarea; merged to main
 05/06/2026 13:20 - Completed Markdown Editor: MarkdownEditor component (src/components/ui/MarkdownEditor.tsx) with Write/Preview tabs, copy button, readonly mode, GFM rendering via react-markdown + remark-gfm; inline styles used for markdown elements (Tailwind v4 drops non-@layer CSS from globals.css); replaces Textarea in ItemDrawer and NewItemDialog for note/prompt types; merged to main
+05/06/2026 14:10 - Completed Collection Create: NewCollectionDialog component (src/components/collections/NewCollectionDialog.tsx) with name/description fields, createCollection server action (src/actions/collections.ts, Zod v4, auth check), createCollection DB query added to src/lib/db/collections.ts (user-scoped), wired into TopBar replacing placeholder button, toast on success/failure, router.refresh() on save; 10 unit tests; merged to main
