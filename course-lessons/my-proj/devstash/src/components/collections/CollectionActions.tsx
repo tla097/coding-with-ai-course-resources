@@ -55,7 +55,7 @@ export default function CollectionActions({ collection }: CollectionActionsProps
         open={deleteOpen}
         onOpenChange={setDeleteOpen}
         collection={collection}
-        redirectAfterDelete="/collections"
+        redirectAfterDelete="/dashboard"
       />
     </>
   )

@@ -1,13 +1,14 @@
-# Current Feature
+# Current Feature: Fix Delete Collection Redirect to Dashboard
 
 ## Status
-Not Started
+In Progress
 
 ## Goals
-<!-- Bullet points of what success looks like -->
+- Deleting a collection from the `/collections/[id]` page navigates to `/dashboard`, not `/collections`
 
 ## Notes
-<!-- Additional context, constraints, or details from spec -->
+- The bug: `CollectionActions.tsx` passes `redirectAfterDelete="/collections"` to `DeleteCollectionDialog` — change it to `/dashboard`
+- No other changes needed; the `DeleteCollectionDialog` redirect logic is correct
 
 ## History
 <!-- Keep this updated. Earliest to Latest. Format: DD/MM/YYYY HH:MM -->
