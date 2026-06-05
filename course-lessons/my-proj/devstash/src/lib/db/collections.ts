@@ -131,3 +131,23 @@ export async function getCollectionById(id: string, userId: string): Promise<Col
   if (!col) return null
   return mapCollectionStats(col)
 }
+
+export async function updateCollection(
+  id: string,
+  userId: string,
+  data: { name: string; description?: string | null },
+) {
+  return prisma.collection.update({
+    where: { id, userId },
+    data: {
+      name: data.name,
+      description: data.description ?? null,
+    },
+  })
+}
+
+export async function deleteCollection(id: string, userId: string) {
+  return prisma.collection.delete({
+    where: { id, userId },
+  })
+}

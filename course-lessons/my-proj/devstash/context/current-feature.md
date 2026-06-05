@@ -1,13 +1,25 @@
-# Current Feature
+# Current Feature: Collection Actions & Card Dropdowns
 
 ## Status
-Not Started
+In Progress
 
 ## Goals
-<!-- Bullet points of what success looks like -->
+- `/collections/[id]` page has Edit, Delete, and Favorite buttons
+- Favorite button is present (icon only) but not yet functional
+- Edit button opens a modal to edit collection metadata (name, description)
+- Delete button shows a confirmation dialog before proceeding
+- Deleting a collection does NOT delete items — it only removes the collection (items remain, just no longer in that collection)
+- Collection cards on `/collections` and `/dashboard` show a 3-dots dropdown menu with Edit, Delete, and Favorite options
+- Clicking anywhere else on a collection card navigates to `/collections/[id]`
 
 ## Notes
-<!-- Additional context, constraints, or details from spec -->
+- Favorites: render the heart/star icon and button, but wire no action (no DB call, no state change)
+- Edit modal: fields for collection name and description; reuse or create a `updateCollection` server action
+- Delete confirmation: "Are you sure?" style dialog; on confirm calls `deleteCollection` server action
+- `deleteCollection` should use Prisma to delete the Collection record — items are linked via a join table (CollectionItem), Prisma cascade will clean up join rows but items themselves must not be deleted
+- The 3-dots dropdown on cards must stop click propagation so it doesn't trigger the card navigation
+- Card click (outside the dropdown) navigates to `/collections/[id]`
+- Follow existing patterns: server actions in `src/actions/collections.ts`, DB queries in `src/lib/db/collections.ts`, Zod v4 validation, `{ success, data, error }` return shape, `router.refresh()` after mutations
 
 ## History
 <!-- Keep this updated. Earliest to Latest. Format: DD/MM/YYYY HH:MM -->

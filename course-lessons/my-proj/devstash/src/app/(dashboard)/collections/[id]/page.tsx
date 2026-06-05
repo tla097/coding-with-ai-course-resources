@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import { FolderOpen } from 'lucide-react'
 import ItemsWithDrawer from '@/components/items/ItemsWithDrawer'
+import CollectionActions from '@/components/collections/CollectionActions'
 import { getCollectionById, getCollectionList } from '@/lib/db/collections'
 import { getItemsByCollection } from '@/lib/db/items'
 import { auth } from '@/auth'
@@ -28,24 +29,28 @@ export default async function CollectionPage({ params }: Props) {
 
   return (
     <div className="mx-auto w-full max-w-6xl space-y-6">
-      <div className="flex items-center gap-3">
-        <div
-          className="flex h-9 w-9 items-center justify-center rounded-md"
-          style={{ backgroundColor: `${accentColor}20` }}
-        >
-          <FolderOpen className="h-5 w-5" style={{ color: accentColor }} />
-        </div>
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">{collection.name}</h1>
-          <p className="text-sm text-muted-foreground">
-            {collection.description ?? `${items.length} item${items.length !== 1 ? 's' : ''}`}
-          </p>
-          {collection.description && (
-            <p className="text-xs text-muted-foreground/70 mt-0.5">
-              {items.length} item{items.length !== 1 ? 's' : ''}
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex items-center gap-3 min-w-0">
+          <div
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md"
+            style={{ backgroundColor: `${accentColor}20` }}
+          >
+            <FolderOpen className="h-5 w-5" style={{ color: accentColor }} />
+          </div>
+          <div className="min-w-0">
+            <h1 className="text-2xl font-bold tracking-tight truncate">{collection.name}</h1>
+            <p className="text-sm text-muted-foreground">
+              {collection.description ?? `${items.length} item${items.length !== 1 ? 's' : ''}`}
             </p>
-          )}
+            {collection.description && (
+              <p className="text-xs text-muted-foreground/70 mt-0.5">
+                {items.length} item{items.length !== 1 ? 's' : ''}
+              </p>
+            )}
+          </div>
         </div>
+
+        <CollectionActions collection={collection} />
       </div>
 
       {items.length === 0 ? (
