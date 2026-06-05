@@ -1,23 +1,13 @@
-# Current Feature: Add Item to Collections
+# Current Feature
 
 ## Status
-In Progress
+Not Started
 
 ## Goals
-- NewItemDialog includes a multi-select input listing the user's collections, allowing one or more to be selected at creation time
-- ItemDrawer edit mode includes the same multi-select collection picker, pre-populated with the item's current collections
-- `createItem` server action accepts `collectionIds` and creates the corresponding `ItemCollection` join records
-- `updateItem` server action accepts `collectionIds` and syncs `ItemCollection` records (disconnect all, reconnect selected)
-- Collection changes in edit mode are reflected immediately after save (router.refresh())
+<!-- Bullet points of what success looks like -->
 
 ## Notes
-- The join table `ItemCollection` already exists in the schema — no migration needed
-- Collections are user-scoped; only the authenticated user's collections should appear in the picker
-- An item can belong to zero or more collections
-- No collection detail/view pages are required for this feature
-- Follow existing `{ success, data, error }` return pattern in server actions
-- Zod v4 validation for all inputs
-- Unit tests for updated/new server action logic and any new DB utilities
+<!-- Additional context, constraints, or details from spec -->
 
 ## History
 <!-- Keep this updated. Earliest to Latest. Format: DD/MM/YYYY HH:MM -->
@@ -70,3 +60,4 @@ In Progress
 04/06/2026 17:30 - Completed Code Editor (Monaco): CodeEditor component (src/components/ui/CodeEditor.tsx) with macOS window dots, copy button, language label, fluid height (120-400px), themed scrollbar; replaces Textarea in ItemDrawer and NewItemDialog for snippet/command types; notes/prompts keep Textarea; merged to main
 05/06/2026 13:20 - Completed Markdown Editor: MarkdownEditor component (src/components/ui/MarkdownEditor.tsx) with Write/Preview tabs, copy button, readonly mode, GFM rendering via react-markdown + remark-gfm; inline styles used for markdown elements (Tailwind v4 drops non-@layer CSS from globals.css); replaces Textarea in ItemDrawer and NewItemDialog for note/prompt types; merged to main
 05/06/2026 14:10 - Completed Collection Create: NewCollectionDialog component (src/components/collections/NewCollectionDialog.tsx) with name/description fields, createCollection server action (src/actions/collections.ts, Zod v4, auth check), createCollection DB query added to src/lib/db/collections.ts (user-scoped), wired into TopBar replacing placeholder button, toast on success/failure, router.refresh() on save; 10 unit tests; merged to main
+05/06/2026 14:35 - Completed Add Item to Collections: CollectionPicker component (src/components/items/CollectionPicker.tsx), multi-select picker added to NewItemDialog and ItemDrawer edit mode, collectionIds added to createItem/updateItem schemas and DB queries (createMany on create, deleteMany+createMany sync on update), allCollections threaded via SidebarData for create flow, getCollectionList fetched per-page for drawer edit flow; 14 unit tests added; merged to main
