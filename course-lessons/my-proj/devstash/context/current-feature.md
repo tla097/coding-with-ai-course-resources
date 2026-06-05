@@ -1,13 +1,21 @@
-# Current Feature
+# Current Feature: Collection Create
 
 ## Status
-Not Started
+In Progress
 
 ## Goals
-<!-- Bullet points of what success looks like -->
+- "New Collection" button visible in the top bar on dashboard pages
+- Button opens a modal/dialog with name (required) and description (optional) fields
+- `createCollection` server action in `src/actions/collections.ts` (Zod v4 validated, auth check, `{ success, data, error }` pattern)
+- `createCollection` DB query in `src/lib/db/collections.ts` — collection is user-scoped (linked to session user)
+- Toast shown on success; toast shown on failure
+- UI updates immediately after save (`router.refresh()`) so the new collection appears in the dashboard grid and sidebar
 
 ## Notes
-<!-- Additional context, constraints, or details from spec -->
+- Follow item create patterns: server action in `src/actions/`, DB query in `src/lib/db/`, dialog component in `src/components/collections/`
+- Collections are user-scoped — always attach `userId` from session
+- Prefer server action for the create mutation; no API route needed
+- Keep the dialog simple: name + description fields only
 
 ## History
 <!-- Keep this updated. Earliest to Latest. Format: DD/MM/YYYY HH:MM -->
