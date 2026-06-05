@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma'
+import { ITEMS_PER_PAGE, COLLECTIONS_PER_PAGE } from '@/lib/constants'
 
 export interface ItemWithType {
   id: string
@@ -232,6 +233,41 @@ export async function createItem(userId: string, data: CreateItemData): Promise<
       },
     },
   })
+}
+
+export interface PaginatedItems {
+  items: ItemWithType[]
+  total: number
+}
+
+export async function getItemsByTypePaginated(
+  userId: string,
+  typeName: string,
+  page: number,
+  pageSize = ITEMS_PER_PAGE,
+): Promise<PaginatedItems> {
+  const skip = (page - 1) * pageSize
+  const where = { userId, itemType: { name: typeName } }
+  const [items, total] = await Promise.all([
+    prisma.item.findMany({ where, orderBy: { createdAt: 'desc' }, skip, take: pageSize, select: itemSelect }),
+    prisma.item.count({ where }),
+  ])
+  return { items, total }
+}
+
+export async function getItemsByCollectionPaginated(
+  userId: string,
+  collectionId: string,
+  page: number,
+  pageSize = COLLECTIONS_PER_PAGE,
+): Promise<PaginatedItems> {
+  const skip = (page - 1) * pageSize
+  const where = { userId, collections: { some: { collectionId } } }
+  const [items, total] = await Promise.all([
+    prisma.item.findMany({ where, orderBy: { createdAt: 'desc' }, skip, take: pageSize, select: itemSelect }),
+    prisma.item.count({ where }),
+  ])
+  return { items, total }
 }
 
 export async function deleteItem(id: string, userId: string): Promise<boolean> {

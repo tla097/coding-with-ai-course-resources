@@ -2,29 +2,35 @@ import { notFound } from 'next/navigation'
 import { FolderOpen } from 'lucide-react'
 import ItemsWithDrawer from '@/components/items/ItemsWithDrawer'
 import CollectionActions from '@/components/collections/CollectionActions'
+import Pagination from '@/components/ui/Pagination'
 import { getCollectionById, getCollectionList } from '@/lib/db/collections'
-import { getItemsByCollection } from '@/lib/db/items'
+import { getItemsByCollectionPaginated } from '@/lib/db/items'
+import { COLLECTIONS_PER_PAGE } from '@/lib/constants'
 import { auth } from '@/auth'
 
 export const dynamic = 'force-dynamic'
 
 interface Props {
   params: Promise<{ id: string }>
+  searchParams: Promise<{ page?: string }>
 }
 
-export default async function CollectionPage({ params }: Props) {
-  const { id } = await params
+export default async function CollectionPage({ params, searchParams }: Props) {
+  const [{ id }, { page: pageParam }] = await Promise.all([params, searchParams])
+  const page = Math.max(1, parseInt(pageParam ?? '1', 10) || 1)
+
   const session = await auth()
   const userId = session?.user?.id ?? ''
 
-  const [collection, items, collectionList] = await Promise.all([
+  const [collection, { items, total }, collectionList] = await Promise.all([
     getCollectionById(id, userId),
-    getItemsByCollection(userId, id),
+    getItemsByCollectionPaginated(userId, id, page, COLLECTIONS_PER_PAGE),
     getCollectionList(userId),
   ])
 
   if (!collection) notFound()
 
+  const totalPages = Math.ceil(total / COLLECTIONS_PER_PAGE)
   const accentColor = collection.dominantType?.color ?? '#8b5cf6'
 
   return (
@@ -40,11 +46,11 @@ export default async function CollectionPage({ params }: Props) {
           <div className="min-w-0">
             <h1 className="text-2xl font-bold tracking-tight truncate">{collection.name}</h1>
             <p className="text-sm text-muted-foreground">
-              {collection.description ?? `${items.length} item${items.length !== 1 ? 's' : ''}`}
+              {collection.description ?? `${total} item${total !== 1 ? 's' : ''}`}
             </p>
             {collection.description && (
               <p className="text-xs text-muted-foreground/70 mt-0.5">
-                {items.length} item{items.length !== 1 ? 's' : ''}
+                {total} item{total !== 1 ? 's' : ''}
               </p>
             )}
           </div>
@@ -53,12 +59,15 @@ export default async function CollectionPage({ params }: Props) {
         <CollectionActions collection={collection} />
       </div>
 
-      {items.length === 0 ? (
+      {total === 0 ? (
         <div className="flex h-40 items-center justify-center rounded-lg border border-dashed border-border">
           <p className="text-sm text-muted-foreground">No items in this collection yet.</p>
         </div>
       ) : (
-        <ItemsWithDrawer items={items} collections={collectionList} variant="grid" />
+        <>
+          <ItemsWithDrawer items={items} collections={collectionList} variant="grid" />
+          <Pagination page={page} totalPages={totalPages} basePath={`/collections/${id}`} />
+        </>
       )}
     </div>
   )
