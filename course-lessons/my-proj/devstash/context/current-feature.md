@@ -1,20 +1,13 @@
-# Current Feature: Settings Page
+# Current Feature
 
 ## Status
-In Progress
+Not Started
 
 ## Goals
-- Create a `/settings` route (protected, redirects to `/sign-in` if unauthenticated)
-- Add a "Settings" link in the user icon dropdown at the bottom of the sidebar
-- Move account actions (ChangePasswordForm and DeleteAccountButton) from the profile page to the settings page
-- Remove those sections from the profile page once moved
+<!-- Bullet points of what success looks like -->
 
 ## Notes
-- Sidebar dropdown already has Profile and Sign out — add Settings between Profile and the separator before Sign out (or just above Sign out)
-- The settings page should follow the same layout/style as the profile page (max-w-2xl, space-y-6)
-- ChangePasswordForm should only appear for credentials users (hasPassword check), same as profile page
-- The proxy.ts protects routes — must add `/settings` to `isProtected` check and to `config.matcher`
-- No new DB queries needed — reuse `getProfileData` to get the `hasPassword` flag for the settings page
+<!-- Additional context, constraints, or details from spec -->
 
 ## History
 <!-- Keep this updated. Earliest to Latest. Format: DD/MM/YYYY HH:MM -->
@@ -74,3 +67,4 @@ In Progress
 05/06/2026 15:35 - Fixed Delete Collection Redirect: CollectionActions.tsx redirectAfterDelete changed from /collections to /dashboard; merged to main
 05/06/2026 15:50 - Completed Global Search / Command Palette: cmdk palette opens on Ctrl+K/Cmd+K and TopBar click; fuzzy search across items and collections; grouped results with type icon and item count; item selection opens ItemDrawer; collection selection navigates to /collections/[id]; search data pre-fetched in layout; 10 unit tests; merged to main
 05/06/2026 16:15 - Completed Pagination: src/lib/constants.ts (ITEMS_PER_PAGE=21, COLLECTIONS_PER_PAGE=21, DASHBOARD_COLLECTIONS_LIMIT=6, DASHBOARD_RECENT_ITEMS_LIMIT=10); getItemsByTypePaginated and getItemsByCollectionPaginated (skip/take); Pagination component (numbered links, prev/next, ellipsis); /items/[type] and /collections/[id] paginated via searchParams; dashboard uses limit constants with accurate collection count stat; 10 unit tests; merged to main
+05/06/2026 16:35 - Completed Settings Page: /settings route (protected), Settings link added to sidebar user dropdown, ChangePasswordForm and DeleteAccountButton moved from /profile to /settings; proxy.ts updated to protect /settings; merged to main
