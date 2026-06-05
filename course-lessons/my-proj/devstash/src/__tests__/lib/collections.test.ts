@@ -5,11 +5,18 @@ vi.mock('@/lib/prisma', () => ({
     collection: {
       findMany: vi.fn(),
       findFirst: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn(),
     },
   },
 }))
 
-import { getAllCollections, getCollectionById } from '@/lib/db/collections'
+import {
+  getAllCollections,
+  getCollectionById,
+  updateCollection,
+  deleteCollection,
+} from '@/lib/db/collections'
 
 const snippetType = { id: 'type-snippet', name: 'snippet', icon: 'Code', color: '#3b82f6' }
 const promptType = { id: 'type-prompt', name: 'prompt', icon: 'Sparkles', color: '#8b5cf6' }
@@ -138,5 +145,68 @@ describe('getAllCollections', () => {
     expect(result).toHaveLength(2)
     expect(result[0].itemCount).toBe(1)
     expect(result[1].itemCount).toBe(0)
+  })
+})
+
+describe('updateCollection', () => {
+  beforeEach(() => vi.clearAllMocks())
+
+  it('calls prisma.collection.update with id, userId, and data', async () => {
+    const { prisma } = await import('@/lib/prisma')
+    const updated = { ...makeCollection(), name: 'Updated', description: 'New desc' }
+    vi.mocked(prisma.collection.update).mockResolvedValue(updated as never)
+
+    await updateCollection('col-1', 'user-1', { name: 'Updated', description: 'New desc' })
+
+    expect(prisma.collection.update).toHaveBeenCalledWith({
+      where: { id: 'col-1', userId: 'user-1' },
+      data: { name: 'Updated', description: 'New desc' },
+    })
+  })
+
+  it('stores null when description is null', async () => {
+    const { prisma } = await import('@/lib/prisma')
+    vi.mocked(prisma.collection.update).mockResolvedValue(makeCollection() as never)
+
+    await updateCollection('col-1', 'user-1', { name: 'Updated', description: null })
+
+    expect(prisma.collection.update).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ description: null }) }),
+    )
+  })
+
+  it('returns the updated collection record', async () => {
+    const { prisma } = await import('@/lib/prisma')
+    const updated = { ...makeCollection(), name: 'Updated' }
+    vi.mocked(prisma.collection.update).mockResolvedValue(updated as never)
+
+    const result = await updateCollection('col-1', 'user-1', { name: 'Updated' })
+    expect(result.name).toBe('Updated')
+  })
+})
+
+describe('deleteCollection', () => {
+  beforeEach(() => vi.clearAllMocks())
+
+  it('calls prisma.collection.delete with id and userId', async () => {
+    const { prisma } = await import('@/lib/prisma')
+    vi.mocked(prisma.collection.delete).mockResolvedValue(makeCollection() as never)
+
+    await deleteCollection('col-1', 'user-1')
+
+    expect(prisma.collection.delete).toHaveBeenCalledWith({
+      where: { id: 'col-1', userId: 'user-1' },
+    })
+  })
+
+  it('scopes delete to userId to prevent cross-user deletion', async () => {
+    const { prisma } = await import('@/lib/prisma')
+    vi.mocked(prisma.collection.delete).mockResolvedValue(makeCollection() as never)
+
+    await deleteCollection('col-xyz', 'user-abc')
+
+    expect(prisma.collection.delete).toHaveBeenCalledWith({
+      where: { id: 'col-xyz', userId: 'user-abc' },
+    })
   })
 })
