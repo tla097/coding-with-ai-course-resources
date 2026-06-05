@@ -1,25 +1,13 @@
-# Current Feature: Collection Actions & Card Dropdowns
+# Current Feature
 
 ## Status
-In Progress
+Not Started
 
 ## Goals
-- `/collections/[id]` page has Edit, Delete, and Favorite buttons
-- Favorite button is present (icon only) but not yet functional
-- Edit button opens a modal to edit collection metadata (name, description)
-- Delete button shows a confirmation dialog before proceeding
-- Deleting a collection does NOT delete items — it only removes the collection (items remain, just no longer in that collection)
-- Collection cards on `/collections` and `/dashboard` show a 3-dots dropdown menu with Edit, Delete, and Favorite options
-- Clicking anywhere else on a collection card navigates to `/collections/[id]`
+<!-- Bullet points of what success looks like -->
 
 ## Notes
-- Favorites: render the heart/star icon and button, but wire no action (no DB call, no state change)
-- Edit modal: fields for collection name and description; reuse or create a `updateCollection` server action
-- Delete confirmation: "Are you sure?" style dialog; on confirm calls `deleteCollection` server action
-- `deleteCollection` should use Prisma to delete the Collection record — items are linked via a join table (CollectionItem), Prisma cascade will clean up join rows but items themselves must not be deleted
-- The 3-dots dropdown on cards must stop click propagation so it doesn't trigger the card navigation
-- Card click (outside the dropdown) navigates to `/collections/[id]`
-- Follow existing patterns: server actions in `src/actions/collections.ts`, DB queries in `src/lib/db/collections.ts`, Zod v4 validation, `{ success, data, error }` return shape, `router.refresh()` after mutations
+<!-- Additional context, constraints, or details from spec -->
 
 ## History
 <!-- Keep this updated. Earliest to Latest. Format: DD/MM/YYYY HH:MM -->
@@ -75,3 +63,4 @@ In Progress
 05/06/2026 14:35 - Completed Add Item to Collections: CollectionPicker component (src/components/items/CollectionPicker.tsx), multi-select picker added to NewItemDialog and ItemDrawer edit mode, collectionIds added to createItem/updateItem schemas and DB queries (createMany on create, deleteMany+createMany sync on update), allCollections threaded via SidebarData for create flow, getCollectionList fetched per-page for drawer edit flow; 14 unit tests added; merged to main
 05/06/2026 14:45 - Completed Dashboard Title Navigation: TopBar.tsx title span replaced with Next.js Link to /dashboard; merged to main
 05/06/2026 15:05 - Completed Collections Pages: /collections page (getAllCollections + CollectionCard grid), /collections/[id] page (getCollectionById + getItemsByCollection + ItemsWithDrawer grid); mapCollectionStats/collectionInclude extracted to remove duplication; 14 unit tests; merged to main
+05/06/2026 15:15 - Completed Collection Actions & Card Dropdowns: CollectionActions component (Edit/Delete/Favorite buttons) on /collections/[id], EditCollectionDialog (name/description, updateCollection server action), DeleteCollectionDialog (confirmation, deletes collection only — items kept via cascade join cleanup), CollectionCard converted to client component with 3-dots dropdown (Edit/Delete/Favorite), card click navigates; updateCollection and deleteCollection added to actions and DB layer; 16 unit tests; merged to main
