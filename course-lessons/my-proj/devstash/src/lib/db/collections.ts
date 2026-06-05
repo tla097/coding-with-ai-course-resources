@@ -104,14 +104,18 @@ const collectionInclude = {
   },
 } as const
 
-export async function getRecentCollections(userId: string): Promise<CollectionWithStats[]> {
+export async function getRecentCollections(userId: string, limit = 20): Promise<CollectionWithStats[]> {
   const collections = await prisma.collection.findMany({
     where: { userId },
     orderBy: { createdAt: 'desc' },
-    take: 20,
+    take: limit,
     include: collectionInclude,
   })
   return collections.map(mapCollectionStats)
+}
+
+export async function getCollectionCount(userId: string): Promise<number> {
+  return prisma.collection.count({ where: { userId } })
 }
 
 export async function getAllCollections(userId: string): Promise<CollectionWithStats[]> {

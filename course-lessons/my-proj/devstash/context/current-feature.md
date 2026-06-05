@@ -1,13 +1,21 @@
-# Current Feature
+# Current Feature: Pagination
 
 ## Status
-Not Started
+In Progress
 
 ## Goals
-<!-- Bullet points of what success looks like -->
+- Add pagination to `/items/[type]` pages with numbered page links and prev/next controls
+- Add pagination to `/collections/[id]` pages with numbered page links and prev/next controls
+- Prev/next links are disabled (greyed out) when not available
+- Only fetch the items required for the current page — no fetching all records at once
+- Use constants: `ITEMS_PER_PAGE = 21`, `COLLECTIONS_PER_PAGE = 21`
+- Dashboard limits remain: `DASHBOARD_COLLECTIONS_LIMIT = 6`, `DASHBOARD_RECENT_ITEMS_LIMIT = 10`
 
 ## Notes
-<!-- Additional context, constraints, or details from spec -->
+- Constants defined in a shared location (e.g. `src/lib/constants.ts`)
+- Pagination controls sit at the bottom of the list
+- Dashboard page is NOT paginated — it uses the separate limit constants
+- Only fetch what a page requires — use `skip`/`take` in Prisma queries
 
 ## History
 <!-- Keep this updated. Earliest to Latest. Format: DD/MM/YYYY HH:MM -->

@@ -7,6 +7,7 @@ vi.mock('@/lib/prisma', () => ({
       findFirst: vi.fn(),
       update: vi.fn(),
       delete: vi.fn(),
+      count: vi.fn(),
     },
   },
 }))
@@ -16,6 +17,7 @@ import {
   getCollectionById,
   updateCollection,
   deleteCollection,
+  getCollectionCount,
 } from '@/lib/db/collections'
 
 const snippetType = { id: 'type-snippet', name: 'snippet', icon: 'Code', color: '#3b82f6' }
@@ -208,5 +210,26 @@ describe('deleteCollection', () => {
     expect(prisma.collection.delete).toHaveBeenCalledWith({
       where: { id: 'col-xyz', userId: 'user-abc' },
     })
+  })
+})
+
+describe('getCollectionCount', () => {
+  beforeEach(() => vi.clearAllMocks())
+
+  it('returns the total collection count for the user', async () => {
+    const { prisma } = await import('@/lib/prisma')
+    vi.mocked(prisma.collection.count).mockResolvedValue(7)
+
+    const result = await getCollectionCount('user-1')
+    expect(result).toBe(7)
+  })
+
+  it('scopes count to userId', async () => {
+    const { prisma } = await import('@/lib/prisma')
+    vi.mocked(prisma.collection.count).mockResolvedValue(0)
+
+    await getCollectionCount('user-abc')
+
+    expect(prisma.collection.count).toHaveBeenCalledWith({ where: { userId: 'user-abc' } })
   })
 })

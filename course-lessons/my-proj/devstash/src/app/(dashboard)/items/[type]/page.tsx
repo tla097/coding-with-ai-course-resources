@@ -1,20 +1,24 @@
 import { notFound } from 'next/navigation'
 import { auth } from '@/auth'
-import { getItemsByType } from '@/lib/db/items'
+import { getItemsByTypePaginated } from '@/lib/db/items'
 import { getCollectionList } from '@/lib/db/collections'
 import { ICON_MAP } from '@/lib/icon-map'
+import { ITEMS_PER_PAGE } from '@/lib/constants'
 import { prisma } from '@/lib/prisma'
 import ItemsWithDrawer from '@/components/items/ItemsWithDrawer'
+import Pagination from '@/components/ui/Pagination'
 
 export const dynamic = 'force-dynamic'
 
 interface Props {
   params: Promise<{ type: string }>
+  searchParams: Promise<{ page?: string }>
 }
 
-export default async function ItemsTypePage({ params }: Props) {
-  const { type } = await params
+export default async function ItemsTypePage({ params, searchParams }: Props) {
+  const [{ type }, { page: pageParam }] = await Promise.all([params, searchParams])
   const typeName = type.endsWith('s') ? type.slice(0, -1) : type
+  const page = Math.max(1, parseInt(pageParam ?? '1', 10) || 1)
 
   const itemType = await prisma.itemType.findFirst({
     where: { name: typeName },
@@ -25,11 +29,12 @@ export default async function ItemsTypePage({ params }: Props) {
   const session = await auth()
   const userId = session?.user?.id ?? ''
 
-  const [items, collectionList] = await Promise.all([
-    getItemsByType(userId, typeName),
+  const [{ items, total }, collectionList] = await Promise.all([
+    getItemsByTypePaginated(userId, typeName, page, ITEMS_PER_PAGE),
     getCollectionList(userId),
   ])
 
+  const totalPages = Math.ceil(total / ITEMS_PER_PAGE)
   const Icon = ICON_MAP[itemType.icon] ?? null
 
   return (
@@ -45,16 +50,19 @@ export default async function ItemsTypePage({ params }: Props) {
         )}
         <div>
           <h1 className="text-2xl font-bold tracking-tight capitalize">{type}</h1>
-          <p className="text-sm text-muted-foreground">{items.length} item{items.length !== 1 ? 's' : ''}</p>
+          <p className="text-sm text-muted-foreground">{total} item{total !== 1 ? 's' : ''}</p>
         </div>
       </div>
 
-      {items.length === 0 ? (
+      {total === 0 ? (
         <div className="flex h-40 items-center justify-center rounded-lg border border-dashed border-border">
           <p className="text-sm text-muted-foreground">No {type} yet.</p>
         </div>
       ) : (
-        <ItemsWithDrawer items={items} collections={collectionList} variant="grid" />
+        <>
+          <ItemsWithDrawer items={items} collections={collectionList} variant="grid" />
+          <Pagination page={page} totalPages={totalPages} basePath={`/items/${type}`} />
+        </>
       )}
     </div>
   )

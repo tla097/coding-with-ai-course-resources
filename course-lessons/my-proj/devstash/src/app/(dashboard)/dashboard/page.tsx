@@ -2,8 +2,9 @@ import Link from 'next/link'
 import { Package, FolderOpen, Star, Bookmark, Pin } from 'lucide-react'
 import CollectionCard from '@/components/dashboard/CollectionCard'
 import ItemsWithDrawer from '@/components/items/ItemsWithDrawer'
-import { getRecentCollections, getCollectionList } from '@/lib/db/collections'
+import { getRecentCollections, getCollectionList, getCollectionCount } from '@/lib/db/collections'
 import { getPinnedItems, getRecentItems, getItemStats } from '@/lib/db/items'
+import { DASHBOARD_COLLECTIONS_LIMIT, DASHBOARD_RECENT_ITEMS_LIMIT } from '@/lib/constants'
 import { auth } from '@/auth'
 
 export const dynamic = 'force-dynamic'
@@ -13,12 +14,13 @@ export default async function DashboardPage() {
     const session = await auth()
     const userId = session?.user?.id ?? ''
 
-    const [collections, pinnedItems, recentItems, itemStats, collectionList] = await Promise.all([
-      getRecentCollections(userId),
+    const [collections, pinnedItems, recentItems, itemStats, collectionList, collectionCount] = await Promise.all([
+      getRecentCollections(userId, DASHBOARD_COLLECTIONS_LIMIT),
       getPinnedItems(userId),
-      getRecentItems(userId),
+      getRecentItems(userId, DASHBOARD_RECENT_ITEMS_LIMIT),
       getItemStats(userId),
       getCollectionList(userId),
+      getCollectionCount(userId),
     ])
 
     const stats = [
@@ -30,7 +32,7 @@ export default async function DashboardPage() {
       },
       {
         label: 'Collections',
-        value: collections.length,
+        value: collectionCount,
         icon: FolderOpen,
         color: '#8b5cf6',
       },
