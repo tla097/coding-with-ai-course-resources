@@ -2,8 +2,6 @@ import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 import { getProfileData } from '@/lib/db/profile'
 import UserAvatar from '@/components/ui/user-avatar'
-import ChangePasswordForm from '@/components/profile/ChangePasswordForm'
-import DeleteAccountButton from '@/components/profile/DeleteAccountButton'
 
 export const dynamic = 'force-dynamic'
 
@@ -69,11 +67,6 @@ export default async function ProfilePage() {
         </div>
       </div>
 
-      {/* Change password — credentials users only */}
-      {profile.hasPassword && <ChangePasswordForm />}
-
-      {/* Delete account */}
-      <DeleteAccountButton />
     </div>
   )
 }
