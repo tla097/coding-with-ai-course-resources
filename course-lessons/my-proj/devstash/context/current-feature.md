@@ -1,13 +1,20 @@
-# Current Feature
+# Current Feature: Settings Page
 
 ## Status
-Not Started
+In Progress
 
 ## Goals
-<!-- Bullet points of what success looks like -->
+- Create a `/settings` route (protected, redirects to `/sign-in` if unauthenticated)
+- Add a "Settings" link in the user icon dropdown at the bottom of the sidebar
+- Move account actions (ChangePasswordForm and DeleteAccountButton) from the profile page to the settings page
+- Remove those sections from the profile page once moved
 
 ## Notes
-<!-- Additional context, constraints, or details from spec -->
+- Sidebar dropdown already has Profile and Sign out — add Settings between Profile and the separator before Sign out (or just above Sign out)
+- The settings page should follow the same layout/style as the profile page (max-w-2xl, space-y-6)
+- ChangePasswordForm should only appear for credentials users (hasPassword check), same as profile page
+- The proxy.ts protects routes — must add `/settings` to `isProtected` check and to `config.matcher`
+- No new DB queries needed — reuse `getProfileData` to get the `hasPassword` flag for the settings page
 
 ## History
 <!-- Keep this updated. Earliest to Latest. Format: DD/MM/YYYY HH:MM -->

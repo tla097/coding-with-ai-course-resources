@@ -174,6 +174,9 @@ export default function Sidebar({ isOpen, onClose, sidebarData, user }: SidebarP
                 <DropdownMenuItem onClick={() => router.push('/profile')}>
                   Profile
                 </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => router.push('/settings')}>
+                  Settings
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   variant="destructive"
