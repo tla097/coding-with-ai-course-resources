@@ -1,14 +1,13 @@
-# Current Feature: Fix Delete Collection Redirect to Dashboard
+# Current Feature
 
 ## Status
-In Progress
+Not Started
 
 ## Goals
-- Deleting a collection from the `/collections/[id]` page navigates to `/dashboard`, not `/collections`
+<!-- Bullet points of what success looks like -->
 
 ## Notes
-- The bug: `CollectionActions.tsx` passes `redirectAfterDelete="/collections"` to `DeleteCollectionDialog` — change it to `/dashboard`
-- No other changes needed; the `DeleteCollectionDialog` redirect logic is correct
+<!-- Additional context, constraints, or details from spec -->
 
 ## History
 <!-- Keep this updated. Earliest to Latest. Format: DD/MM/YYYY HH:MM -->
@@ -65,3 +64,4 @@ In Progress
 05/06/2026 14:45 - Completed Dashboard Title Navigation: TopBar.tsx title span replaced with Next.js Link to /dashboard; merged to main
 05/06/2026 15:05 - Completed Collections Pages: /collections page (getAllCollections + CollectionCard grid), /collections/[id] page (getCollectionById + getItemsByCollection + ItemsWithDrawer grid); mapCollectionStats/collectionInclude extracted to remove duplication; 14 unit tests; merged to main
 05/06/2026 15:15 - Completed Collection Actions & Card Dropdowns: CollectionActions component (Edit/Delete/Favorite buttons) on /collections/[id], EditCollectionDialog (name/description, updateCollection server action), DeleteCollectionDialog (confirmation, deletes collection only — items kept via cascade join cleanup), CollectionCard converted to client component with 3-dots dropdown (Edit/Delete/Favorite), card click navigates; updateCollection and deleteCollection added to actions and DB layer; 16 unit tests; merged to main
+05/06/2026 15:35 - Fixed Delete Collection Redirect: CollectionActions.tsx redirectAfterDelete changed from /collections to /dashboard; merged to main
