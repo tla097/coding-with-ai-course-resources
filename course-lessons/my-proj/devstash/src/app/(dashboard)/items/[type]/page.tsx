@@ -29,7 +29,7 @@ export default async function ItemsTypePage({ params }: Props) {
   const Icon = ICON_MAP[itemType.icon] ?? null
 
   return (
-    <div className="space-y-6 max-w-6xl">
+    <div className="mx-auto w-full max-w-6xl space-y-6">
       <div className="flex items-center gap-3">
         {Icon && (
           <div

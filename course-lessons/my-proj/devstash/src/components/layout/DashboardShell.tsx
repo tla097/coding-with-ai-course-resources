@@ -49,7 +49,7 @@ export default function DashboardShell({ children, sidebarData, user }: Props) {
           sidebarData={sidebarData}
           user={user}
         />
-        <main className="flex-1 overflow-auto p-6">{children}</main>
+        <main className="flex-1 overflow-auto px-8 py-8">{children}</main>
       </div>
     </div>
   )
