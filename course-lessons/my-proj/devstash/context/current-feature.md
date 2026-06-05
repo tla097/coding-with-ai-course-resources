@@ -1,13 +1,23 @@
-# Current Feature
+# Current Feature: Add Item to Collections
 
 ## Status
-Not Started
+In Progress
 
 ## Goals
-<!-- Bullet points of what success looks like -->
+- NewItemDialog includes a multi-select input listing the user's collections, allowing one or more to be selected at creation time
+- ItemDrawer edit mode includes the same multi-select collection picker, pre-populated with the item's current collections
+- `createItem` server action accepts `collectionIds` and creates the corresponding `ItemCollection` join records
+- `updateItem` server action accepts `collectionIds` and syncs `ItemCollection` records (disconnect all, reconnect selected)
+- Collection changes in edit mode are reflected immediately after save (router.refresh())
 
 ## Notes
-<!-- Additional context, constraints, or details from spec -->
+- The join table `ItemCollection` already exists in the schema — no migration needed
+- Collections are user-scoped; only the authenticated user's collections should appear in the picker
+- An item can belong to zero or more collections
+- No collection detail/view pages are required for this feature
+- Follow existing `{ success, data, error }` return pattern in server actions
+- Zod v4 validation for all inputs
+- Unit tests for updated/new server action logic and any new DB utilities
 
 ## History
 <!-- Keep this updated. Earliest to Latest. Format: DD/MM/YYYY HH:MM -->

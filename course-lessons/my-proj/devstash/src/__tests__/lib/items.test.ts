@@ -39,6 +39,7 @@ const createData = {
   url: null,
   language: 'typescript',
   tags: ['react'],
+  collectionIds: [],
   itemTypeId: 'type-1',
   contentType: 'TEXT' as const,
 }
@@ -130,6 +131,46 @@ describe('createItem', () => {
               { where: { name: 'react' }, create: { name: 'react' } },
               { where: { name: 'hooks' }, create: { name: 'hooks' } },
             ],
+          },
+        }),
+      }),
+    )
+  })
+
+  it('creates ItemCollection records for provided collectionIds', async () => {
+    const { prisma } = await import('@/lib/prisma')
+    vi.mocked(prisma.item.create).mockResolvedValue(mockCreatedItem as never)
+
+    await createItem('user-1', { ...createData, collectionIds: ['col-1', 'col-2'] })
+
+    expect(prisma.item.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          collections: {
+            createMany: {
+              data: [{ collectionId: 'col-1' }, { collectionId: 'col-2' }],
+              skipDuplicates: true,
+            },
+          },
+        }),
+      }),
+    )
+  })
+
+  it('passes empty collections array when no collectionIds provided', async () => {
+    const { prisma } = await import('@/lib/prisma')
+    vi.mocked(prisma.item.create).mockResolvedValue(mockCreatedItem as never)
+
+    await createItem('user-1', { ...createData, collectionIds: [] })
+
+    expect(prisma.item.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          collections: {
+            createMany: {
+              data: [],
+              skipDuplicates: true,
+            },
           },
         }),
       }),

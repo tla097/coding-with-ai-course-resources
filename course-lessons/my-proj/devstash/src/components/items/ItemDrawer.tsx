@@ -28,6 +28,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 import { ICON_MAP } from '@/lib/icon-map'
+import CollectionPicker from '@/components/items/CollectionPicker'
 import type { ItemDetail } from '@/lib/db/items'
 import { updateItem, deleteItem } from '@/actions/items'
 
@@ -43,12 +44,14 @@ interface EditForm {
   url: string
   language: string
   tags: string
+  collectionIds: string[]
 }
 
 interface Props {
   itemId: string | null
   open: boolean
   onOpenChange: (open: boolean) => void
+  collections: { id: string; name: string }[]
 }
 
 const CONTENT_TYPES = ['snippet', 'prompt', 'command', 'note']
@@ -57,7 +60,7 @@ const CODE_EDITOR_TYPES = ['snippet', 'command']
 const MARKDOWN_EDITOR_TYPES = ['note', 'prompt']
 const URL_TYPES = ['link']
 
-export default function ItemDrawer({ itemId, open, onOpenChange }: Props) {
+export default function ItemDrawer({ itemId, open, onOpenChange, collections }: Props) {
   const router = useRouter()
   const [item, setItem] = useState<ItemDetailResponse | null>(null)
   const [loading, setLoading] = useState(false)
@@ -71,6 +74,7 @@ export default function ItemDrawer({ itemId, open, onOpenChange }: Props) {
     url: '',
     language: '',
     tags: '',
+    collectionIds: [],
   })
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
@@ -105,6 +109,7 @@ export default function ItemDrawer({ itemId, open, onOpenChange }: Props) {
       url: item.url ?? '',
       language: item.language ?? '',
       tags: item.tags.map(t => t.name).join(', '),
+      collectionIds: item.collections.map(c => c.collection.id),
     })
     setIsEditing(true)
   }
@@ -129,6 +134,7 @@ export default function ItemDrawer({ itemId, open, onOpenChange }: Props) {
         url: editForm.url || null,
         language: editForm.language || null,
         tags,
+        collectionIds: editForm.collectionIds,
       })
 
       if (!result.success) {
@@ -394,6 +400,17 @@ export default function ItemDrawer({ itemId, open, onOpenChange }: Props) {
                     />
                     <p className="text-xs text-muted-foreground">Comma-separated</p>
                   </div>
+
+                  {collections.length > 0 && (
+                    <div className="space-y-1.5">
+                      <Label>Collections</Label>
+                      <CollectionPicker
+                        collections={collections}
+                        selected={editForm.collectionIds}
+                        onChange={ids => setEditForm(f => ({ ...f, collectionIds: ids }))}
+                      />
+                    </div>
+                  )}
                 </>
               ) : (
                 <>

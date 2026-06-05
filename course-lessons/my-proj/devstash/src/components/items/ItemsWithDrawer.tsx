@@ -7,10 +7,11 @@ import type { ItemWithType } from '@/lib/db/items'
 
 interface Props {
   items: ItemWithType[]
+  collections: { id: string; name: string }[]
   variant?: 'list' | 'grid'
 }
 
-export default function ItemsWithDrawer({ items, variant = 'list' }: Props) {
+export default function ItemsWithDrawer({ items, collections, variant = 'list' }: Props) {
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null)
   const [open, setOpen] = useState(false)
 
@@ -35,6 +36,7 @@ export default function ItemsWithDrawer({ items, variant = 'list' }: Props) {
         itemId={selectedItemId}
         open={open}
         onOpenChange={setOpen}
+        collections={collections}
       />
     </>
   )

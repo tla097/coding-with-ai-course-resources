@@ -1,5 +1,18 @@
 import { prisma } from '@/lib/prisma'
 
+export interface CollectionListItem {
+  id: string
+  name: string
+}
+
+export async function getCollectionList(userId: string): Promise<CollectionListItem[]> {
+  return prisma.collection.findMany({
+    where: { userId },
+    orderBy: { name: 'asc' },
+    select: { id: true, name: true },
+  })
+}
+
 export async function createCollection(
   userId: string,
   data: { name: string; description?: string | null },

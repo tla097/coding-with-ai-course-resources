@@ -18,10 +18,11 @@ export interface SidebarData {
   itemTypes: SidebarItemType[]
   favoriteCollections: SidebarCollection[]
   recentCollections: SidebarCollection[]
+  allCollections: { id: string; name: string }[]
 }
 
 export async function getSidebarData(userId: string): Promise<SidebarData> {
-  const [itemTypes, collections] = await Promise.all([
+  const [itemTypes, collections, allCollections] = await Promise.all([
     prisma.itemType.findMany({
       where: { isSystem: true },
       include: { _count: { select: { items: { where: { userId } } } } },
@@ -40,6 +41,11 @@ export async function getSidebarData(userId: string): Promise<SidebarData> {
           },
         },
       },
+    }),
+    prisma.collection.findMany({
+      where: { userId },
+      orderBy: { name: 'asc' },
+      select: { id: true, name: true },
     }),
   ])
 
@@ -70,5 +76,6 @@ export async function getSidebarData(userId: string): Promise<SidebarData> {
     })),
     favoriteCollections: processedCollections.filter(c => c.isFavorite),
     recentCollections: processedCollections.filter(c => !c.isFavorite),
+    allCollections,
   }
 }

@@ -15,6 +15,7 @@ const updateItemSchema = z.object({
   url: z.url('Invalid URL').optional().nullable().transform(v => v ?? null),
   language: z.string().trim().optional().nullable().transform(v => v ?? null),
   tags: z.array(z.string().trim().min(1)).default([]),
+  collectionIds: z.array(z.string()).default([]),
 })
 
 const ITEM_TYPE_NAMES = ['snippet', 'prompt', 'command', 'note', 'link'] as const
@@ -26,6 +27,7 @@ const createItemSchema = z.object({
   url: z.url('Invalid URL').optional().nullable().transform(v => v ?? null),
   language: z.string().trim().optional().nullable().transform(v => v ?? null),
   tags: z.array(z.string().trim().min(1)).default([]),
+  collectionIds: z.array(z.string()).default([]),
   itemTypeId: z.string().min(1, 'Item type is required'),
   itemTypeName: z.enum(ITEM_TYPE_NAMES),
 }).superRefine((data, ctx) => {
@@ -45,12 +47,12 @@ export async function createItem(data: CreateItemInput) {
     return { success: false as const, error: z.flattenError(parsed.error).fieldErrors }
   }
 
-  const { title, description, content, url, language, tags, itemTypeId, itemTypeName } = parsed.data
+  const { title, description, content, url, language, tags, collectionIds, itemTypeId, itemTypeName } = parsed.data
   const contentType: 'TEXT' | 'URL' = itemTypeName === 'link' ? 'URL' : 'TEXT'
 
   try {
     const created = await dbCreateItem(session.user.id, {
-      title, description, content, url, language, tags, itemTypeId, contentType,
+      title, description, content, url, language, tags, collectionIds, itemTypeId, contentType,
     })
     return { success: true as const, data: created }
   } catch {

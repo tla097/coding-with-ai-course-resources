@@ -210,6 +210,26 @@ describe('createItem server action', () => {
     })
     expect(result.success).toBe(true)
   })
+
+  it('passes collectionIds to db', async () => {
+    mockAuth.mockResolvedValue(mockSession as never)
+    mockDbCreate.mockResolvedValue(mockCreatedItem)
+    await createItem({ ...validCreateInput, collectionIds: ['col-1'] })
+    expect(mockDbCreate).toHaveBeenCalledWith(
+      'user-1',
+      expect.objectContaining({ collectionIds: ['col-1'] }),
+    )
+  })
+
+  it('defaults collectionIds to empty array when not provided', async () => {
+    mockAuth.mockResolvedValue(mockSession as never)
+    mockDbCreate.mockResolvedValue(mockCreatedItem)
+    await createItem(validCreateInput)
+    expect(mockDbCreate).toHaveBeenCalledWith(
+      'user-1',
+      expect.objectContaining({ collectionIds: [] }),
+    )
+  })
 })
 
 describe('deleteItem server action', () => {
@@ -361,6 +381,28 @@ describe('updateItem server action', () => {
       'item-1',
       'user-1',
       expect.objectContaining({ tags: ['react', 'next'] }),
+    )
+  })
+
+  it('passes collectionIds to db', async () => {
+    mockAuth.mockResolvedValue(mockSession as never)
+    mockDbUpdate.mockResolvedValue(mockItemDetail)
+    await updateItem('item-1', { ...validInput, collectionIds: ['col-1', 'col-2'] })
+    expect(mockDbUpdate).toHaveBeenCalledWith(
+      'item-1',
+      'user-1',
+      expect.objectContaining({ collectionIds: ['col-1', 'col-2'] }),
+    )
+  })
+
+  it('defaults collectionIds to empty array when not provided', async () => {
+    mockAuth.mockResolvedValue(mockSession as never)
+    mockDbUpdate.mockResolvedValue(mockItemDetail)
+    await updateItem('item-1', validInput)
+    expect(mockDbUpdate).toHaveBeenCalledWith(
+      'item-1',
+      'user-1',
+      expect.objectContaining({ collectionIds: [] }),
     )
   })
 })

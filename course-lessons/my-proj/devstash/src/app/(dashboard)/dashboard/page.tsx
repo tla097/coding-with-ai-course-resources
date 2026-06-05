@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { Package, FolderOpen, Star, Bookmark, Pin } from 'lucide-react'
 import CollectionCard from '@/components/dashboard/CollectionCard'
 import ItemsWithDrawer from '@/components/items/ItemsWithDrawer'
-import { getRecentCollections } from '@/lib/db/collections'
+import { getRecentCollections, getCollectionList } from '@/lib/db/collections'
 import { getPinnedItems, getRecentItems, getItemStats } from '@/lib/db/items'
 import { auth } from '@/auth'
 
@@ -13,11 +13,12 @@ export default async function DashboardPage() {
     const session = await auth()
     const userId = session?.user?.id ?? ''
 
-    const [collections, pinnedItems, recentItems, itemStats] = await Promise.all([
+    const [collections, pinnedItems, recentItems, itemStats, collectionList] = await Promise.all([
       getRecentCollections(userId),
       getPinnedItems(userId),
       getRecentItems(userId),
       getItemStats(userId),
+      getCollectionList(userId),
     ])
 
     const stats = [
@@ -104,7 +105,7 @@ export default async function DashboardPage() {
               <Pin className="h-4 w-4 text-muted-foreground" />
               <h2 className="text-base font-semibold">Pinned</h2>
             </div>
-            <ItemsWithDrawer items={pinnedItems} />
+            <ItemsWithDrawer items={pinnedItems} collections={collectionList} />
           </section>
         )}
 
@@ -113,7 +114,7 @@ export default async function DashboardPage() {
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-base font-semibold">Recent Items</h2>
           </div>
-          <ItemsWithDrawer items={recentItems} />
+          <ItemsWithDrawer items={recentItems} collections={collectionList} />
         </section>
       </div>
     )
