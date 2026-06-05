@@ -3,7 +3,10 @@
 import { useState, useEffect } from 'react'
 import TopBar from '@/components/layout/TopBar'
 import Sidebar from '@/components/layout/Sidebar'
+import CommandPalette from '@/components/search/CommandPalette'
+import ItemDrawer from '@/components/items/ItemDrawer'
 import { type SidebarData } from '@/lib/db/sidebar'
+import { type SearchData } from '@/lib/db/search'
 
 type User = {
   id?: string
@@ -15,15 +18,30 @@ type User = {
 interface Props {
   children: React.ReactNode
   sidebarData: SidebarData
+  searchData: SearchData
   user: User | null
 }
 
-export default function DashboardShell({ children, sidebarData, user }: Props) {
+export default function DashboardShell({ children, sidebarData, searchData, user }: Props) {
   const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [paletteOpen, setPaletteOpen] = useState(false)
+  const [drawerItemId, setDrawerItemId] = useState<string | null>(null)
+  const [drawerOpen, setDrawerOpen] = useState(false)
 
   useEffect(() => {
     const saved = localStorage.getItem('sidebar-open')
     if (saved !== null) setSidebarOpen(saved === 'true')
+  }, [])
+
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault()
+        setPaletteOpen(open => !open)
+      }
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
   }, [])
 
   const handleToggle = () => {
@@ -39,9 +57,19 @@ export default function DashboardShell({ children, sidebarData, user }: Props) {
     localStorage.setItem('sidebar-open', 'false')
   }
 
+  function handleSelectItem(itemId: string) {
+    setDrawerItemId(itemId)
+    setDrawerOpen(true)
+  }
+
   return (
     <div className="flex h-screen flex-col">
-      <TopBar onMenuToggle={handleToggle} itemTypes={sidebarData.itemTypes} collections={sidebarData.allCollections} />
+      <TopBar
+        onMenuToggle={handleToggle}
+        itemTypes={sidebarData.itemTypes}
+        collections={sidebarData.allCollections}
+        onSearchClick={() => setPaletteOpen(true)}
+      />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar
           isOpen={sidebarOpen}
@@ -51,6 +79,20 @@ export default function DashboardShell({ children, sidebarData, user }: Props) {
         />
         <main className="flex-1 overflow-auto px-8 py-8">{children}</main>
       </div>
+
+      <CommandPalette
+        open={paletteOpen}
+        onOpenChange={setPaletteOpen}
+        searchData={searchData}
+        onSelectItem={handleSelectItem}
+      />
+
+      <ItemDrawer
+        itemId={drawerItemId}
+        open={drawerOpen}
+        onOpenChange={setDrawerOpen}
+        collections={sidebarData.allCollections}
+      />
     </div>
   )
 }
