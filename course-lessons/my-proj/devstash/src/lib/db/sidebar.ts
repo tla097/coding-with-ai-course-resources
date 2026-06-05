@@ -24,7 +24,7 @@ export async function getSidebarData(userId: string): Promise<SidebarData> {
   const [itemTypes, collections] = await Promise.all([
     prisma.itemType.findMany({
       where: { isSystem: true },
-      include: { _count: { select: { items: true } } },
+      include: { _count: { select: { items: { where: { userId } } } } },
       orderBy: { name: 'asc' },
     }),
     prisma.collection.findMany({
