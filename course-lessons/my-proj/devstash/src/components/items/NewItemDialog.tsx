@@ -16,6 +16,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import CodeEditor from '@/components/ui/CodeEditor'
+import MarkdownEditor from '@/components/ui/MarkdownEditor'
 import { ICON_MAP } from '@/lib/icon-map'
 import { createItem } from '@/actions/items'
 import type { SidebarItemType } from '@/lib/db/sidebar'
@@ -24,6 +25,7 @@ const CREATABLE_TYPES = ['snippet', 'prompt', 'command', 'note', 'link']
 const CONTENT_TYPES = ['snippet', 'prompt', 'command', 'note']
 const LANGUAGE_TYPES = ['snippet', 'command']
 const CODE_EDITOR_TYPES = ['snippet', 'command']
+const MARKDOWN_EDITOR_TYPES = ['note', 'prompt']
 
 interface Props {
   itemTypes: SidebarItemType[]
@@ -72,6 +74,7 @@ export default function NewItemDialog({ itemTypes }: Props) {
   const showContent = selectedType ? CONTENT_TYPES.includes(selectedType.name) : false
   const showLanguage = selectedType ? LANGUAGE_TYPES.includes(selectedType.name) : false
   const showCodeEditor = selectedType ? CODE_EDITOR_TYPES.includes(selectedType.name) : false
+  const showMarkdownEditor = selectedType ? MARKDOWN_EDITOR_TYPES.includes(selectedType.name) : false
   const showUrl = selectedType?.name === 'link'
 
   const canSubmit =
@@ -192,6 +195,11 @@ export default function NewItemDialog({ itemTypes }: Props) {
                     value={form.content}
                     onChange={v => setForm(f => ({ ...f, content: v }))}
                     language={form.language || null}
+                  />
+                ) : showMarkdownEditor ? (
+                  <MarkdownEditor
+                    value={form.content}
+                    onChange={v => setForm(f => ({ ...f, content: v }))}
                   />
                 ) : (
                   <Textarea

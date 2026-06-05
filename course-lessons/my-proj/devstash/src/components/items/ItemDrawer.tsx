@@ -15,6 +15,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import CodeEditor from '@/components/ui/CodeEditor'
+import MarkdownEditor from '@/components/ui/MarkdownEditor'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -53,6 +54,7 @@ interface Props {
 const CONTENT_TYPES = ['snippet', 'prompt', 'command', 'note']
 const LANGUAGE_TYPES = ['snippet', 'command']
 const CODE_EDITOR_TYPES = ['snippet', 'command']
+const MARKDOWN_EDITOR_TYPES = ['note', 'prompt']
 const URL_TYPES = ['link']
 
 export default function ItemDrawer({ itemId, open, onOpenChange }: Props) {
@@ -182,6 +184,7 @@ export default function ItemDrawer({ itemId, open, onOpenChange }: Props) {
   const showContent = CONTENT_TYPES.includes(typeName)
   const showLanguage = LANGUAGE_TYPES.includes(typeName)
   const showCodeEditor = CODE_EDITOR_TYPES.includes(typeName)
+  const showMarkdownEditor = MARKDOWN_EDITOR_TYPES.includes(typeName)
   const showUrl = URL_TYPES.includes(typeName)
 
   return (
@@ -339,6 +342,11 @@ export default function ItemDrawer({ itemId, open, onOpenChange }: Props) {
                           onChange={v => setEditForm(f => ({ ...f, content: v }))}
                           language={editForm.language || null}
                         />
+                      ) : showMarkdownEditor ? (
+                        <MarkdownEditor
+                          value={editForm.content}
+                          onChange={v => setEditForm(f => ({ ...f, content: v }))}
+                        />
                       ) : (
                         <Textarea
                           id="edit-content"
@@ -407,6 +415,11 @@ export default function ItemDrawer({ itemId, open, onOpenChange }: Props) {
                         <CodeEditor
                           value={item.content}
                           language={item.language}
+                          readOnly
+                        />
+                      ) : showMarkdownEditor ? (
+                        <MarkdownEditor
+                          value={item.content}
                           readOnly
                         />
                       ) : (
