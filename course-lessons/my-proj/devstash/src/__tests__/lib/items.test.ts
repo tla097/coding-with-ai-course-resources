@@ -4,13 +4,14 @@ vi.mock('@/lib/prisma', () => ({
   prisma: {
     item: {
       findFirst: vi.fn(),
+      findMany: vi.fn(),
       create: vi.fn(),
       delete: vi.fn(),
     },
   },
 }))
 
-import { createItem, getItemById, deleteItem } from '@/lib/db/items'
+import { createItem, getItemById, deleteItem, getItemsByCollection } from '@/lib/db/items'
 
 const mockItem = {
   id: 'item-1',
@@ -242,5 +243,41 @@ describe('getItemById', () => {
 
     const result = await getItemById('item-1', 'user-1')
     expect(result).toEqual(mockItem)
+  })
+})
+
+describe('getItemsByCollection', () => {
+  beforeEach(() => vi.clearAllMocks())
+
+  it('returns items filtered by collectionId and userId', async () => {
+    const { prisma } = await import('@/lib/prisma')
+    vi.mocked(prisma.item.findMany).mockResolvedValue([mockItem] as never)
+
+    const result = await getItemsByCollection('user-1', 'col-1')
+    expect(result).toEqual([mockItem])
+  })
+
+  it('scopes query to userId and collectionId', async () => {
+    const { prisma } = await import('@/lib/prisma')
+    vi.mocked(prisma.item.findMany).mockResolvedValue([])
+
+    await getItemsByCollection('user-abc', 'col-xyz')
+
+    expect(prisma.item.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          userId: 'user-abc',
+          collections: { some: { collectionId: 'col-xyz' } },
+        },
+      }),
+    )
+  })
+
+  it('returns empty array when collection has no items', async () => {
+    const { prisma } = await import('@/lib/prisma')
+    vi.mocked(prisma.item.findMany).mockResolvedValue([])
+
+    const result = await getItemsByCollection('user-1', 'col-empty')
+    expect(result).toEqual([])
   })
 })

@@ -38,64 +38,96 @@ export interface CollectionWithStats {
   types: Array<{ id: string; name: string; icon: string; color: string }>
 }
 
+type CollectionWithItems = {
+  id: string
+  name: string
+  description: string | null
+  isFavorite: boolean
+  createdAt: Date
+  items: Array<{
+    item: { itemType: { id: string; name: string; icon: string; color: string } }
+  }>
+}
+
+function mapCollectionStats(col: CollectionWithItems): CollectionWithStats {
+  const typeCounts = new Map<string, { count: number; name: string; icon: string; color: string }>()
+
+  for (const ic of col.items) {
+    const type = ic.item.itemType
+    const existing = typeCounts.get(type.id)
+    if (existing) {
+      existing.count++
+    } else {
+      typeCounts.set(type.id, { count: 1, name: type.name, icon: type.icon, color: type.color })
+    }
+  }
+
+  let dominantType: { icon: string; color: string } | null = null
+  let maxCount = 0
+  for (const val of typeCounts.values()) {
+    if (val.count > maxCount) {
+      maxCount = val.count
+      dominantType = { icon: val.icon, color: val.color }
+    }
+  }
+
+  const types = Array.from(typeCounts.entries()).map(([id, val]) => ({
+    id,
+    name: val.name,
+    icon: val.icon,
+    color: val.color,
+  }))
+
+  return {
+    id: col.id,
+    name: col.name,
+    description: col.description,
+    isFavorite: col.isFavorite,
+    createdAt: col.createdAt,
+    itemCount: col.items.length,
+    dominantType,
+    types,
+  }
+}
+
+const collectionInclude = {
+  items: {
+    include: {
+      item: {
+        select: {
+          itemType: {
+            select: { id: true, name: true, icon: true, color: true },
+          },
+        },
+      },
+    },
+  },
+} as const
+
 export async function getRecentCollections(userId: string): Promise<CollectionWithStats[]> {
   const collections = await prisma.collection.findMany({
     where: { userId },
     orderBy: { createdAt: 'desc' },
     take: 20,
-    include: {
-      items: {
-        include: {
-          item: {
-            select: {
-              itemType: {
-                select: { id: true, name: true, icon: true, color: true },
-              },
-            },
-          },
-        },
-      },
-    },
+    include: collectionInclude,
   })
+  return collections.map(mapCollectionStats)
+}
 
-  return collections.map(col => {
-    const typeCounts = new Map<string, { count: number; name: string; icon: string; color: string }>()
-
-    for (const ic of col.items) {
-      const type = ic.item.itemType
-      const existing = typeCounts.get(type.id)
-      if (existing) {
-        existing.count++
-      } else {
-        typeCounts.set(type.id, { count: 1, name: type.name, icon: type.icon, color: type.color })
-      }
-    }
-
-    let dominantType: { icon: string; color: string } | null = null
-    let maxCount = 0
-    for (const val of typeCounts.values()) {
-      if (val.count > maxCount) {
-        maxCount = val.count
-        dominantType = { icon: val.icon, color: val.color }
-      }
-    }
-
-    const types = Array.from(typeCounts.entries()).map(([id, val]) => ({
-      id,
-      name: val.name,
-      icon: val.icon,
-      color: val.color,
-    }))
-
-    return {
-      id: col.id,
-      name: col.name,
-      description: col.description,
-      isFavorite: col.isFavorite,
-      createdAt: col.createdAt,
-      itemCount: col.items.length,
-      dominantType,
-      types,
-    }
+export async function getAllCollections(userId: string): Promise<CollectionWithStats[]> {
+  const collections = await prisma.collection.findMany({
+    where: { userId },
+    orderBy: { name: 'asc' },
+    include: collectionInclude,
   })
+  return collections.map(mapCollectionStats)
+}
+
+export async function getCollectionById(id: string, userId: string): Promise<CollectionWithStats | null> {
+  const col = await prisma.collection.findFirst({
+    where: { id, userId },
+    include: collectionInclude,
+  })
+  if (!col) return null
+  return mapCollectionStats(col)
 }

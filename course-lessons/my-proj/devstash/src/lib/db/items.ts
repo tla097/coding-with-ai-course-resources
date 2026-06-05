@@ -75,6 +75,14 @@ export async function getItemsByType(userId: string, typeName: string): Promise<
   })
 }
 
+export async function getItemsByCollection(userId: string, collectionId: string): Promise<ItemWithType[]> {
+  return prisma.item.findMany({
+    where: { userId, collections: { some: { collectionId } } },
+    orderBy: { createdAt: 'desc' },
+    select: itemSelect,
+  })
+}
+
 export async function getItemById(id: string, userId: string): Promise<ItemDetail | null> {
   return prisma.item.findFirst({
     where: { id, userId },
