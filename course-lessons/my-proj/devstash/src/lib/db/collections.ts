@@ -1,5 +1,19 @@
 import { prisma } from '@/lib/prisma'
 
+export async function createCollection(
+  userId: string,
+  data: { name: string; description?: string | null },
+) {
+  return prisma.collection.create({
+    data: {
+      name: data.name,
+      description: data.description ?? null,
+      userId,
+    },
+  })
+}
+
+
 export interface CollectionWithStats {
   id: string
   name: string

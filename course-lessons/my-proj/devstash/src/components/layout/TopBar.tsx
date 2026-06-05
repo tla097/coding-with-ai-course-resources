@@ -4,6 +4,7 @@ import { PanelLeft, Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import NewItemDialog from '@/components/items/NewItemDialog'
+import NewCollectionDialog from '@/components/collections/NewCollectionDialog'
 import type { SidebarItemType } from '@/lib/db/sidebar'
 
 interface TopBarProps {
@@ -25,9 +26,7 @@ export default function TopBar({ onMenuToggle, itemTypes }: TopBarProps) {
         <Input placeholder="Search items..." className="pl-9" />
       </div>
       <div className="flex flex-1 items-center justify-end gap-2">
-        <Button variant="outline" size="sm">
-          New Collection
-        </Button>
+        <NewCollectionDialog />
         <NewItemDialog itemTypes={itemTypes} />
       </div>
     </header>
