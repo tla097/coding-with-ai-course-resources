@@ -1,27 +1,14 @@
-# Current Feature: Stripe Integration Phase 2 — Webhooks, Feature Gating & UI
+# Current Feature
 
 ## Status
-In Progress
+<!-- Not Started|In Progress|Completed -->
+Not Started
 
 ## Goals
-- Stripe webhook handler at `/api/webhooks/stripe` handling `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`
-- Checkout session API route at `/api/stripe/checkout` — creates/reuses Stripe Customer, validates price IDs server-side
-- Billing portal API route at `/api/stripe/portal` — opens Stripe Customer Portal for subscription management
-- `BillingSection` component on settings page — upgrade buttons (monthly/yearly) for free users, manage subscription for Pro users
-- `UpgradeToast` client component — fires success toast on `?upgrade=success` redirect
-- Settings page updated to fetch `isPro` + `stripeCustomerId`, render `BillingSection`, handle `?upgrade=success`
-- Rename `STRIPE_PRICE_ID_MONTHLY` → `NEXT_PUBLIC_STRIPE_PRICE_ID_MONTHLY` and `STRIPE_PRICE_ID_YEARLY` → `NEXT_PUBLIC_STRIPE_PRICE_ID_YEARLY`
-- Add `STRIPE_WEBHOOK_SECRET` env var
+<!-- Goals & requirements -->
 
 ## Notes
-- Webhook signature must be verified (reject unsigned with 400)
-- Webhook handler must be idempotent — same event twice must not corrupt data
-- Webhook path `/api/webhooks/stripe` must NOT be behind auth proxy (no change to proxy.ts needed)
-- Checkout creates Stripe Customer on first checkout, reuses `stripeCustomerId` on subsequent
-- After successful checkout, redirect to `/settings?upgrade=success`
-- Billing portal only available to users with `stripeCustomerId`
-- Price IDs from client validated server-side against env vars — unknown price IDs rejected with 400
-- No unit tests in Phase 2 — webhook/checkout routes require real Stripe calls; tested via Stripe CLI
+<!-- Any extra notes -->
 
 ## History
 <!-- Keep this updated. Earliest to Latest. Format: DD/MM/YYYY HH:MM -->
@@ -92,3 +79,4 @@ In Progress
 08/06/2026 13:30 - Completed Marketing Homepage: standalone prototype at prototypes/homepage/ (index.html, styles.css, script.js); navbar, hero chaos/arrow/dashboard visual with animated bouncing icons and mouse repel, features grid, AI section, pricing with monthly/yearly toggle, CTA, footer; scroll fade-in animations; responsive mobile layout; merged to main
 08/06/2026 13:50 - Completed Marketing Homepage (Next.js): src/app/page.tsx (server, auth redirect), Navbar.tsx (client, sticky scroll bg, mobile hamburger), HeroVisual.tsx (client, chaos canvas with labelled bubbles + mouse repel, arrow, static dashboard mockup), PricingSection.tsx (client, monthly/yearly toggle, $8/$6 Pro pricing); Features grid, AI section with code editor mockup, CTA, Footer all inline server components; build passing, 165 tests passing; merged to main
 08/06/2026 15:15 - Completed Stripe Integration Phase 1: stripe installed, src/lib/stripe.ts singleton (apiVersion 2026-05-27.dahlia), isPro: boolean added to Session + JWT types, JWT always-sync callback reads isPro from DB on every refresh, FREE_TIER_ITEM_LIMIT=50 + FREE_TIER_COLLECTION_LIMIT=3 added to constants, src/lib/usage-limits.ts (checkItemLimit + checkCollectionLimit), free tier enforced in createItem + createCollection actions; 8 new unit tests; 173 tests passing; merged to main
+08/06/2026 15:30 - Completed Stripe Integration Phase 2: webhook handler (/api/webhooks/stripe) for checkout.session.completed, customer.subscription.updated, customer.subscription.deleted; checkout route (/api/stripe/checkout) with Customer create/reuse and server-side price ID validation; billing portal route (/api/stripe/portal); BillingSection component (Free/Pro badge, upgrade buttons, manage subscription); UpgradeToast client component; settings page updated with searchParams and parallel billing fetch; env vars renamed to NEXT_PUBLIC_*; 173 tests passing; merged to main
