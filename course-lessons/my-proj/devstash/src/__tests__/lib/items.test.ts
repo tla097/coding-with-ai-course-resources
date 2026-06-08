@@ -6,13 +6,14 @@ vi.mock('@/lib/prisma', () => ({
       findFirst: vi.fn(),
       findMany: vi.fn(),
       create: vi.fn(),
+      update: vi.fn(),
       delete: vi.fn(),
       count: vi.fn(),
     },
   },
 }))
 
-import { createItem, getItemById, deleteItem, getItemsByCollection, getItemsByTypePaginated, getItemsByCollectionPaginated } from '@/lib/db/items'
+import { createItem, getItemById, deleteItem, getItemsByCollection, getItemsByTypePaginated, getItemsByCollectionPaginated, toggleItemPin } from '@/lib/db/items'
 
 const mockItem = {
   id: 'item-1',
@@ -399,5 +400,62 @@ describe('getItemsByCollectionPaginated', () => {
 
     const result = await getItemsByCollectionPaginated('user-1', 'col-empty', 1, 21)
     expect(result).toEqual({ items: [], total: 0 })
+  })
+})
+
+describe('toggleItemPin', () => {
+  beforeEach(() => vi.clearAllMocks())
+
+  it('returns null when item is not found or belongs to another user', async () => {
+    const { prisma } = await import('@/lib/prisma')
+    vi.mocked(prisma.item.findFirst).mockResolvedValue(null)
+
+    const result = await toggleItemPin('item-1', 'user-1')
+    expect(result).toBeNull()
+    expect(prisma.item.update).not.toHaveBeenCalled()
+  })
+
+  it('pins an unpinned item and returns true', async () => {
+    const { prisma } = await import('@/lib/prisma')
+    vi.mocked(prisma.item.findFirst).mockResolvedValue({ isPinned: false } as never)
+    vi.mocked(prisma.item.update).mockResolvedValue({ isPinned: true } as never)
+
+    const result = await toggleItemPin('item-1', 'user-1')
+    expect(result).toBe(true)
+  })
+
+  it('unpins a pinned item and returns false', async () => {
+    const { prisma } = await import('@/lib/prisma')
+    vi.mocked(prisma.item.findFirst).mockResolvedValue({ isPinned: true } as never)
+    vi.mocked(prisma.item.update).mockResolvedValue({ isPinned: false } as never)
+
+    const result = await toggleItemPin('item-1', 'user-1')
+    expect(result).toBe(false)
+  })
+
+  it('scopes ownership check to both id and userId', async () => {
+    const { prisma } = await import('@/lib/prisma')
+    vi.mocked(prisma.item.findFirst).mockResolvedValue(null)
+
+    await toggleItemPin('item-abc', 'user-xyz')
+
+    expect(prisma.item.findFirst).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { id: 'item-abc', userId: 'user-xyz' } })
+    )
+  })
+
+  it('calls update with the toggled isPinned value', async () => {
+    const { prisma } = await import('@/lib/prisma')
+    vi.mocked(prisma.item.findFirst).mockResolvedValue({ isPinned: false } as never)
+    vi.mocked(prisma.item.update).mockResolvedValue({ isPinned: true } as never)
+
+    await toggleItemPin('item-1', 'user-1')
+
+    expect(prisma.item.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: 'item-1' },
+        data: { isPinned: true },
+      })
+    )
   })
 })

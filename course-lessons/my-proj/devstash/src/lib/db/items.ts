@@ -249,7 +249,7 @@ export async function getItemsByTypePaginated(
   const skip = (page - 1) * pageSize
   const where = { userId, itemType: { name: typeName } }
   const [items, total] = await Promise.all([
-    prisma.item.findMany({ where, orderBy: { createdAt: 'desc' }, skip, take: pageSize, select: itemSelect }),
+    prisma.item.findMany({ where, orderBy: [{ isPinned: 'desc' }, { createdAt: 'desc' }], skip, take: pageSize, select: itemSelect }),
     prisma.item.count({ where }),
   ])
   return { items, total }
@@ -264,7 +264,7 @@ export async function getItemsByCollectionPaginated(
   const skip = (page - 1) * pageSize
   const where = { userId, collections: { some: { collectionId } } }
   const [items, total] = await Promise.all([
-    prisma.item.findMany({ where, orderBy: { createdAt: 'desc' }, skip, take: pageSize, select: itemSelect }),
+    prisma.item.findMany({ where, orderBy: [{ isPinned: 'desc' }, { createdAt: 'desc' }], skip, take: pageSize, select: itemSelect }),
     prisma.item.count({ where }),
   ])
   return { items, total }
@@ -287,6 +287,17 @@ export async function toggleItemFavorite(id: string, userId: string): Promise<bo
     select: { isFavorite: true },
   })
   return updated.isFavorite
+}
+
+export async function toggleItemPin(id: string, userId: string): Promise<boolean | null> {
+  const item = await prisma.item.findFirst({ where: { id, userId }, select: { isPinned: true } })
+  if (!item) return null
+  const updated = await prisma.item.update({
+    where: { id },
+    data: { isPinned: !item.isPinned },
+    select: { isPinned: true },
+  })
+  return updated.isPinned
 }
 
 export async function getItemStats(userId: string) {

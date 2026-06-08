@@ -30,7 +30,7 @@ import {
 import { ICON_MAP } from '@/lib/icon-map'
 import CollectionPicker from '@/components/items/CollectionPicker'
 import type { ItemDetail } from '@/lib/db/items'
-import { updateItem, deleteItem, toggleItemFavorite } from '@/actions/items'
+import { updateItem, deleteItem, toggleItemFavorite, toggleItemPin } from '@/actions/items'
 
 interface ItemDetailResponse extends Omit<ItemDetail, 'createdAt' | 'updatedAt'> {
   createdAt: string
@@ -79,6 +79,7 @@ export default function ItemDrawer({ itemId, open, onOpenChange, collections }: 
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [favoriting, setFavoriting] = useState(false)
+  const [pinning, setPinning] = useState(false)
 
   useEffect(() => {
     if (!itemId || !open) return
@@ -196,6 +197,25 @@ export default function ItemDrawer({ itemId, open, onOpenChange, collections }: 
     }
   }
 
+  async function handleTogglePin() {
+    if (!itemId) return
+    const optimistic = !isPinned
+    setIsPinned(optimistic)
+    setPinning(true)
+    try {
+      const result = await toggleItemPin(itemId)
+      if (!result.success) {
+        setIsPinned(!optimistic)
+        toast.error(typeof result.error === 'string' ? result.error : 'Failed to update pin.')
+        return
+      }
+      toast.success(optimistic ? 'Item pinned' : 'Item unpinned')
+      router.refresh()
+    } finally {
+      setPinning(false)
+    }
+  }
+
   function handleCopy() {
     if (!item) return
     const text = item.content ?? item.url ?? item.title
@@ -281,10 +301,12 @@ export default function ItemDrawer({ itemId, open, onOpenChange, collections }: 
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => setIsPinned(p => !p)}
+                    onClick={handleTogglePin}
+                    disabled={pinning}
+                    className={isPinned ? 'text-foreground' : ''}
                   >
                     <Pin className={`h-4 w-4 ${isPinned ? 'fill-foreground' : ''}`} />
-                    Pin
+                    {isPinned ? 'Unpin' : 'Pin'}
                   </Button>
                   <Button variant="ghost" size="sm" onClick={handleCopy}>
                     <Copy className="h-4 w-4" />

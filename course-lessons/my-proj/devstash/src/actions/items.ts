@@ -7,6 +7,7 @@ import {
   updateItem as dbUpdateItem,
   deleteItem as dbDeleteItem,
   toggleItemFavorite as dbToggleItemFavorite,
+  toggleItemPin as dbToggleItemPin,
 } from '@/lib/db/items'
 
 const updateItemSchema = z.object({
@@ -104,5 +105,18 @@ export async function toggleItemFavorite(itemId: string) {
     return { success: true as const, data: { isFavorite } }
   } catch {
     return { success: false as const, error: 'Failed to update favorite.' }
+  }
+}
+
+export async function toggleItemPin(itemId: string) {
+  const session = await auth()
+  if (!session?.user?.id) return { success: false as const, error: 'Not authenticated.' }
+
+  try {
+    const isPinned = await dbToggleItemPin(itemId, session.user.id)
+    if (isPinned === null) return { success: false as const, error: 'Item not found.' }
+    return { success: true as const, data: { isPinned } }
+  } catch {
+    return { success: false as const, error: 'Failed to update pin.' }
   }
 }
