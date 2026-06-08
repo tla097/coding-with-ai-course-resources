@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Star, Pin } from 'lucide-react'
 import { toast } from 'sonner'
@@ -18,6 +18,10 @@ export default function ItemCard({ item, onClick }: ItemCardProps) {
   const Icon = ICON_MAP[item.itemType.icon] ?? null
   const [isFavorite, setIsFavorite] = useState(item.isFavorite)
   const [favoriting, setFavoriting] = useState(false)
+
+  useEffect(() => {
+    setIsFavorite(item.isFavorite)
+  }, [item.isFavorite])
 
   const formattedDate = new Date(item.createdAt).toLocaleDateString('en-US', {
     month: 'short',

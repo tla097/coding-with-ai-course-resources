@@ -180,14 +180,16 @@ export default function ItemDrawer({ itemId, open, onOpenChange, collections }: 
 
   async function handleToggleFavorite() {
     if (!itemId) return
+    const optimistic = !isFavorite
+    setIsFavorite(optimistic)
     setFavoriting(true)
     try {
       const result = await toggleItemFavorite(itemId)
       if (!result.success) {
+        setIsFavorite(!optimistic)
         toast.error(typeof result.error === 'string' ? result.error : 'Failed to update favorite.')
         return
       }
-      setIsFavorite(result.data.isFavorite)
       router.refresh()
     } finally {
       setFavoriting(false)
