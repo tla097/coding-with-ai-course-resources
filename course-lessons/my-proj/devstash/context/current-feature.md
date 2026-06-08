@@ -1,14 +1,28 @@
-# Current Feature
+# Current Feature: Favourites Page Sortable Columns
 
 ## Status
-<!-- Not Started|In Progress|Completed -->
-Not Started
+In Progress
 
 ## Goals
-<!-- Goals & requirements -->
+- Add a column header row above the items list with Name, Type, and Date columns
+- Add a column header row above the collections list with Name and Date columns
+- Clicking a column header sorts the list by that column (client-side, no server round-trip)
+- Active sort column is subtly highlighted (background tint on the header label)
+- Clicking a different column removes highlight from the previous column and activates the new one
+- Items sort: Name (alphabetical a→z / z→a on toggle), Type (alphabetical by type name), Date (newest first / oldest first on toggle)
+- Collections sort: Name (alphabetical a→z / z→a on toggle), Date (newest first / oldest first on toggle)
+- Default sort is Date descending (matches current DB ordering)
+- Sort direction toggles on second click of the same column (asc ↔ desc)
+- All sorting logic lives inside FavoritesView.tsx — no changes to server components or DB queries
 
 ## Notes
-<!-- Any extra notes -->
+- Component: `src/components/favorites/FavoritesView.tsx` (already a client component with `'use client'`)
+- Items list columns visible in current layout: icon+title (Name), type badge (Type), date (Date)
+- Collections list columns: name (Name), item count badge (not sortable), date (Date)
+- Type sort is alphabetical by `item.itemType.name` string
+- Column headers should align with their respective data columns in the row layout
+- Subtle highlight: a light background on the active header cell (e.g. `bg-accent` or similar muted tint)
+- Use a small chevron icon (ChevronUp/ChevronDown from lucide-react) to indicate sort direction next to the active column label
 
 ## History
 <!-- Keep this updated. Earliest to Latest. Format: DD/MM/YYYY HH:MM -->

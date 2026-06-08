@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import Link from 'next/link'
-import { Folder } from 'lucide-react'
+import { Folder, ChevronUp, ChevronDown } from 'lucide-react'
 import ItemDrawer from '@/components/items/ItemDrawer'
 import { ICON_MAP } from '@/lib/icon-map'
 import type { FavoriteItem, FavoriteCollection } from '@/lib/db/favorites'
@@ -13,6 +13,10 @@ interface Props {
   collectionList: { id: string; name: string }[]
 }
 
+type ItemSortKey = 'name' | 'type' | 'date'
+type CollectionSortKey = 'name' | 'date'
+type SortDir = 'asc' | 'desc'
+
 function formatDate(date: Date): string {
   return new Date(date).toLocaleDateString('en-GB', {
     day: '2-digit',
@@ -21,9 +25,93 @@ function formatDate(date: Date): string {
   })
 }
 
+interface SortHeaderProps {
+  label: string
+  sortKey: string
+  activeKey: string
+  dir: SortDir
+  onClick: (key: string) => void
+  className?: string
+}
+
+function SortHeader({ label, sortKey, activeKey, dir, onClick, className = '' }: SortHeaderProps) {
+  const isActive = sortKey === activeKey
+  return (
+    <button
+      type="button"
+      onClick={() => onClick(sortKey)}
+      className={`flex items-center gap-0.5 font-mono text-[10px] font-semibold uppercase tracking-widest transition-colors ${
+        isActive
+          ? 'rounded bg-accent px-1.5 py-0.5 text-foreground'
+          : 'px-1.5 py-0.5 text-muted-foreground hover:text-foreground'
+      } ${className}`}
+    >
+      {label}
+      {isActive ? (
+        dir === 'asc' ? (
+          <ChevronUp className="h-3 w-3" />
+        ) : (
+          <ChevronDown className="h-3 w-3" />
+        )
+      ) : null}
+    </button>
+  )
+}
+
 export default function FavoritesView({ items, collections, collectionList }: Props) {
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null)
   const [drawerOpen, setDrawerOpen] = useState(false)
+
+  const [itemSortKey, setItemSortKey] = useState<ItemSortKey>('date')
+  const [itemSortDir, setItemSortDir] = useState<SortDir>('desc')
+  const [colSortKey, setColSortKey] = useState<CollectionSortKey>('date')
+  const [colSortDir, setColSortDir] = useState<SortDir>('desc')
+
+  function handleItemSort(key: string) {
+    const k = key as ItemSortKey
+    if (k === itemSortKey) {
+      setItemSortDir(d => (d === 'asc' ? 'desc' : 'asc'))
+    } else {
+      setItemSortKey(k)
+      setItemSortDir(k === 'date' ? 'desc' : 'asc')
+    }
+  }
+
+  function handleColSort(key: string) {
+    const k = key as CollectionSortKey
+    if (k === colSortKey) {
+      setColSortDir(d => (d === 'asc' ? 'desc' : 'asc'))
+    } else {
+      setColSortKey(k)
+      setColSortDir(k === 'date' ? 'desc' : 'asc')
+    }
+  }
+
+  const sortedItems = useMemo(() => {
+    return [...items].sort((a, b) => {
+      let cmp = 0
+      if (itemSortKey === 'name') {
+        cmp = a.title.localeCompare(b.title)
+      } else if (itemSortKey === 'type') {
+        cmp = a.itemType.name.localeCompare(b.itemType.name)
+      } else {
+        cmp = new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime()
+      }
+      return itemSortDir === 'asc' ? cmp : -cmp
+    })
+  }, [items, itemSortKey, itemSortDir])
+
+  const sortedCollections = useMemo(() => {
+    return [...collections].sort((a, b) => {
+      let cmp = 0
+      if (colSortKey === 'name') {
+        cmp = a.name.localeCompare(b.name)
+      } else {
+        cmp = new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime()
+      }
+      return colSortDir === 'asc' ? cmp : -cmp
+    })
+  }, [collections, colSortKey, colSortDir])
 
   function openItem(id: string) {
     setSelectedItemId(id)
@@ -42,13 +130,36 @@ export default function FavoritesView({ items, collections, collectionList }: Pr
             <span className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-muted-foreground">
               {items.length}
             </span>
+            <div className="ml-auto flex items-center gap-1">
+              <SortHeader
+                label="Name"
+                sortKey="name"
+                activeKey={itemSortKey}
+                dir={itemSortDir}
+                onClick={handleItemSort}
+              />
+              <SortHeader
+                label="Type"
+                sortKey="type"
+                activeKey={itemSortKey}
+                dir={itemSortDir}
+                onClick={handleItemSort}
+              />
+              <SortHeader
+                label="Date"
+                sortKey="date"
+                activeKey={itemSortKey}
+                dir={itemSortDir}
+                onClick={handleItemSort}
+              />
+            </div>
           </div>
 
-          {items.length === 0 ? (
+          {sortedItems.length === 0 ? (
             <p className="py-4 font-mono text-xs text-muted-foreground">No favorite items yet.</p>
           ) : (
             <ul>
-              {items.map(item => {
+              {sortedItems.map(item => {
                 const Icon = ICON_MAP[item.itemType.icon] ?? null
                 return (
                   <li key={item.id}>
@@ -97,13 +208,29 @@ export default function FavoritesView({ items, collections, collectionList }: Pr
             <span className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-muted-foreground">
               {collections.length}
             </span>
+            <div className="ml-auto flex items-center gap-1">
+              <SortHeader
+                label="Name"
+                sortKey="name"
+                activeKey={colSortKey}
+                dir={colSortDir}
+                onClick={handleColSort}
+              />
+              <SortHeader
+                label="Date"
+                sortKey="date"
+                activeKey={colSortKey}
+                dir={colSortDir}
+                onClick={handleColSort}
+              />
+            </div>
           </div>
 
-          {collections.length === 0 ? (
+          {sortedCollections.length === 0 ? (
             <p className="py-4 font-mono text-xs text-muted-foreground">No favorite collections yet.</p>
           ) : (
             <ul>
-              {collections.map(col => (
+              {sortedCollections.map(col => (
                 <li key={col.id}>
                   <Link
                     href={`/collections/${col.id}`}
