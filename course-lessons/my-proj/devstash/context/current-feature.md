@@ -1,23 +1,14 @@
-# Current Feature: Favorites Page
+# Current Feature
 
 ## Status
-In Progress
+<!-- Not Started|In Progress|Completed -->
+Not Started
 
 ## Goals
-- Star icon button in TopBar links to /favorites
-- /favorites route created and protected
-- Fetches all favorited items and collections for the current user
-- Compact list view (VS Code/terminal style — not cards)
-- Each item row: type icon, title, type badge, date added
-- Separate sections for Items and Collections with counts
-- Clicking an item opens ItemDrawer; clicking a collection navigates to /collections/[id]
-- Empty state shown when no favorites exist
-- Sorted by most recently favorited (updatedAt desc)
+<!-- Goals & requirements -->
 
 ## Notes
-- UI style: monospace or semi-monospace font, minimal padding, high density, subtle hover states, no cards or heavy borders
-- Reuse ItemDrawer and ItemsWithDrawer pattern from existing item pages
-- /favorites must be protected (same as other dashboard routes via proxy.ts)
+<!-- Any extra notes -->
 
 ## History
 <!-- Keep this updated. Earliest to Latest. Format: DD/MM/YYYY HH:MM -->
@@ -80,3 +71,4 @@ In Progress
 05/06/2026 16:35 - Completed Settings Page: /settings route (protected), Settings link added to sidebar user dropdown, ChangePasswordForm and DeleteAccountButton moved from /profile to /settings; proxy.ts updated to protect /settings; merged to main
 08/06/2026 10:15 - Completed Editor Preferences Settings: editorPreferences JSON column on User model (migration applied), EditorPreferencesContext with auto-save, EditorPreferencesForm (font size, tab size, theme dropdowns; word wrap, minimap toggles) added to /settings, Monaco editor reads preferences live (monokai and github-dark themes registered); 12 unit tests; merged to main
 08/06/2026 12:00 - Started Favorites Page: created feature/favorites-page branch
+08/06/2026 10:45 - Completed Favorites Page: /favorites route (protected), getFavoriteItems + getFavoriteCollections DB queries (updatedAt desc), FavoritesView compact monospace list (type icon/badge/date rows, two sections with counts), ItemDrawer on item click, collection rows navigate to /collections/[id], empty state, star icon in TopBar, 10 unit tests; merged to main
