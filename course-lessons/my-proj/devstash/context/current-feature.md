@@ -1,25 +1,14 @@
-# Current Feature: Favourite Toggle Button
+# Current Feature
 
 ## Status
-In Progress
+<!-- Not Started|In Progress|Completed -->
+Not Started
 
 ## Goals
-- Favourite toggle button on ItemCard that toggles `isFavorite` on the item with visual filled/outline star state
-- Favourite toggle button in ItemDrawer action bar that toggles `isFavorite` on the item with visual filled/outline star state
-- Favourite toggle button on CollectionCard that toggles `isFavorite` on the collection with visual filled/outline star state
-- Favourite toggle button on the collection page (/collections/[id]) header area that toggles `isFavorite` on the collection
-- `toggleItemFavorite` server action in src/actions/items.ts (auth check, ownership check, { success, data, error } pattern)
-- `toggleCollectionFavorite` server action in src/actions/collections.ts (auth check, ownership check, { success, data, error } pattern)
-- Toast notification on success/failure
-- router.refresh() after toggle to sync all views including sidebar favorites list
-- Unit tests for both server actions
+<!-- Goals & requirements -->
 
 ## Notes
-- `isFavorite Boolean @default(false)` already exists on both Item and Collection models — no migration needed
-- CollectionActions component and ItemDrawer already have placeholder Favourite buttons — audit current state before implementing
-- Drawer already listed Favorite in the action bar per history (04/06/2026 16:25), CollectionActions had a Favorite button per history (05/06/2026 15:15) — check if these are wired up or placeholders
-- Use a Star icon (filled vs outline) to indicate favorited state
-- Button should be visually distinct (yellow/amber fill when active)
+<!-- Any extra notes -->
 
 ## History
 <!-- Keep this updated. Earliest to Latest. Format: DD/MM/YYYY HH:MM -->
@@ -81,5 +70,5 @@ In Progress
 05/06/2026 16:15 - Completed Pagination: src/lib/constants.ts (ITEMS_PER_PAGE=21, COLLECTIONS_PER_PAGE=21, DASHBOARD_COLLECTIONS_LIMIT=6, DASHBOARD_RECENT_ITEMS_LIMIT=10); getItemsByTypePaginated and getItemsByCollectionPaginated (skip/take); Pagination component (numbered links, prev/next, ellipsis); /items/[type] and /collections/[id] paginated via searchParams; dashboard uses limit constants with accurate collection count stat; 10 unit tests; merged to main
 05/06/2026 16:35 - Completed Settings Page: /settings route (protected), Settings link added to sidebar user dropdown, ChangePasswordForm and DeleteAccountButton moved from /profile to /settings; proxy.ts updated to protect /settings; merged to main
 08/06/2026 10:15 - Completed Editor Preferences Settings: editorPreferences JSON column on User model (migration applied), EditorPreferencesContext with auto-save, EditorPreferencesForm (font size, tab size, theme dropdowns; word wrap, minimap toggles) added to /settings, Monaco editor reads preferences live (monokai and github-dark themes registered); 12 unit tests; merged to main
-08/06/2026 12:00 - Started Favorites Page: created feature/favorites-page branch
 08/06/2026 10:45 - Completed Favorites Page: /favorites route (protected), getFavoriteItems + getFavoriteCollections DB queries (updatedAt desc), FavoritesView compact monospace list (type icon/badge/date rows, two sections with counts), ItemDrawer on item click, collection rows navigate to /collections/[id], empty state, star icon in TopBar, 10 unit tests; merged to main
+08/06/2026 11:10 - Completed Favourite Toggle Button: toggleItemFavorite and toggleCollectionFavorite DB functions and server actions (ownership checked, { success, data, error } pattern); star toggle button on ItemCard (top-right, stops propagation), ItemDrawer action bar (Favorite/Unfavorite label), CollectionCard (star button + dropdown item), CollectionActions on /collections/[id]; local optimistic state + router.refresh() on all surfaces; 12 unit tests; merged to main
