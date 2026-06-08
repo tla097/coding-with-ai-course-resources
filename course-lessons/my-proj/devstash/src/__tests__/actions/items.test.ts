@@ -8,6 +8,9 @@ vi.mock('@/lib/db/items', () => ({
   toggleItemFavorite: vi.fn(),
   toggleItemPin: vi.fn(),
 }))
+vi.mock('@/lib/usage-limits', () => ({
+  checkItemLimit: vi.fn().mockResolvedValue({ allowed: true }),
+}))
 
 import { createItem, updateItem, deleteItem, toggleItemFavorite, toggleItemPin } from '@/actions/items'
 import { auth } from '@/auth'
@@ -26,7 +29,7 @@ const mockDbDelete = vi.mocked(dbDeleteItem)
 const mockDbToggleFavorite = vi.mocked(dbToggleItemFavorite)
 const mockDbTogglePin = vi.mocked(dbToggleItemPin)
 
-const mockSession = { user: { id: 'user-1' } }
+const mockSession = { user: { id: 'user-1', isPro: false } }
 
 const validInput = {
   title: 'Updated Title',

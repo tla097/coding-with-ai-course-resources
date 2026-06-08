@@ -2,6 +2,7 @@
 
 import { z } from 'zod'
 import { auth } from '@/auth'
+import { checkItemLimit } from '@/lib/usage-limits'
 import {
   createItem as dbCreateItem,
   updateItem as dbUpdateItem,
@@ -47,6 +48,11 @@ export async function createItem(data: CreateItemInput) {
   const parsed = createItemSchema.safeParse(data)
   if (!parsed.success) {
     return { success: false as const, error: z.flattenError(parsed.error).fieldErrors }
+  }
+
+  const limitCheck = await checkItemLimit(session.user.id, session.user.isPro)
+  if (!limitCheck.allowed) {
+    return { success: false as const, error: limitCheck.error, limitReached: limitCheck.limitReached }
   }
 
   const { title, description, content, url, language, tags, collectionIds, itemTypeId, itemTypeName } = parsed.data

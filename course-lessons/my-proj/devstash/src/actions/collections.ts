@@ -2,6 +2,7 @@
 
 import { z } from 'zod'
 import { auth } from '@/auth'
+import { checkCollectionLimit } from '@/lib/usage-limits'
 import {
   createCollection as dbCreateCollection,
   updateCollection as dbUpdateCollection,
@@ -23,6 +24,11 @@ export async function createCollection(data: CreateCollectionInput) {
   const parsed = createCollectionSchema.safeParse(data)
   if (!parsed.success) {
     return { success: false as const, error: z.flattenError(parsed.error).fieldErrors }
+  }
+
+  const limitCheck = await checkCollectionLimit(session.user.id, session.user.isPro)
+  if (!limitCheck.allowed) {
+    return { success: false as const, error: limitCheck.error, limitReached: limitCheck.limitReached }
   }
 
   try {
