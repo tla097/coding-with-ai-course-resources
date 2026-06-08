@@ -1,30 +1,14 @@
-# Current Feature: Marketing Homepage
+# Current Feature
 
 ## Status
 <!-- Not Started|In Progress|Completed -->
-In Progress
+Not Started
 
 ## Goals
-- Build a standalone marketing homepage at `prototypes/homepage/` (index.html, styles.css, script.js)
-- Fixed top navbar with logo, Features/Pricing links, Sign In/Get Started buttons (becomes more opaque on scroll)
-- Hero section with "chaos to order" concept: chaos container (left), pulsing arrow (center), dashboard preview (right)
-- Chaos container: 8 floating icons (Notion, GitHub, Slack, VS Code, browser tabs, terminal, text file, bookmark) that float/bounce off walls, pulse, and repel from mouse cursor
-- Dashboard preview: simplified sidebar + item cards grid with colored top borders matching item type colors
-- Features section: 6 cards grid (Code Snippets, AI Prompts, Instant Search, Commands, Files & Docs, Collections) with item type accent colors
-- AI section: two columns — "Pro Feature" badge + AI capabilities checklist (left), code editor mockup with "AI Generated Tags" demo (right)
-- Pricing section: Free ($0, 50 items, 3 collections) vs Pro ($8/mo, unlimited + AI), Pro card highlighted with "Most Popular", monthly/yearly toggle ($72/year)
-- CTA section: "Ready to Organize Your Knowledge?" with button
-- Footer: logo, link columns, copyright with current year
-- Scroll animations: elements fade in on scroll into view
-- Responsive: stack chaos/arrow/dashboard vertically on mobile, arrow rotates 90° on mobile
+<!-- Goals & requirements -->
 
 ## Notes
-- Color palette: Snippet #3b82f6, Prompt #f59e0b, Command #06b6d4, Note #22c55e, File #64748b, Image #ec4899, URL #6366f1
-- Dark theme throughout
-- Chaos icons animate via requestAnimationFrame — drift, bounce off walls, repel from mouse
-- Arrow uses CSS pulse animation
-- Output is a standalone prototype (plain HTML/CSS/JS) — not part of the Next.js app
-- Prototype goes in `prototypes/homepage/` relative to the project root (my-proj/)
+<!-- Any extra notes -->
 
 ## History
 <!-- Keep this updated. Earliest to Latest. Format: DD/MM/YYYY HH:MM -->
@@ -92,3 +76,4 @@ In Progress
 08/06/2026 12:55 - Started Pinned Items: created feature/pinned-items branch
 08/06/2026 13:00 - Implemented Pinned Items: toggleItemPin DB function and server action (ownership checked, { success, data, error } pattern); Pin button in ItemDrawer wired (optimistic update, Pin/Unpin label, toast on success); pinned items sort to top of /items/[type] and /collections/[id] listings (isPinned desc, createdAt desc); 11 unit tests; build passing
 08/06/2026 13:00 - Completed Pinned Items: toggleItemPin DB function and server action; Pin button wired in ItemDrawer with optimistic UI and toast; pinned items sort to top of type/collection listings; 11 unit tests; merged to main
+08/06/2026 13:30 - Completed Marketing Homepage: standalone prototype at prototypes/homepage/ (index.html, styles.css, script.js); navbar, hero chaos/arrow/dashboard visual with animated bouncing icons and mouse repel, features grid, AI section, pricing with monthly/yearly toggle, CTA, footer; scroll fade-in animations; responsive mobile layout; merged to main
