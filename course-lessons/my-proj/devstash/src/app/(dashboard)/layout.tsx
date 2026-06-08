@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import DashboardShell from '@/components/layout/DashboardShell'
 import { getSidebarData } from '@/lib/db/sidebar'
 import { getSearchData } from '@/lib/db/search'
+import { getEditorPreferences } from '@/actions/editor-preferences'
 
 export default async function DashboardLayout({
   children,
@@ -24,12 +25,13 @@ export default async function DashboardLayout({
 
   try {
     const userId = session?.user?.id ?? ''
-    const [sidebarData, searchData] = await Promise.all([
+    const [sidebarData, searchData, editorPreferences] = await Promise.all([
       getSidebarData(userId),
       getSearchData(userId),
+      getEditorPreferences(),
     ])
     return (
-      <DashboardShell sidebarData={sidebarData} searchData={searchData} user={session?.user ?? null}>
+      <DashboardShell sidebarData={sidebarData} searchData={searchData} user={session?.user ?? null} editorPreferences={editorPreferences}>
         {children}
       </DashboardShell>
     )

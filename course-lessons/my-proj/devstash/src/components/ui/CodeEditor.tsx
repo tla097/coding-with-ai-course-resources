@@ -4,11 +4,55 @@ import dynamic from 'next/dynamic'
 import { useState, useMemo } from 'react'
 import { Copy, Check } from 'lucide-react'
 import { toast } from 'sonner'
+import { useEditorPreferences } from '@/contexts/EditorPreferencesContext'
+import type Monaco from 'monaco-editor'
 
 const MonacoEditor = dynamic(() => import('@monaco-editor/react'), {
   ssr: false,
   loading: () => <div className="h-full w-full bg-[#1e1e1e] animate-pulse" />,
 })
+
+function registerCustomThemes(monaco: typeof Monaco) {
+  monaco.editor.defineTheme('monokai', {
+    base: 'vs-dark',
+    inherit: true,
+    rules: [
+      { token: 'comment', foreground: '75715e', fontStyle: 'italic' },
+      { token: 'keyword', foreground: 'f92672' },
+      { token: 'string', foreground: 'e6db74' },
+      { token: 'number', foreground: 'ae81ff' },
+      { token: 'type', foreground: '66d9e8' },
+      { token: 'function', foreground: 'a6e22e' },
+    ],
+    colors: {
+      'editor.background': '#272822',
+      'editor.foreground': '#f8f8f2',
+      'editor.lineHighlightBackground': '#3e3d32',
+      'editorCursor.foreground': '#f8f8f0',
+      'editor.selectionBackground': '#49483e',
+    },
+  })
+
+  monaco.editor.defineTheme('github-dark', {
+    base: 'vs-dark',
+    inherit: true,
+    rules: [
+      { token: 'comment', foreground: '8b949e', fontStyle: 'italic' },
+      { token: 'keyword', foreground: 'ff7b72' },
+      { token: 'string', foreground: 'a5d6ff' },
+      { token: 'number', foreground: '79c0ff' },
+      { token: 'type', foreground: 'ffa657' },
+      { token: 'function', foreground: 'd2a8ff' },
+    ],
+    colors: {
+      'editor.background': '#0d1117',
+      'editor.foreground': '#c9d1d9',
+      'editor.lineHighlightBackground': '#161b22',
+      'editorCursor.foreground': '#c9d1d9',
+      'editor.selectionBackground': '#388bfd26',
+    },
+  })
+}
 
 interface Props {
   value: string
@@ -24,6 +68,7 @@ const PADDING = 24
 
 export default function CodeEditor({ value, onChange, language, readOnly = false }: Props) {
   const [copied, setCopied] = useState(false)
+  const { preferences } = useEditorPreferences()
 
   const height = useMemo(() => {
     const lines = value ? value.split('\n').length : 1
@@ -70,16 +115,18 @@ export default function CodeEditor({ value, onChange, language, readOnly = false
         height={height}
         value={value}
         language={monacoLanguage}
-        theme="vs-dark"
+        theme={preferences.theme}
+        beforeMount={registerCustomThemes}
         onChange={readOnly ? undefined : v => onChange?.(v ?? '')}
         options={{
           readOnly,
-          minimap: { enabled: false },
+          minimap: { enabled: preferences.minimap },
           scrollBeyondLastLine: false,
-          fontSize: 13,
+          fontSize: preferences.fontSize,
+          tabSize: preferences.tabSize,
           lineNumbers: readOnly ? 'off' : 'on',
           folding: false,
-          wordWrap: 'on',
+          wordWrap: preferences.wordWrap ? 'on' : 'off',
           automaticLayout: true,
           scrollbar: {
             vertical: 'auto',

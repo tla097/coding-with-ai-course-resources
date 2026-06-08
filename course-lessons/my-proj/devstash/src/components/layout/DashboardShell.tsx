@@ -5,8 +5,10 @@ import TopBar from '@/components/layout/TopBar'
 import Sidebar from '@/components/layout/Sidebar'
 import CommandPalette from '@/components/search/CommandPalette'
 import ItemDrawer from '@/components/items/ItemDrawer'
+import { EditorPreferencesProvider } from '@/contexts/EditorPreferencesContext'
 import { type SidebarData } from '@/lib/db/sidebar'
 import { type SearchData } from '@/lib/db/search'
+import { type EditorPreferences } from '@/types/editor-preferences'
 
 type User = {
   id?: string
@@ -20,9 +22,10 @@ interface Props {
   sidebarData: SidebarData
   searchData: SearchData
   user: User | null
+  editorPreferences: EditorPreferences
 }
 
-export default function DashboardShell({ children, sidebarData, searchData, user }: Props) {
+export default function DashboardShell({ children, sidebarData, searchData, user, editorPreferences }: Props) {
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [paletteOpen, setPaletteOpen] = useState(false)
   const [drawerItemId, setDrawerItemId] = useState<string | null>(null)
@@ -63,6 +66,7 @@ export default function DashboardShell({ children, sidebarData, searchData, user
   }
 
   return (
+    <EditorPreferencesProvider initialPreferences={editorPreferences}>
     <div className="flex h-screen flex-col">
       <TopBar
         onMenuToggle={handleToggle}
@@ -94,5 +98,6 @@ export default function DashboardShell({ children, sidebarData, searchData, user
         collections={sidebarData.allCollections}
       />
     </div>
+    </EditorPreferencesProvider>
   )
 }
