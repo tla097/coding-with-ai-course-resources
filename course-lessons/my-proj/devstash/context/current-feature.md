@@ -1,28 +1,14 @@
-# Current Feature: Favourites Page Sortable Columns
+# Current Feature
 
 ## Status
-In Progress
+<!-- Not Started|In Progress|Completed -->
+Not Started
 
 ## Goals
-- Add a column header row above the items list with Name, Type, and Date columns
-- Add a column header row above the collections list with Name and Date columns
-- Clicking a column header sorts the list by that column (client-side, no server round-trip)
-- Active sort column is subtly highlighted (background tint on the header label)
-- Clicking a different column removes highlight from the previous column and activates the new one
-- Items sort: Name (alphabetical a→z / z→a on toggle), Type (alphabetical by type name), Date (newest first / oldest first on toggle)
-- Collections sort: Name (alphabetical a→z / z→a on toggle), Date (newest first / oldest first on toggle)
-- Default sort is Date descending (matches current DB ordering)
-- Sort direction toggles on second click of the same column (asc ↔ desc)
-- All sorting logic lives inside FavoritesView.tsx — no changes to server components or DB queries
+<!-- Goals & requirements -->
 
 ## Notes
-- Component: `src/components/favorites/FavoritesView.tsx` (already a client component with `'use client'`)
-- Items list columns visible in current layout: icon+title (Name), type badge (Type), date (Date)
-- Collections list columns: name (Name), item count badge (not sortable), date (Date)
-- Type sort is alphabetical by `item.itemType.name` string
-- Column headers should align with their respective data columns in the row layout
-- Subtle highlight: a light background on the active header cell (e.g. `bg-accent` or similar muted tint)
-- Use a small chevron icon (ChevronUp/ChevronDown from lucide-react) to indicate sort direction next to the active column label
+<!-- Any extra notes -->
 
 ## History
 <!-- Keep this updated. Earliest to Latest. Format: DD/MM/YYYY HH:MM -->
@@ -86,3 +72,4 @@ In Progress
 08/06/2026 10:15 - Completed Editor Preferences Settings: editorPreferences JSON column on User model (migration applied), EditorPreferencesContext with auto-save, EditorPreferencesForm (font size, tab size, theme dropdowns; word wrap, minimap toggles) added to /settings, Monaco editor reads preferences live (monokai and github-dark themes registered); 12 unit tests; merged to main
 08/06/2026 10:45 - Completed Favorites Page: /favorites route (protected), getFavoriteItems + getFavoriteCollections DB queries (updatedAt desc), FavoritesView compact monospace list (type icon/badge/date rows, two sections with counts), ItemDrawer on item click, collection rows navigate to /collections/[id], empty state, star icon in TopBar, 10 unit tests; merged to main
 08/06/2026 11:10 - Completed Favourite Toggle Button: toggleItemFavorite and toggleCollectionFavorite DB functions and server actions (ownership checked, { success, data, error } pattern); star toggle button on ItemCard (top-right, stops propagation), ItemDrawer action bar (Favorite/Unfavorite label), CollectionCard (star button + dropdown item), CollectionActions on /collections/[id]; local optimistic state + router.refresh() on all surfaces; 12 unit tests; merged to main
+08/06/2026 11:35 - Completed Favourites Sortable Columns: client-side sort by Name/Type/Date on items section and Name/Date on collections section; SortHeader component with active bg-accent highlight and ChevronUp/Down direction indicator; sort toggles asc↔desc on repeat click; defaults to Date descending; no server or DB changes; merged to main
