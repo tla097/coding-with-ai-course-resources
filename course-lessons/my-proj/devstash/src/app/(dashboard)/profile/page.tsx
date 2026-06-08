@@ -1,9 +1,15 @@
+import type { Metadata } from 'next'
 import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 import { getProfileData } from '@/lib/db/profile'
 import UserAvatar from '@/components/ui/user-avatar'
+import EditNameForm from '@/components/profile/EditNameForm'
 
 export const dynamic = 'force-dynamic'
+
+export const metadata: Metadata = {
+  title: 'Profile | DevStash',
+}
 
 export default async function ProfilePage() {
   const session = await auth()
@@ -33,6 +39,9 @@ export default async function ProfilePage() {
           <p className="text-xs text-muted-foreground mt-1">Member since {joinedDate}</p>
         </div>
       </div>
+
+      {/* Edit name */}
+      <EditNameForm currentName={profile.name ?? null} />
 
       {/* Usage stats */}
       <div className="rounded-lg border border-border bg-card p-6 space-y-4">

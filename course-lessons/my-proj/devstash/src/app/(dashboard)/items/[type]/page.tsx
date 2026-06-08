@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { auth } from '@/auth'
 import { getItemsByTypePaginated } from '@/lib/db/items'
@@ -9,6 +10,12 @@ import ItemsWithDrawer from '@/components/items/ItemsWithDrawer'
 import Pagination from '@/components/ui/Pagination'
 
 export const dynamic = 'force-dynamic'
+
+export async function generateMetadata({ params }: { params: Promise<{ type: string }> }): Promise<Metadata> {
+  const { type } = await params
+  const label = type.charAt(0).toUpperCase() + type.slice(1)
+  return { title: `${label} | DevStash` }
+}
 
 interface Props {
   params: Promise<{ type: string }>
@@ -55,8 +62,9 @@ export default async function ItemsTypePage({ params, searchParams }: Props) {
       </div>
 
       {total === 0 ? (
-        <div className="flex h-40 items-center justify-center rounded-lg border border-dashed border-border">
+        <div className="flex h-40 flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-border">
           <p className="text-sm text-muted-foreground">No {type} yet.</p>
+          <p className="text-xs text-muted-foreground/70">Use the <span className="font-medium text-muted-foreground">New Item</span> button to add your first one.</p>
         </div>
       ) : (
         <>

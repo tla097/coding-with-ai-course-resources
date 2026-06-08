@@ -4,6 +4,22 @@ import bcrypt from 'bcryptjs'
 import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
 
+export async function updateName(name: string) {
+  const session = await auth()
+  if (!session?.user?.id) return { success: false, error: 'Not authenticated.' }
+
+  const trimmed = name.trim()
+  if (!trimmed) return { success: false, error: 'Name cannot be empty.' }
+  if (trimmed.length > 100) return { success: false, error: 'Name too long.' }
+
+  await prisma.user.update({
+    where: { id: session.user.id },
+    data: { name: trimmed },
+  })
+
+  return { success: true }
+}
+
 export async function changePassword(
   currentPassword: string,
   newPassword: string,

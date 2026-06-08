@@ -53,6 +53,8 @@ export default function Sidebar({ isOpen, onClose, sidebarData, user }: SidebarP
       )}
 
       <aside
+        aria-hidden={!isOpen || undefined}
+        {...(!isOpen && { inert: '' } as object)}
         className={cn(
           'fixed inset-y-0 left-0 z-50 flex flex-col border-r border-border bg-background transition-all duration-300 overflow-hidden',
           'md:relative md:inset-auto md:z-auto',

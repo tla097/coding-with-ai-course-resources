@@ -1,26 +1,32 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Package, FolderOpen, Star, Bookmark, Pin } from 'lucide-react'
 import CollectionCard from '@/components/dashboard/CollectionCard'
 import ItemsWithDrawer from '@/components/items/ItemsWithDrawer'
-import { getRecentCollections, getCollectionList, getCollectionCount } from '@/lib/db/collections'
+import { getRecentCollections, getCollectionList, getCollectionCount, getFavoriteCollectionCount } from '@/lib/db/collections'
 import { getPinnedItems, getRecentItems, getItemStats } from '@/lib/db/items'
 import { DASHBOARD_COLLECTIONS_LIMIT, DASHBOARD_RECENT_ITEMS_LIMIT } from '@/lib/constants'
 import { auth } from '@/auth'
 
 export const dynamic = 'force-dynamic'
 
+export const metadata: Metadata = {
+  title: 'Dashboard | DevStash',
+}
+
 export default async function DashboardPage() {
   try {
     const session = await auth()
     const userId = session?.user?.id ?? ''
 
-    const [collections, pinnedItems, recentItems, itemStats, collectionList, collectionCount] = await Promise.all([
+    const [collections, pinnedItems, recentItems, itemStats, collectionList, collectionCount, favoriteCollectionCount] = await Promise.all([
       getRecentCollections(userId, DASHBOARD_COLLECTIONS_LIMIT),
       getPinnedItems(userId),
       getRecentItems(userId, DASHBOARD_RECENT_ITEMS_LIMIT),
       getItemStats(userId),
       getCollectionList(userId),
       getCollectionCount(userId),
+      getFavoriteCollectionCount(userId),
     ])
 
     const stats = [
@@ -44,7 +50,7 @@ export default async function DashboardPage() {
       },
       {
         label: 'Favorite Collections',
-        value: collections.filter(c => c.isFavorite).length,
+        value: favoriteCollectionCount,
         icon: Bookmark,
         color: '#10b981',
       },
@@ -93,11 +99,17 @@ export default async function DashboardPage() {
               View all
             </Link>
           </div>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {collections.map(col => (
-              <CollectionCard key={col.id} collection={col} />
-            ))}
-          </div>
+          {collections.length === 0 ? (
+            <div className="flex h-32 items-center justify-center rounded-lg border border-dashed border-border">
+              <p className="text-sm text-muted-foreground">No collections yet — create one using the button above.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {collections.map(col => (
+                <CollectionCard key={col.id} collection={col} />
+              ))}
+            </div>
+          )}
         </section>
 
         {/* Pinned Items */}
@@ -116,7 +128,13 @@ export default async function DashboardPage() {
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-base font-semibold">Recent Items</h2>
           </div>
-          <ItemsWithDrawer items={recentItems} collections={collectionList} />
+          {recentItems.length === 0 ? (
+            <div className="flex h-32 items-center justify-center rounded-lg border border-dashed border-border">
+              <p className="text-sm text-muted-foreground">No items yet — add your first one using the <span className="font-medium">New Item</span> button above.</p>
+            </div>
+          ) : (
+            <ItemsWithDrawer items={recentItems} collections={collectionList} />
+          )}
         </section>
       </div>
     )

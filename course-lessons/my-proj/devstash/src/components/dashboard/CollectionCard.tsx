@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { MoreHorizontal, Pencil, Trash2, Star } from 'lucide-react'
 import { toast } from 'sonner'
 import {
@@ -31,10 +32,6 @@ export default function CollectionCard({ collection }: CollectionCardProps) {
     ? { borderLeftColor: collection.dominantType.color }
     : undefined
 
-  function handleCardClick() {
-    router.push(`/collections/${collection.id}`)
-  }
-
   function handleDropdownClick(e: React.MouseEvent) {
     e.stopPropagation()
   }
@@ -59,14 +56,16 @@ export default function CollectionCard({ collection }: CollectionCardProps) {
   return (
     <>
       <div
-        role="link"
-        tabIndex={0}
-        onClick={handleCardClick}
-        onKeyDown={e => e.key === 'Enter' && handleCardClick()}
-        className="relative flex flex-col gap-3 rounded-lg border border-border border-l-[3px] bg-card p-4 hover:bg-accent/30 transition-colors min-h-[110px] cursor-pointer"
+        className="relative flex flex-col gap-3 rounded-lg border border-border border-l-[3px] bg-card p-4 hover:bg-accent/30 transition-colors min-h-[110px]"
         style={borderStyle}
       >
-        <div className="flex items-start justify-between gap-2">
+        {/* Stretched link covering the card; interactive elements sit above via z-10 */}
+        <Link
+          href={`/collections/${collection.id}`}
+          className="absolute inset-0 z-0 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1"
+          aria-label={`Open ${collection.name}`}
+        />
+        <div className="relative z-10 flex items-start justify-between gap-2">
           <div className="min-w-0 flex-1">
             <p className="font-medium text-sm truncate pr-1">{collection.name}</p>
             <p className="text-xs text-muted-foreground mt-0.5">{collection.itemCount} items</p>

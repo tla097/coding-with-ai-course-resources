@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 
 function GithubIcon({ className }: { className?: string }) {
   return (
@@ -95,27 +96,35 @@ function SignInForm() {
             {error}
           </p>
         )}
-        <div className="space-y-2">
-          <Input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            required
-            autoComplete="email"
-          />
-          <Input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            required
-            autoComplete="current-password"
-          />
-          <div className="flex justify-end">
-            <Link href="/forgot-password" className="text-xs text-muted-foreground underline underline-offset-4 hover:text-foreground">
-              Forgot password?
-            </Link>
+        <div className="space-y-3">
+          <div className="space-y-1.5">
+            <Label htmlFor="signin-email">Email</Label>
+            <Input
+              id="signin-email"
+              type="email"
+              placeholder="you@example.com"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              required
+              autoComplete="email"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="signin-password">Password</Label>
+              <Link href="/forgot-password" className="text-xs text-muted-foreground underline underline-offset-4 hover:text-foreground">
+                Forgot password?
+              </Link>
+            </div>
+            <Input
+              id="signin-password"
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              required
+              autoComplete="current-password"
+            />
           </div>
         </div>
         <Button type="submit" className="w-full" disabled={loading}>

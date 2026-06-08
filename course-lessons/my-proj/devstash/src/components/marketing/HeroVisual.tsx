@@ -152,8 +152,8 @@ export default function HeroVisual() {
     <div className="max-w-6xl mx-auto px-4">
       <div className="flex flex-col md:flex-row items-center gap-6 md:gap-4">
 
-        {/* Chaos box — hidden on mobile */}
-        <div className="hidden md:flex flex-col flex-1 min-w-0">
+        {/* Chaos box */}
+        <div className="flex flex-col flex-1 min-w-0">
           <p className="text-xs text-muted-foreground text-center mb-2">Your knowledge today...</p>
           <div className="rounded-xl border border-border bg-muted/20 overflow-hidden" style={{ height: 320 }}>
             <canvas ref={canvasRef} className="w-full h-full" />

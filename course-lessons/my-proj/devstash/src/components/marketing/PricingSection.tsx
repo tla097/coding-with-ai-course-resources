@@ -24,6 +24,7 @@ export default function PricingSection() {
             <button
               role="switch"
               aria-checked={yearly}
+              aria-label="Toggle between monthly and yearly billing"
               onClick={() => setYearly(!yearly)}
               className={`relative w-11 h-6 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
                 yearly ? 'bg-primary' : 'bg-muted'

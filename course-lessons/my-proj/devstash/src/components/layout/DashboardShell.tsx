@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useLayoutEffect } from 'react'
 import TopBar from '@/components/layout/TopBar'
 import Sidebar from '@/components/layout/Sidebar'
 import CommandPalette from '@/components/search/CommandPalette'
@@ -31,7 +31,7 @@ export default function DashboardShell({ children, sidebarData, searchData, user
   const [drawerItemId, setDrawerItemId] = useState<string | null>(null)
   const [drawerOpen, setDrawerOpen] = useState(false)
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const saved = localStorage.getItem('sidebar-open')
     if (saved !== null) setSidebarOpen(saved === 'true')
   }, [])

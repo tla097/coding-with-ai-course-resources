@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import { Star } from 'lucide-react'
 import { auth } from '@/auth'
 import { getFavoriteItems, getFavoriteCollections } from '@/lib/db/favorites'
@@ -5,6 +6,10 @@ import { getCollectionList } from '@/lib/db/collections'
 import FavoritesView from '@/components/favorites/FavoritesView'
 
 export const dynamic = 'force-dynamic'
+
+export const metadata: Metadata = {
+  title: 'Favorites | DevStash',
+}
 
 export default async function FavoritesPage() {
   const session = await auth()
@@ -34,7 +39,7 @@ export default async function FavoritesPage() {
 
       {total === 0 ? (
         <div className="flex h-40 items-center justify-center rounded-lg border border-dashed border-border">
-          <p className="font-mono text-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             No favorites yet — star items or collections to see them here.
           </p>
         </div>

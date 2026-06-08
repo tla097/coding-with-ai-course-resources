@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Star, Pin, Copy, Pencil, Trash2, FolderOpen, Calendar, Save, X } from 'lucide-react'
+import { Star, Pin, Copy, Pencil, Trash2, FolderOpen, Calendar, CalendarCheck, Save, X } from 'lucide-react'
 import { toast } from 'sonner'
 import {
   Sheet,
@@ -559,7 +559,7 @@ export default function ItemDrawer({ itemId, open, onOpenChange, collections }: 
                         </span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Calendar className="h-3.5 w-3.5 shrink-0" />
+                        <CalendarCheck className="h-3.5 w-3.5 shrink-0" />
                         <span>
                           Updated{' '}
                           {new Date(item.updatedAt).toLocaleDateString('en-US', {

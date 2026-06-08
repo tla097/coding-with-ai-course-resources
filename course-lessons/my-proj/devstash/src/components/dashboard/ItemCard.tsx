@@ -47,9 +47,12 @@ export default function ItemCard({ item, onClick }: ItemCardProps) {
 
   return (
     <div
-      className="flex gap-4 rounded-lg border border-border border-l-[3px] bg-card p-4 hover:bg-accent/20 transition-colors cursor-pointer"
+      role="button"
+      tabIndex={0}
+      className="flex gap-4 rounded-lg border border-border border-l-[3px] bg-card p-4 hover:bg-accent/20 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       style={{ borderLeftColor: item.itemType.color }}
       onClick={onClick}
+      onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick?.() } }}
     >
       {Icon && (
         <div
@@ -71,8 +74,8 @@ export default function ItemCard({ item, onClick }: ItemCardProps) {
             <button
               onClick={handleToggleFavorite}
               disabled={favoriting}
-              className={`p-0.5 rounded transition-colors hover:text-yellow-500 ${isFavorite ? 'text-yellow-500' : 'text-muted-foreground/40 hover:text-yellow-500'}`}
-              title={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+              aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+              className={`flex h-8 w-8 items-center justify-center rounded transition-colors ${isFavorite ? 'text-yellow-500' : 'text-muted-foreground/40 hover:text-yellow-500'}`}
             >
               <Star className={`h-3.5 w-3.5 ${isFavorite ? 'fill-yellow-500' : ''}`} />
             </button>

@@ -118,6 +118,10 @@ export async function getCollectionCount(userId: string): Promise<number> {
   return prisma.collection.count({ where: { userId } })
 }
 
+export async function getFavoriteCollectionCount(userId: string): Promise<number> {
+  return prisma.collection.count({ where: { userId, isFavorite: true } })
+}
+
 export async function getAllCollections(userId: string): Promise<CollectionWithStats[]> {
   const collections = await prisma.collection.findMany({
     where: { userId },

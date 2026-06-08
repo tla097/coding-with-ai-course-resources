@@ -4,6 +4,12 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
 @theme inline {
     --font-heading: var(--font-sans);
     --font-sans: var(--font-sans);
