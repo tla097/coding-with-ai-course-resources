@@ -35,7 +35,8 @@ export const proxy = auth(async function proxy(req) {
   const isProtected =
     req.nextUrl.pathname.startsWith("/dashboard") ||
     req.nextUrl.pathname === "/profile" ||
-    req.nextUrl.pathname === "/settings"
+    req.nextUrl.pathname === "/settings" ||
+    req.nextUrl.pathname === "/favorites"
 
   if (isProtected && !isLoggedIn) {
     return NextResponse.redirect(new URL("/sign-in", req.nextUrl))
@@ -43,5 +44,5 @@ export const proxy = auth(async function proxy(req) {
 })
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/profile", "/settings", "/api/auth/callback/credentials"],
+  matcher: ["/dashboard/:path*", "/profile", "/settings", "/favorites", "/api/auth/callback/credentials"],
 }
