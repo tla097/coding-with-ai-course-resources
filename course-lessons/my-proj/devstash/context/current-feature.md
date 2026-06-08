@@ -1,24 +1,14 @@
-# Current Feature: Pinned Items
+# Current Feature
 
 ## Status
 <!-- Not Started|In Progress|Completed -->
-In Progress
+Not Started
 
 ## Goals
 <!-- Goals & requirements -->
-- Create `toggleItemPin` server action (ownership checked, `{ success, data, error }` pattern)
-- Wire Pin button in ItemDrawer (currently has no `onClick`)
-- Optimistic UI update in ItemDrawer action bar (Pin/Unpin label toggle)
-- Toast notification on success and error
-- Pinned items sort to top of listings (`/items/[type]`, `/collections/[id]`, dashboard recent items)
-- Pin icon on ItemCard remains a static visual indicator (no click handler)
-- Items only — no collection pinning
 
 ## Notes
 <!-- Any extra notes -->
-- Follow the Favourite Button pattern (toggleItemFavorite / toggleCollectionFavorite) for implementation
-- `isPinned` field already exists on the `Item` model in the Prisma schema
-- Pinned items section already exists on the dashboard as a static placeholder — wire it to real data
 
 ## History
 <!-- Keep this updated. Earliest to Latest. Format: DD/MM/YYYY HH:MM -->
@@ -85,3 +75,4 @@ In Progress
 08/06/2026 11:35 - Completed Favourites Sortable Columns: client-side sort by Name/Type/Date on items section and Name/Date on collections section; SortHeader component with active bg-accent highlight and ChevronUp/Down direction indicator; sort toggles asc↔desc on repeat click; defaults to Date descending; no server or DB changes; merged to main
 08/06/2026 12:55 - Started Pinned Items: created feature/pinned-items branch
 08/06/2026 13:00 - Implemented Pinned Items: toggleItemPin DB function and server action (ownership checked, { success, data, error } pattern); Pin button in ItemDrawer wired (optimistic update, Pin/Unpin label, toast on success); pinned items sort to top of /items/[type] and /collections/[id] listings (isPinned desc, createdAt desc); 11 unit tests; build passing
+08/06/2026 13:00 - Completed Pinned Items: toggleItemPin DB function and server action; Pin button wired in ItemDrawer with optimistic UI and toast; pinned items sort to top of type/collection listings; 11 unit tests; merged to main
