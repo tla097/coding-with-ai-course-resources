@@ -278,6 +278,17 @@ export async function deleteItem(id: string, userId: string): Promise<boolean> {
   return true
 }
 
+export async function toggleItemFavorite(id: string, userId: string): Promise<boolean | null> {
+  const item = await prisma.item.findFirst({ where: { id, userId }, select: { isFavorite: true } })
+  if (!item) return null
+  const updated = await prisma.item.update({
+    where: { id },
+    data: { isFavorite: !item.isFavorite },
+    select: { isFavorite: true },
+  })
+  return updated.isFavorite
+}
+
 export async function getItemStats(userId: string) {
   const [total, favorites] = await Promise.all([
     prisma.item.count({ where: { userId } }),

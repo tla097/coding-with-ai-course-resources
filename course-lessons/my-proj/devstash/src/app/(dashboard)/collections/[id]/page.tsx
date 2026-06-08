@@ -56,7 +56,7 @@ export default async function CollectionPage({ params, searchParams }: Props) {
           </div>
         </div>
 
-        <CollectionActions collection={collection} />
+        <CollectionActions collection={{ id: collection.id, name: collection.name, description: collection.description, isFavorite: collection.isFavorite }} />
       </div>
 
       {total === 0 ? (

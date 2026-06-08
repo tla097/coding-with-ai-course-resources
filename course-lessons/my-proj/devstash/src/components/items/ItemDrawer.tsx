@@ -30,7 +30,7 @@ import {
 import { ICON_MAP } from '@/lib/icon-map'
 import CollectionPicker from '@/components/items/CollectionPicker'
 import type { ItemDetail } from '@/lib/db/items'
-import { updateItem, deleteItem } from '@/actions/items'
+import { updateItem, deleteItem, toggleItemFavorite } from '@/actions/items'
 
 interface ItemDetailResponse extends Omit<ItemDetail, 'createdAt' | 'updatedAt'> {
   createdAt: string
@@ -78,6 +78,7 @@ export default function ItemDrawer({ itemId, open, onOpenChange, collections }: 
   })
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [favoriting, setFavoriting] = useState(false)
 
   useEffect(() => {
     if (!itemId || !open) return
@@ -177,6 +178,22 @@ export default function ItemDrawer({ itemId, open, onOpenChange, collections }: 
     }
   }
 
+  async function handleToggleFavorite() {
+    if (!itemId) return
+    setFavoriting(true)
+    try {
+      const result = await toggleItemFavorite(itemId)
+      if (!result.success) {
+        toast.error(typeof result.error === 'string' ? result.error : 'Failed to update favorite.')
+        return
+      }
+      setIsFavorite(result.data.isFavorite)
+      router.refresh()
+    } finally {
+      setFavoriting(false)
+    }
+  }
+
   function handleCopy() {
     if (!item) return
     const text = item.content ?? item.url ?? item.title
@@ -252,11 +269,12 @@ export default function ItemDrawer({ itemId, open, onOpenChange, collections }: 
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => setIsFavorite(f => !f)}
+                    onClick={handleToggleFavorite}
+                    disabled={favoriting}
                     className={isFavorite ? 'text-yellow-500 hover:text-yellow-600' : ''}
                   >
                     <Star className={`h-4 w-4 ${isFavorite ? 'fill-yellow-500' : ''}`} />
-                    Favorite
+                    {isFavorite ? 'Unfavorite' : 'Favorite'}
                   </Button>
                   <Button
                     variant="ghost"

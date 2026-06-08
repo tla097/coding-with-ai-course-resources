@@ -6,6 +6,7 @@ import {
   createItem as dbCreateItem,
   updateItem as dbUpdateItem,
   deleteItem as dbDeleteItem,
+  toggleItemFavorite as dbToggleItemFavorite,
 } from '@/lib/db/items'
 
 const updateItemSchema = z.object({
@@ -90,5 +91,18 @@ export async function deleteItem(itemId: string) {
     return { success: true as const }
   } catch {
     return { success: false as const, error: 'Failed to delete item.' }
+  }
+}
+
+export async function toggleItemFavorite(itemId: string) {
+  const session = await auth()
+  if (!session?.user?.id) return { success: false as const, error: 'Not authenticated.' }
+
+  try {
+    const isFavorite = await dbToggleItemFavorite(itemId, session.user.id)
+    if (isFavorite === null) return { success: false as const, error: 'Item not found.' }
+    return { success: true as const, data: { isFavorite } }
+  } catch {
+    return { success: false as const, error: 'Failed to update favorite.' }
   }
 }

@@ -1,14 +1,25 @@
-# Current Feature
+# Current Feature: Favourite Toggle Button
 
 ## Status
-<!-- Not Started|In Progress|Completed -->
-Not Started
+In Progress
 
 ## Goals
-<!-- Goals & requirements -->
+- Favourite toggle button on ItemCard that toggles `isFavorite` on the item with visual filled/outline star state
+- Favourite toggle button in ItemDrawer action bar that toggles `isFavorite` on the item with visual filled/outline star state
+- Favourite toggle button on CollectionCard that toggles `isFavorite` on the collection with visual filled/outline star state
+- Favourite toggle button on the collection page (/collections/[id]) header area that toggles `isFavorite` on the collection
+- `toggleItemFavorite` server action in src/actions/items.ts (auth check, ownership check, { success, data, error } pattern)
+- `toggleCollectionFavorite` server action in src/actions/collections.ts (auth check, ownership check, { success, data, error } pattern)
+- Toast notification on success/failure
+- router.refresh() after toggle to sync all views including sidebar favorites list
+- Unit tests for both server actions
 
 ## Notes
-<!-- Any extra notes -->
+- `isFavorite Boolean @default(false)` already exists on both Item and Collection models — no migration needed
+- CollectionActions component and ItemDrawer already have placeholder Favourite buttons — audit current state before implementing
+- Drawer already listed Favorite in the action bar per history (04/06/2026 16:25), CollectionActions had a Favorite button per history (05/06/2026 15:15) — check if these are wired up or placeholders
+- Use a Star icon (filled vs outline) to indicate favorited state
+- Button should be visually distinct (yellow/amber fill when active)
 
 ## History
 <!-- Keep this updated. Earliest to Latest. Format: DD/MM/YYYY HH:MM -->

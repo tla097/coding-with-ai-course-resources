@@ -155,3 +155,14 @@ export async function deleteCollection(id: string, userId: string) {
     where: { id, userId },
   })
 }
+
+export async function toggleCollectionFavorite(id: string, userId: string): Promise<boolean | null> {
+  const collection = await prisma.collection.findFirst({ where: { id, userId }, select: { isFavorite: true } })
+  if (!collection) return null
+  const updated = await prisma.collection.update({
+    where: { id },
+    data: { isFavorite: !collection.isFavorite },
+    select: { isFavorite: true },
+  })
+  return updated.isFavorite
+}
