@@ -6,15 +6,17 @@ vi.mock('@/lib/db/items', () => ({
   updateItem: vi.fn(),
   deleteItem: vi.fn(),
   toggleItemFavorite: vi.fn(),
+  toggleItemPin: vi.fn(),
 }))
 
-import { createItem, updateItem, deleteItem, toggleItemFavorite } from '@/actions/items'
+import { createItem, updateItem, deleteItem, toggleItemFavorite, toggleItemPin } from '@/actions/items'
 import { auth } from '@/auth'
 import {
   createItem as dbCreateItem,
   updateItem as dbUpdateItem,
   deleteItem as dbDeleteItem,
   toggleItemFavorite as dbToggleItemFavorite,
+  toggleItemPin as dbToggleItemPin,
 } from '@/lib/db/items'
 
 const mockAuth = vi.mocked(auth)
@@ -22,6 +24,7 @@ const mockDbCreate = vi.mocked(dbCreateItem)
 const mockDbUpdate = vi.mocked(dbUpdateItem)
 const mockDbDelete = vi.mocked(dbDeleteItem)
 const mockDbToggleFavorite = vi.mocked(dbToggleItemFavorite)
+const mockDbTogglePin = vi.mocked(dbToggleItemPin)
 
 const mockSession = { user: { id: 'user-1' } }
 
@@ -453,5 +456,51 @@ describe('toggleItemFavorite server action', () => {
     mockDbToggleFavorite.mockRejectedValue(new Error('DB error'))
     const result = await toggleItemFavorite('item-1')
     expect(result).toEqual({ success: false, error: 'Failed to update favorite.' })
+  })
+})
+
+describe('toggleItemPin server action', () => {
+  beforeEach(() => vi.clearAllMocks())
+
+  it('returns not authenticated when no session', async () => {
+    mockAuth.mockResolvedValue(null)
+    const result = await toggleItemPin('item-1')
+    expect(result).toEqual({ success: false, error: 'Not authenticated.' })
+    expect(mockDbTogglePin).not.toHaveBeenCalled()
+  })
+
+  it('returns updated isPinned true on success', async () => {
+    mockAuth.mockResolvedValue(mockSession as never)
+    mockDbTogglePin.mockResolvedValue(true)
+    const result = await toggleItemPin('item-1')
+    expect(result).toEqual({ success: true, data: { isPinned: true } })
+  })
+
+  it('returns updated isPinned false on success', async () => {
+    mockAuth.mockResolvedValue(mockSession as never)
+    mockDbTogglePin.mockResolvedValue(false)
+    const result = await toggleItemPin('item-1')
+    expect(result).toEqual({ success: true, data: { isPinned: false } })
+  })
+
+  it('returns item not found when db returns null', async () => {
+    mockAuth.mockResolvedValue(mockSession as never)
+    mockDbTogglePin.mockResolvedValue(null)
+    const result = await toggleItemPin('item-1')
+    expect(result).toEqual({ success: false, error: 'Item not found.' })
+  })
+
+  it('passes itemId and userId to db', async () => {
+    mockAuth.mockResolvedValue(mockSession as never)
+    mockDbTogglePin.mockResolvedValue(true)
+    await toggleItemPin('item-1')
+    expect(mockDbTogglePin).toHaveBeenCalledWith('item-1', 'user-1')
+  })
+
+  it('returns error when db throws', async () => {
+    mockAuth.mockResolvedValue(mockSession as never)
+    mockDbTogglePin.mockRejectedValue(new Error('DB error'))
+    const result = await toggleItemPin('item-1')
+    expect(result).toEqual({ success: false, error: 'Failed to update pin.' })
   })
 })
