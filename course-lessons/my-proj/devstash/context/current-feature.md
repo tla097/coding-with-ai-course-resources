@@ -1,30 +1,14 @@
-# Current Feature: Marketing Homepage (Next.js)
+# Current Feature
 
 ## Status
 <!-- Not Started|In Progress|Completed -->
-In Progress
+Not Started
 
 ## Goals
-- Build `src/app/page.tsx` as a public, statically rendered marketing page
-- Authenticated users redirected to `/dashboard`
-- Navbar: sticky, scroll bg, mobile hamburger, Sign In + Get Started buttons
-- Hero: text section (server) + HeroVisual with canvas chaos animation and dashboard mockup (client)
-- Features grid: 6 feature cards, server component, `id="features"`
-- AI section: two-column layout with code editor mockup, server component
-- Pricing: monthly/yearly toggle, Free and Pro cards, `id="pricing"`, client component
-- CTA section: gradient background, server component
-- Footer: brand + 3 link columns + copyright, server component
+<!-- Goals & requirements -->
 
 ## Notes
-- Three new component files: `src/components/marketing/Navbar.tsx`, `HeroVisual.tsx`, `PricingSection.tsx`
-- `src/app/page.tsx` is the server root; only client sections get `'use client'`
-- Chaos canvas: bouncing labelled bubbles (Snippets, Prompts, Commands, Notes, Links, Files) with mouse repel
-- Dashboard mockup in HeroVisual is static HTML/Tailwind (no canvas)
-- HeroVisual hides chaos box on small screens; stacks vertically on mobile
-- Pricing: Free ($0), Pro ($8/mo or $6/mo billed yearly with "Save 25%" badge)
-- All buttons use ShadCN `Button`; Pro badge uses ShadCN `Badge`
-- Gradient text on hero headline via `bg-gradient-to-r` + `bg-clip-text text-transparent`
-- Use prototype at `prototypes/homepage/` as visual reference (index.html, styles.css, script.js)
+<!-- Any extra notes -->
 
 ## History
 <!-- Keep this updated. Earliest to Latest. Format: DD/MM/YYYY HH:MM -->
@@ -93,3 +77,4 @@ In Progress
 08/06/2026 13:00 - Implemented Pinned Items: toggleItemPin DB function and server action (ownership checked, { success, data, error } pattern); Pin button in ItemDrawer wired (optimistic update, Pin/Unpin label, toast on success); pinned items sort to top of /items/[type] and /collections/[id] listings (isPinned desc, createdAt desc); 11 unit tests; build passing
 08/06/2026 13:00 - Completed Pinned Items: toggleItemPin DB function and server action; Pin button wired in ItemDrawer with optimistic UI and toast; pinned items sort to top of type/collection listings; 11 unit tests; merged to main
 08/06/2026 13:30 - Completed Marketing Homepage: standalone prototype at prototypes/homepage/ (index.html, styles.css, script.js); navbar, hero chaos/arrow/dashboard visual with animated bouncing icons and mouse repel, features grid, AI section, pricing with monthly/yearly toggle, CTA, footer; scroll fade-in animations; responsive mobile layout; merged to main
+08/06/2026 13:50 - Completed Marketing Homepage (Next.js): src/app/page.tsx (server, auth redirect), Navbar.tsx (client, sticky scroll bg, mobile hamburger), HeroVisual.tsx (client, chaos canvas with labelled bubbles + mouse repel, arrow, static dashboard mockup), PricingSection.tsx (client, monthly/yearly toggle, $8/$6 Pro pricing); Features grid, AI section with code editor mockup, CTA, Footer all inline server components; build passing, 165 tests passing; merged to main
