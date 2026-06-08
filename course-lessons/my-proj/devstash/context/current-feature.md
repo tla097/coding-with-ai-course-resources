@@ -1,14 +1,27 @@
-# Current Feature
+# Current Feature: Stripe Integration Phase 2 — Webhooks, Feature Gating & UI
 
 ## Status
-<!-- Not Started|In Progress|Completed -->
-Not Started
+In Progress
 
 ## Goals
-<!-- Goals & requirements -->
+- Stripe webhook handler at `/api/webhooks/stripe` handling `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`
+- Checkout session API route at `/api/stripe/checkout` — creates/reuses Stripe Customer, validates price IDs server-side
+- Billing portal API route at `/api/stripe/portal` — opens Stripe Customer Portal for subscription management
+- `BillingSection` component on settings page — upgrade buttons (monthly/yearly) for free users, manage subscription for Pro users
+- `UpgradeToast` client component — fires success toast on `?upgrade=success` redirect
+- Settings page updated to fetch `isPro` + `stripeCustomerId`, render `BillingSection`, handle `?upgrade=success`
+- Rename `STRIPE_PRICE_ID_MONTHLY` → `NEXT_PUBLIC_STRIPE_PRICE_ID_MONTHLY` and `STRIPE_PRICE_ID_YEARLY` → `NEXT_PUBLIC_STRIPE_PRICE_ID_YEARLY`
+- Add `STRIPE_WEBHOOK_SECRET` env var
 
 ## Notes
-<!-- Any extra notes -->
+- Webhook signature must be verified (reject unsigned with 400)
+- Webhook handler must be idempotent — same event twice must not corrupt data
+- Webhook path `/api/webhooks/stripe` must NOT be behind auth proxy (no change to proxy.ts needed)
+- Checkout creates Stripe Customer on first checkout, reuses `stripeCustomerId` on subsequent
+- After successful checkout, redirect to `/settings?upgrade=success`
+- Billing portal only available to users with `stripeCustomerId`
+- Price IDs from client validated server-side against env vars — unknown price IDs rejected with 400
+- No unit tests in Phase 2 — webhook/checkout routes require real Stripe calls; tested via Stripe CLI
 
 ## History
 <!-- Keep this updated. Earliest to Latest. Format: DD/MM/YYYY HH:MM -->
