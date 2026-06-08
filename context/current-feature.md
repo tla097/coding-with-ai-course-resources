@@ -1,20 +1,70 @@
-# Current Feature
-
-<!-- Feature Name -->
+# Current Feature: UI Fixes from Accessibility and Quality Review
 
 ## Status
 
-<!-- Not Started|In Progress|Completed -->
-
-Not Started
+Completed
 
 ## Goals
 
-<!-- Goals & requirements -->
+### Critical
+- Add `<Label htmlFor>` elements to all auth form inputs (sign-in and register pages) — placeholders alone fail WCAG 1.3.1
+- Increase favorite star button touch target on ItemCard to meet WCAG minimum (44×44px)
+- Make ItemCard keyboard accessible: add `role="button"`, `tabIndex={0}`, and `onKeyDown` handler
+
+### High
+- Fix Navbar transparent background at scroll-zero — apply base `bg-background` regardless of scroll state
+- Add DevStash logo and home link to auth layout so branding appears on sign-in/register pages
+- Add `aria-label` to sidebar toggle button in TopBar
+- Fix mobile topbar overflow — collapse search bar to icon on small screens
+- Add `aria-hidden` and remove from tab order when sidebar is collapsed (`w-0`)
+- Fix AlertDialog delete trigger in ItemDrawer — replace invalid `render=` prop with correct Radix `asChild` pattern
+
+### Medium
+- Show hero "chaos" visual on mobile (currently `hidden md:flex`) or replace with mobile-appropriate layout
+- Fix misleading "Favorite Collections" stat — use a dedicated count query instead of filtering capped recent collections
+- Add empty state with CTA to dashboard Collections section when user has no collections
+- Add empty state to dashboard Recent Items section when array is empty
+- Add "Create" CTA to items list view empty state (currently just "No {type} yet." with no action)
+- Add `aria-pressed` / `aria-selected` to type selector buttons in NewItemDialog (color alone is insufficient)
+- Isolate Delete Account in a "Danger Zone" card with red border on settings page
+
+### Low / Polish
+- Add `aria-label` to pricing toggle switch (`PricingSection.tsx`)
+- Add `scroll-behavior: smooth` to `<html>` for anchor links (`#features`, `#pricing`)
+- Add GitHub OAuth button to register page (parity with sign-in)
+- Add minimum password length hint on register form
+- Fix SSR hydration layout shift when stored `sidebarOpen` differs from default
+- Make profile page editable (name field at minimum)
+- Add `<html lang="en">` to root layout
+- Add per-page `<title>` metadata to dashboard pages (Dashboard, Snippets, Prompts, etc.)
+- Replace `role="link"` + div on CollectionCard with `<Link>` wrapper for real link semantics
+- Remove `font-mono` from favorites page empty state instructional copy
+- Add distinct icon for "Updated" date in ItemDrawer detail section (currently same `Calendar` icon as "Created")
 
 ## Notes
 
-<!-- Any extra notes -->
+All issues identified by a UI subagent code review of the DevStash codebase. No Playwright browser session was used — all findings are from static code analysis. Fixes should be applied across these files:
+
+- `src/app/(auth)/layout.tsx` — branding
+- `src/app/(auth)/sign-in/page.tsx` — input labels
+- `src/app/(auth)/register/page.tsx` — input labels, GitHub button, password hint
+- `src/app/(dashboard)/dashboard/page.tsx` — stat fix, empty states
+- `src/app/(dashboard)/items/[type]/page.tsx` — empty state CTA
+- `src/app/(dashboard)/profile/page.tsx` — editable name
+- `src/app/(dashboard)/settings/page.tsx` — danger zone card
+- `src/app/(dashboard)/favorites/page.tsx` — remove font-mono from copy
+- `src/app/layout.tsx` — lang attribute, metadata
+- `src/components/layout/Navbar.tsx` — scroll-zero background
+- `src/components/layout/TopBar.tsx` — aria-label, mobile search collapse
+- `src/components/layout/Sidebar.tsx` — aria-hidden when collapsed
+- `src/components/layout/DashboardShell.tsx` — SSR hydration fix
+- `src/components/dashboard/ItemCard.tsx` — keyboard access, star button size
+- `src/components/dashboard/CollectionCard.tsx` — Link wrapper
+- `src/components/items/ItemDrawer.tsx` — AlertDialog fix, date icon
+- `src/components/items/NewItemDialog.tsx` — aria-pressed on type selector
+- `src/components/marketing/Navbar.tsx` — transparent background fix
+- `src/components/marketing/HeroVisual.tsx` — mobile visibility
+- `src/components/marketing/PricingSection.tsx` — aria-label on toggle
 
 ## History
 
@@ -65,3 +115,4 @@ Not Started
 04/06/2026 16:25 - Completed Item Drawer: shadcn Sheet drawer opens on ItemCard click, fetches full item via GET /api/items/[id] with auth check; skeleton loading state; action bar (Favorite, Pin, Copy, Edit, Delete); detail sections (description, content, URL, tags, collections, dates); ItemsWithDrawer client wrapper manages state on server component pages; unit tests for getItemById; merged to main
 04/06/2026 16:40 - Completed Item Drawer Edit Mode: pencil button toggles inline edit form; title/description/tags for all types; content/language/URL shown per type; Save/Cancel replace action bar; updateItem server action (Zod v4 validated, ownership checked, { success, data, error } pattern); updateItem DB query (disconnect-all/connect-or-create tags); router.refresh() on save; 12 unit tests; merged to main
 04/06/2026 16:55 - Completed Item Delete: trash icon in drawer opens Shadcn AlertDialog confirmation; deleteItem server action (ownership checked, { success, error } pattern); deleteItem DB query; sonner toast on success/failure; drawer closes and router.refresh() after delete; 9 unit tests; merged to main
+08/06/2026 12:00 - Completed UI Accessibility and Quality Fixes: 36 issues addressed across auth pages, dashboard, items, layout, marketing, and profile; added EditNameForm component and updateName server action; getFavoriteCollectionCount DB query; CollectionCard stretched-link pattern; build passing; merged to main
