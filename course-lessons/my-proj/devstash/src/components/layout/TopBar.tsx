@@ -2,9 +2,10 @@
 
 import Link from 'next/link'
 import { PanelLeft, Search, Star } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
 import NewItemDialog from '@/components/items/NewItemDialog'
 import NewCollectionDialog from '@/components/collections/NewCollectionDialog'
+import { cn } from '@/lib/utils'
 import type { SidebarItemType } from '@/lib/db/sidebar'
 
 interface TopBarProps {
@@ -12,9 +13,10 @@ interface TopBarProps {
   itemTypes: SidebarItemType[]
   collections: { id: string; name: string }[]
   onSearchClick: () => void
+  isPro?: boolean
 }
 
-export default function TopBar({ onMenuToggle, itemTypes, collections, onSearchClick }: TopBarProps) {
+export default function TopBar({ onMenuToggle, itemTypes, collections, onSearchClick, isPro }: TopBarProps) {
   return (
     <header className="flex items-center gap-2 border-b border-border px-4 py-3">
       <Button variant="ghost" size="icon" onClick={onMenuToggle} aria-label="Toggle sidebar" className="shrink-0">
@@ -46,6 +48,11 @@ export default function TopBar({ onMenuToggle, itemTypes, collections, onSearchC
         <Search className="h-5 w-5" />
       </button>
       <div className="flex flex-1 items-center justify-end gap-2">
+        {!isPro && (
+          <Link href="/upgrade" className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), 'text-muted-foreground text-xs')}>
+            Upgrade
+          </Link>
+        )}
         <Link
           href="/favorites"
           aria-label="Favorites"

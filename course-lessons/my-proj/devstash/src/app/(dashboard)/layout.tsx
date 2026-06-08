@@ -31,7 +31,7 @@ export default async function DashboardLayout({
       getEditorPreferences(),
     ])
     return (
-      <DashboardShell sidebarData={sidebarData} searchData={searchData} user={session?.user ?? null} editorPreferences={editorPreferences}>
+      <DashboardShell sidebarData={sidebarData} searchData={searchData} user={session?.user ?? null} editorPreferences={editorPreferences} isPro={session?.user?.isPro ?? false}>
         {children}
       </DashboardShell>
     )

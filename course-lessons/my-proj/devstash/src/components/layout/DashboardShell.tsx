@@ -23,9 +23,10 @@ interface Props {
   searchData: SearchData
   user: User | null
   editorPreferences: EditorPreferences
+  isPro?: boolean
 }
 
-export default function DashboardShell({ children, sidebarData, searchData, user, editorPreferences }: Props) {
+export default function DashboardShell({ children, sidebarData, searchData, user, editorPreferences, isPro }: Props) {
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [paletteOpen, setPaletteOpen] = useState(false)
   const [drawerItemId, setDrawerItemId] = useState<string | null>(null)
@@ -73,6 +74,7 @@ export default function DashboardShell({ children, sidebarData, searchData, user
         itemTypes={sidebarData.itemTypes}
         collections={sidebarData.allCollections}
         onSearchClick={() => setPaletteOpen(true)}
+        isPro={isPro}
       />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar

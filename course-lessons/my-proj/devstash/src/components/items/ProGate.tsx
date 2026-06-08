@@ -1,9 +1,6 @@
-'use client'
-
-import { useState } from 'react'
-import { toast } from 'sonner'
+import Link from 'next/link'
 import { Crown, Lock } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { buttonVariants } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 
 interface ProGateProps {
@@ -12,29 +9,6 @@ interface ProGateProps {
 }
 
 export default function ProGate({ type, color }: ProGateProps) {
-  const [loading, setLoading] = useState(false)
-
-  async function handleUpgrade(priceId: string) {
-    setLoading(true)
-    try {
-      const res = await fetch('/api/stripe/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ priceId }),
-      })
-      const data = await res.json()
-      if (data.url) {
-        window.location.href = data.url
-      } else {
-        toast.error('Failed to start checkout')
-      }
-    } catch {
-      toast.error('Something went wrong')
-    } finally {
-      setLoading(false)
-    }
-  }
-
   return (
     <div className="mx-auto w-full max-w-6xl space-y-6">
       <div className="flex items-center gap-3">
@@ -69,24 +43,9 @@ export default function ProGate({ type, color }: ProGateProps) {
             File and image storage is a Pro feature. Upgrade to upload, organise, and access your files directly in DevStash.
           </p>
         </div>
-        <div className="flex flex-wrap justify-center gap-3">
-          <Button
-            size="sm"
-            onClick={() => handleUpgrade(process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_MONTHLY!)}
-            disabled={loading}
-          >
-            Upgrade Monthly — $8/mo
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handleUpgrade(process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_YEARLY!)}
-            disabled={loading}
-          >
-            Upgrade Yearly — $72/yr
-            <span className="ml-2 text-xs text-emerald-400">Save 25%</span>
-          </Button>
-        </div>
+        <Link href="/upgrade" className={buttonVariants({ size: 'sm' })}>
+          View upgrade options
+        </Link>
       </div>
     </div>
   )

@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import { auth } from '@/auth'
 import { getItemsByTypePaginated } from '@/lib/db/items'
 import { getCollectionList } from '@/lib/db/collections'
@@ -8,7 +8,6 @@ import { ITEMS_PER_PAGE } from '@/lib/constants'
 import { prisma } from '@/lib/prisma'
 import ItemsWithDrawer from '@/components/items/ItemsWithDrawer'
 import Pagination from '@/components/ui/Pagination'
-import ProGate from '@/components/items/ProGate'
 
 const PRO_ONLY_TYPES = new Set(['file', 'image'])
 
@@ -40,7 +39,7 @@ export default async function ItemsTypePage({ params, searchParams }: Props) {
   const userId = session?.user?.id ?? ''
 
   if (PRO_ONLY_TYPES.has(typeName) && !session?.user?.isPro) {
-    return <ProGate type={type} color={itemType.color} />
+    redirect('/upgrade')
   }
 
   const [{ items, total }, collectionList] = await Promise.all([
