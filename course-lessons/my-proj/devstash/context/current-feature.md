@@ -1,14 +1,30 @@
-# Current Feature
+# Current Feature: Marketing Homepage (Next.js)
 
 ## Status
 <!-- Not Started|In Progress|Completed -->
-Not Started
+In Progress
 
 ## Goals
-<!-- Goals & requirements -->
+- Build `src/app/page.tsx` as a public, statically rendered marketing page
+- Authenticated users redirected to `/dashboard`
+- Navbar: sticky, scroll bg, mobile hamburger, Sign In + Get Started buttons
+- Hero: text section (server) + HeroVisual with canvas chaos animation and dashboard mockup (client)
+- Features grid: 6 feature cards, server component, `id="features"`
+- AI section: two-column layout with code editor mockup, server component
+- Pricing: monthly/yearly toggle, Free and Pro cards, `id="pricing"`, client component
+- CTA section: gradient background, server component
+- Footer: brand + 3 link columns + copyright, server component
 
 ## Notes
-<!-- Any extra notes -->
+- Three new component files: `src/components/marketing/Navbar.tsx`, `HeroVisual.tsx`, `PricingSection.tsx`
+- `src/app/page.tsx` is the server root; only client sections get `'use client'`
+- Chaos canvas: bouncing labelled bubbles (Snippets, Prompts, Commands, Notes, Links, Files) with mouse repel
+- Dashboard mockup in HeroVisual is static HTML/Tailwind (no canvas)
+- HeroVisual hides chaos box on small screens; stacks vertically on mobile
+- Pricing: Free ($0), Pro ($8/mo or $6/mo billed yearly with "Save 25%" badge)
+- All buttons use ShadCN `Button`; Pro badge uses ShadCN `Badge`
+- Gradient text on hero headline via `bg-gradient-to-r` + `bg-clip-text text-transparent`
+- Use prototype at `prototypes/homepage/` as visual reference (index.html, styles.css, script.js)
 
 ## History
 <!-- Keep this updated. Earliest to Latest. Format: DD/MM/YYYY HH:MM -->
