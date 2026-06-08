@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { getProfileData } from '@/lib/db/profile'
 import ChangePasswordForm from '@/components/profile/ChangePasswordForm'
 import DeleteAccountButton from '@/components/profile/DeleteAccountButton'
+import EditorPreferencesForm from '@/components/settings/EditorPreferencesForm'
 
 export const dynamic = 'force-dynamic'
 
@@ -18,6 +19,8 @@ export default async function SettingsPage() {
         <h1 className="text-2xl font-bold tracking-tight">Settings</h1>
         <p className="text-sm text-muted-foreground mt-1">Manage your account settings</p>
       </div>
+
+      <EditorPreferencesForm />
 
       {profile.hasPassword && <ChangePasswordForm />}
 
