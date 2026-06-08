@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { PanelLeft, Search } from 'lucide-react'
+import { PanelLeft, Search, Star } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import NewItemDialog from '@/components/items/NewItemDialog'
 import NewCollectionDialog from '@/components/collections/NewCollectionDialog'
@@ -35,6 +35,13 @@ export default function TopBar({ onMenuToggle, itemTypes, collections, onSearchC
         </kbd>
       </button>
       <div className="flex flex-1 items-center justify-end gap-2">
+        <Link
+          href="/favorites"
+          aria-label="Favorites"
+          className="inline-flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+        >
+          <Star className="h-5 w-5" />
+        </Link>
         <NewCollectionDialog />
         <NewItemDialog itemTypes={itemTypes} collections={collections} />
       </div>
