@@ -2,7 +2,8 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { MoreHorizontal, Pencil, Trash2, Heart, Star } from 'lucide-react'
+import { MoreHorizontal, Pencil, Trash2, Star } from 'lucide-react'
+import { toast } from 'sonner'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,6 +14,7 @@ import type { CollectionWithStats } from '@/lib/db/collections'
 import { ICON_MAP } from '@/lib/icon-map'
 import EditCollectionDialog from '@/components/collections/EditCollectionDialog'
 import DeleteCollectionDialog from '@/components/collections/DeleteCollectionDialog'
+import { toggleCollectionFavorite } from '@/actions/collections'
 
 interface CollectionCardProps {
   collection: CollectionWithStats
@@ -22,6 +24,8 @@ export default function CollectionCard({ collection }: CollectionCardProps) {
   const router = useRouter()
   const [editOpen, setEditOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
+  const [isFavorite, setIsFavorite] = useState(collection.isFavorite)
+  const [favoriting, setFavoriting] = useState(false)
 
   const borderStyle = collection.dominantType
     ? { borderLeftColor: collection.dominantType.color }
@@ -33,6 +37,23 @@ export default function CollectionCard({ collection }: CollectionCardProps) {
 
   function handleDropdownClick(e: React.MouseEvent) {
     e.stopPropagation()
+  }
+
+  async function handleToggleFavorite(e: React.MouseEvent) {
+    e.stopPropagation()
+    if (favoriting) return
+    setFavoriting(true)
+    try {
+      const result = await toggleCollectionFavorite(collection.id)
+      if (!result.success) {
+        toast.error(typeof result.error === 'string' ? result.error : 'Failed to update favorite.')
+        return
+      }
+      setIsFavorite(result.data.isFavorite)
+      router.refresh()
+    } finally {
+      setFavoriting(false)
+    }
   }
 
   return (
@@ -51,9 +72,14 @@ export default function CollectionCard({ collection }: CollectionCardProps) {
             <p className="text-xs text-muted-foreground mt-0.5">{collection.itemCount} items</p>
           </div>
           <div className="flex items-center gap-1 shrink-0" onClick={handleDropdownClick}>
-            {collection.isFavorite && (
-              <Star className="h-4 w-4 fill-yellow-500 text-yellow-500" />
-            )}
+            <button
+              onClick={handleToggleFavorite}
+              disabled={favoriting}
+              className={`p-0.5 rounded transition-colors ${isFavorite ? 'text-yellow-500' : 'text-muted-foreground/40 hover:text-yellow-500'}`}
+              title={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+            >
+              <Star className={`h-4 w-4 ${isFavorite ? 'fill-yellow-500' : ''}`} />
+            </button>
             <DropdownMenu>
               <DropdownMenuTrigger
                 className="flex h-6 w-6 items-center justify-center rounded hover:bg-accent transition-colors"
@@ -70,9 +96,9 @@ export default function CollectionCard({ collection }: CollectionCardProps) {
                   <Trash2 className="h-4 w-4 mr-2" />
                   Delete
                 </DropdownMenuItem>
-                <DropdownMenuItem disabled>
-                  <Heart className="h-4 w-4 mr-2" />
-                  Favorite
+                <DropdownMenuItem onClick={handleToggleFavorite} disabled={favoriting}>
+                  <Star className={`h-4 w-4 mr-2 ${isFavorite ? 'fill-yellow-500 text-yellow-500' : ''}`} />
+                  {isFavorite ? 'Unfavorite' : 'Favorite'}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

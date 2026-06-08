@@ -1,8 +1,12 @@
 'use client'
 
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Star, Pin } from 'lucide-react'
+import { toast } from 'sonner'
 import type { ItemWithType } from '@/lib/db/items'
 import { ICON_MAP } from '@/lib/icon-map'
+import { toggleItemFavorite } from '@/actions/items'
 
 interface ItemCardProps {
   item: ItemWithType
@@ -10,12 +14,32 @@ interface ItemCardProps {
 }
 
 export default function ItemCard({ item, onClick }: ItemCardProps) {
+  const router = useRouter()
   const Icon = ICON_MAP[item.itemType.icon] ?? null
+  const [isFavorite, setIsFavorite] = useState(item.isFavorite)
+  const [favoriting, setFavoriting] = useState(false)
 
   const formattedDate = new Date(item.createdAt).toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
   })
+
+  async function handleToggleFavorite(e: React.MouseEvent) {
+    e.stopPropagation()
+    if (favoriting) return
+    setFavoriting(true)
+    try {
+      const result = await toggleItemFavorite(item.id)
+      if (!result.success) {
+        toast.error(typeof result.error === 'string' ? result.error : 'Failed to update favorite.')
+        return
+      }
+      setIsFavorite(result.data.isFavorite)
+      router.refresh()
+    } finally {
+      setFavoriting(false)
+    }
+  }
 
   return (
     <div
@@ -35,16 +59,23 @@ export default function ItemCard({ item, onClick }: ItemCardProps) {
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-center gap-1.5 min-w-0">
             <span className="font-medium text-sm truncate">{item.title}</span>
-            {item.isFavorite && (
-              <Star className="h-3.5 w-3.5 shrink-0 fill-yellow-500 text-yellow-500" />
-            )}
             {item.isPinned && (
               <Pin className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
             )}
           </div>
-          <span className="text-xs text-muted-foreground shrink-0 whitespace-nowrap">
-            {formattedDate}
-          </span>
+          <div className="flex items-center gap-1.5 shrink-0">
+            <button
+              onClick={handleToggleFavorite}
+              disabled={favoriting}
+              className={`p-0.5 rounded transition-colors hover:text-yellow-500 ${isFavorite ? 'text-yellow-500' : 'text-muted-foreground/40 hover:text-yellow-500'}`}
+              title={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+            >
+              <Star className={`h-3.5 w-3.5 ${isFavorite ? 'fill-yellow-500' : ''}`} />
+            </button>
+            <span className="text-xs text-muted-foreground whitespace-nowrap">
+              {formattedDate}
+            </span>
+          </div>
         </div>
         {item.description && (
           <p className="mt-0.5 text-xs text-muted-foreground line-clamp-1">{item.description}</p>

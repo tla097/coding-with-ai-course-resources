@@ -5,20 +5,23 @@ vi.mock('@/lib/db/items', () => ({
   createItem: vi.fn(),
   updateItem: vi.fn(),
   deleteItem: vi.fn(),
+  toggleItemFavorite: vi.fn(),
 }))
 
-import { createItem, updateItem, deleteItem } from '@/actions/items'
+import { createItem, updateItem, deleteItem, toggleItemFavorite } from '@/actions/items'
 import { auth } from '@/auth'
 import {
   createItem as dbCreateItem,
   updateItem as dbUpdateItem,
   deleteItem as dbDeleteItem,
+  toggleItemFavorite as dbToggleItemFavorite,
 } from '@/lib/db/items'
 
 const mockAuth = vi.mocked(auth)
 const mockDbCreate = vi.mocked(dbCreateItem)
 const mockDbUpdate = vi.mocked(dbUpdateItem)
 const mockDbDelete = vi.mocked(dbDeleteItem)
+const mockDbToggleFavorite = vi.mocked(dbToggleItemFavorite)
 
 const mockSession = { user: { id: 'user-1' } }
 
@@ -404,5 +407,51 @@ describe('updateItem server action', () => {
       'user-1',
       expect.objectContaining({ collectionIds: [] }),
     )
+  })
+})
+
+describe('toggleItemFavorite server action', () => {
+  beforeEach(() => vi.clearAllMocks())
+
+  it('returns not authenticated when no session', async () => {
+    mockAuth.mockResolvedValue(null)
+    const result = await toggleItemFavorite('item-1')
+    expect(result).toEqual({ success: false, error: 'Not authenticated.' })
+    expect(mockDbToggleFavorite).not.toHaveBeenCalled()
+  })
+
+  it('returns updated isFavorite true on success', async () => {
+    mockAuth.mockResolvedValue(mockSession as never)
+    mockDbToggleFavorite.mockResolvedValue(true)
+    const result = await toggleItemFavorite('item-1')
+    expect(result).toEqual({ success: true, data: { isFavorite: true } })
+  })
+
+  it('returns updated isFavorite false on success', async () => {
+    mockAuth.mockResolvedValue(mockSession as never)
+    mockDbToggleFavorite.mockResolvedValue(false)
+    const result = await toggleItemFavorite('item-1')
+    expect(result).toEqual({ success: true, data: { isFavorite: false } })
+  })
+
+  it('returns item not found when db returns null', async () => {
+    mockAuth.mockResolvedValue(mockSession as never)
+    mockDbToggleFavorite.mockResolvedValue(null)
+    const result = await toggleItemFavorite('item-1')
+    expect(result).toEqual({ success: false, error: 'Item not found.' })
+  })
+
+  it('passes itemId and userId to db', async () => {
+    mockAuth.mockResolvedValue(mockSession as never)
+    mockDbToggleFavorite.mockResolvedValue(true)
+    await toggleItemFavorite('item-1')
+    expect(mockDbToggleFavorite).toHaveBeenCalledWith('item-1', 'user-1')
+  })
+
+  it('returns error when db throws', async () => {
+    mockAuth.mockResolvedValue(mockSession as never)
+    mockDbToggleFavorite.mockRejectedValue(new Error('DB error'))
+    const result = await toggleItemFavorite('item-1')
+    expect(result).toEqual({ success: false, error: 'Failed to update favorite.' })
   })
 })

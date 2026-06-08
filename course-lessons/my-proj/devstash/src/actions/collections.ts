@@ -6,6 +6,7 @@ import {
   createCollection as dbCreateCollection,
   updateCollection as dbUpdateCollection,
   deleteCollection as dbDeleteCollection,
+  toggleCollectionFavorite as dbToggleCollectionFavorite,
 } from '@/lib/db/collections'
 
 const createCollectionSchema = z.object({
@@ -65,5 +66,18 @@ export async function deleteCollection(id: string) {
     return { success: true as const }
   } catch {
     return { success: false as const, error: 'Failed to delete collection.' }
+  }
+}
+
+export async function toggleCollectionFavorite(id: string) {
+  const session = await auth()
+  if (!session?.user?.id) return { success: false as const, error: 'Not authenticated.' }
+
+  try {
+    const isFavorite = await dbToggleCollectionFavorite(id, session.user.id)
+    if (isFavorite === null) return { success: false as const, error: 'Collection not found.' }
+    return { success: true as const, data: { isFavorite } }
+  } catch {
+    return { success: false as const, error: 'Failed to update favorite.' }
   }
 }
