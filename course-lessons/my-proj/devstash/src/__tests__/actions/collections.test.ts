@@ -8,6 +8,9 @@ vi.mock('@/lib/db/collections', () => ({
   deleteCollection: vi.fn(),
   toggleCollectionFavorite: vi.fn(),
 }))
+vi.mock('@/lib/usage-limits', () => ({
+  checkCollectionLimit: vi.fn().mockResolvedValue({ allowed: true }),
+}))
 
 import { createCollection, updateCollection, deleteCollection, toggleCollectionFavorite } from '@/actions/collections'
 import { auth } from '@/auth'
@@ -24,7 +27,7 @@ const mockDbUpdate = vi.mocked(dbUpdateCollection)
 const mockDbDelete = vi.mocked(dbDeleteCollection)
 const mockDbToggleFavorite = vi.mocked(dbToggleCollectionFavorite)
 
-const mockSession = { user: { id: 'user-1' } }
+const mockSession = { user: { id: 'user-1', isPro: false } }
 
 const mockCreatedCollection = {
   id: 'col-new',
