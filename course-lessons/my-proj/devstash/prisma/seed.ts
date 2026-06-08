@@ -378,102 +378,12 @@ async function main() {
     data: devopsItems.map(i => ({ itemId: i.id, collectionId: devops.id })),
   })
 
-  // ─── Terminal Commands ────────────────────────────────────────────────────
-  const terminalCommands = await prisma.collection.create({
-    data: {
-      name: 'Terminal Commands',
-      description: 'Useful shell commands for everyday development',
-      userId: user.id,
-      defaultTypeId: command.id,
-    },
-  })
-
-  const terminalItems = await Promise.all([
-    createItem({
-      title: 'Git: Undo last commit (keep changes staged)',
-      description: 'Soft-reset HEAD by one commit — your changes stay in the index',
-      itemTypeId: command.id,
-      content: 'git reset --soft HEAD~1',
-      isPinned: true,
-    }),
-    createItem({
-      title: 'Docker: Prune stopped containers and dangling images',
-      description: 'Free up disk space by removing stopped containers and untagged images',
-      itemTypeId: command.id,
-      content: 'docker container prune -f && docker image prune -f',
-    }),
-    createItem({
-      title: 'Kill process on a port (macOS / Linux)',
-      description: 'Find and kill whatever process is listening on a given port',
-      itemTypeId: command.id,
-      content: 'lsof -ti:<PORT> | xargs kill -9',
-    }),
-    createItem({
-      title: 'Run npm package without installing globally',
-      description: 'Execute any CLI tool from npm on demand using npx',
-      itemTypeId: command.id,
-      content: 'npx <package-name>@latest [args]',
-    }),
-  ])
-
-  await prisma.itemCollection.createMany({
-    data: terminalItems.map(i => ({ itemId: i.id, collectionId: terminalCommands.id })),
-  })
-
-  // ─── Design Resources ─────────────────────────────────────────────────────
-  const designResources = await prisma.collection.create({
-    data: {
-      name: 'Design Resources',
-      description: 'UI/UX resources and references',
-      userId: user.id,
-      defaultTypeId: link.id,
-    },
-  })
-
-  const designItems = await Promise.all([
-    createItem({
-      title: 'Tailwind CSS Docs',
-      description: 'Official Tailwind CSS documentation and utility class reference',
-      itemTypeId: link.id,
-      contentType: ContentType.URL,
-      url: 'https://tailwindcss.com/docs',
-      isFavorite: true,
-    }),
-    createItem({
-      title: 'shadcn/ui',
-      description: 'Accessible, composable components built on Radix UI and Tailwind CSS',
-      itemTypeId: link.id,
-      contentType: ContentType.URL,
-      url: 'https://ui.shadcn.com',
-      isFavorite: true,
-    }),
-    createItem({
-      title: 'Radix UI Primitives',
-      description: 'Unstyled, accessible UI component primitives for React',
-      itemTypeId: link.id,
-      contentType: ContentType.URL,
-      url: 'https://www.radix-ui.com',
-    }),
-    createItem({
-      title: 'Lucide Icons',
-      description: 'Open-source icon library — used for item type icons in this project',
-      itemTypeId: link.id,
-      contentType: ContentType.URL,
-      url: 'https://lucide.dev',
-    }),
-  ])
-
-  await prisma.itemCollection.createMany({
-    data: designItems.map(i => ({ itemId: i.id, collectionId: designResources.id })),
-  })
-
-  const totalItems =
-    reactItems.length + aiItems.length + devopsItems.length + terminalItems.length + designItems.length
+  const totalItems = reactItems.length + aiItems.length + devopsItems.length
 
   console.log('Done.')
   console.log(`  1 user            demo@devstash.io`)
   console.log(`  7 item types      snippet, prompt, command, note, file, image, link`)
-  console.log(`  5 collections     React Patterns, AI Workflows, DevOps, Terminal Commands, Design Resources`)
+  console.log(`  3 collections     React Patterns, AI Workflows, DevOps`)
   console.log(`  ${totalItems} items`)
 
   await prisma.$disconnect()

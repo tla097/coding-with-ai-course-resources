@@ -8,6 +8,9 @@ import { ITEMS_PER_PAGE } from '@/lib/constants'
 import { prisma } from '@/lib/prisma'
 import ItemsWithDrawer from '@/components/items/ItemsWithDrawer'
 import Pagination from '@/components/ui/Pagination'
+import ProGate from '@/components/items/ProGate'
+
+const PRO_ONLY_TYPES = new Set(['file', 'image'])
 
 export const dynamic = 'force-dynamic'
 
@@ -35,6 +38,10 @@ export default async function ItemsTypePage({ params, searchParams }: Props) {
 
   const session = await auth()
   const userId = session?.user?.id ?? ''
+
+  if (PRO_ONLY_TYPES.has(typeName) && !session?.user?.isPro) {
+    return <ProGate type={type} color={itemType.color} />
+  }
 
   const [{ items, total }, collectionList] = await Promise.all([
     getItemsByTypePaginated(userId, typeName, page, ITEMS_PER_PAGE),
