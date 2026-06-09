@@ -10,6 +10,7 @@ export interface ItemWithType {
   createdAt: Date
   contentType: string
   url: string | null
+  fileUrl: string | null
   itemType: { id: string; name: string; icon: string; color: string }
   tags: Array<{ id: string; name: string }>
 }
@@ -43,6 +44,7 @@ const itemSelect = {
   createdAt: true,
   contentType: true,
   url: true,
+  fileUrl: true,
   itemType: {
     select: { id: true, name: true, icon: true, color: true },
   },

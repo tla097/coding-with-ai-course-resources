@@ -1,13 +1,19 @@
-# Current Feature
+# Current Feature: Image Gallery View
 
 ## Status
-Not Started
+In Progress
 
 ## Goals
-<!-- What needs to be built -->
+- Create an `ImageThumbnailCard` component to replace the standard `ItemCard` on the `/items/images` page
+- Display images in a 3-column grid gallery layout
+- Image thumbnail uses 16:9 aspect ratio (`aspect-video`)
+- Image fills the card using `object-cover` (may crop edges)
+- Subtle hover zoom effect: 5% scale (`scale-105`) with 300ms transition
 
 ## Notes
-<!-- Additional context, constraints, or implementation details -->
+- Only the `/items/images` page needs this gallery layout — other item type pages keep the existing `ItemCard`
+- The `ImageThumbnailCard` should use `item.fileUrl` for the image `src`
+- Fall back gracefully if `fileUrl` is null (image not yet uploaded)
 
 ## History
 <!-- Keep this updated. Earliest to Latest. Format: DD/MM/YYYY HH:MM -->
