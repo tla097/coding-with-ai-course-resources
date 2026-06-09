@@ -9,9 +9,10 @@ interface Props {
   items: ItemWithType[]
   collections: { id: string; name: string }[]
   variant?: 'list' | 'grid'
+  isPro?: boolean
 }
 
-export default function ItemsWithDrawer({ items, collections, variant = 'list' }: Props) {
+export default function ItemsWithDrawer({ items, collections, variant = 'list', isPro }: Props) {
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null)
   const [open, setOpen] = useState(false)
 
@@ -37,6 +38,7 @@ export default function ItemsWithDrawer({ items, collections, variant = 'list' }
         open={open}
         onOpenChange={setOpen}
         collections={collections}
+        isPro={isPro}
       />
     </>
   )

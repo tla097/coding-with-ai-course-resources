@@ -44,7 +44,7 @@ export default async function FavoritesPage() {
           </p>
         </div>
       ) : (
-        <FavoritesView items={items} collections={collections} collectionList={collectionList} />
+        <FavoritesView items={items} collections={collections} collectionList={collectionList} isPro={session?.user?.isPro ?? false} />
       )}
     </div>
   )

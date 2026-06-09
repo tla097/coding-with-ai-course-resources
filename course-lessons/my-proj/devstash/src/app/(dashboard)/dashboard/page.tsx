@@ -119,7 +119,7 @@ export default async function DashboardPage() {
               <Pin className="h-4 w-4 text-muted-foreground" />
               <h2 className="text-base font-semibold">Pinned</h2>
             </div>
-            <ItemsWithDrawer items={pinnedItems} collections={collectionList} />
+            <ItemsWithDrawer items={pinnedItems} collections={collectionList} isPro={session?.user?.isPro ?? false} />
           </section>
         )}
 
@@ -133,7 +133,7 @@ export default async function DashboardPage() {
               <p className="text-sm text-muted-foreground">No items yet — add your first one using the <span className="font-medium">New Item</span> button above.</p>
             </div>
           ) : (
-            <ItemsWithDrawer items={recentItems} collections={collectionList} />
+            <ItemsWithDrawer items={recentItems} collections={collectionList} isPro={session?.user?.isPro ?? false} />
           )}
         </section>
       </div>

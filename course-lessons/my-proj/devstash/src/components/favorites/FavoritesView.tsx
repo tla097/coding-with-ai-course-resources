@@ -11,6 +11,7 @@ interface Props {
   items: FavoriteItem[]
   collections: FavoriteCollection[]
   collectionList: { id: string; name: string }[]
+  isPro?: boolean
 }
 
 type ItemSortKey = 'name' | 'type' | 'date'
@@ -58,7 +59,7 @@ function SortHeader({ label, sortKey, activeKey, dir, onClick, className = '' }:
   )
 }
 
-export default function FavoritesView({ items, collections, collectionList }: Props) {
+export default function FavoritesView({ items, collections, collectionList, isPro }: Props) {
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null)
   const [drawerOpen, setDrawerOpen] = useState(false)
 
@@ -259,6 +260,7 @@ export default function FavoritesView({ items, collections, collectionList }: Pr
         open={drawerOpen}
         onOpenChange={setDrawerOpen}
         collections={collectionList}
+        isPro={isPro}
       />
     </>
   )
