@@ -1,28 +1,12 @@
-# Current Feature: AI Explain Code
+# Current Feature
 
 ## Status
-In Progress
+<!-- Not Started|In Progress|Completed -->
 
 ## Goals
 
-- `explainCode` server action with auth, Pro gating, Zod validation, rate limiting
-- "Explain" button (Sparkles icon) in code editor window controls header (next to Copy)
-- Only visible for snippet and command types in the item drawer read view
-- After generating: Code/Explain tabs toggle between code and explanation views
-- Explanation rendered as markdown in the same container space as the code editor
-- Explanation is concise (~200-300 words) covering what the code does and key concepts
-- Loading state: Loader2 spinner while generating
-- Pro gating in UI: Crown icon + tooltip for free users
-- Error handling via toast (Pro gating, rate limit, AI service errors)
-- Unit tests for server action
-
 ## Notes
-
-- Model: `gemini-2.5-flash-lite` (via existing `src/lib/gemini.ts`)
-- Explanations not saved to DB — regenerated on each click
-- Not available in create/edit forms — item drawer read view only
-- `isPro` already threaded to ItemDrawer from previous work
-- Follow existing patterns in `src/actions/ai.ts` and `src/components/ui/CodeEditor.tsx`
+<!-- Any extra notes -->
 
 ## History
 <!-- Keep this updated. Earliest to Latest. Format: DD/MM/YYYY HH:MM -->
@@ -99,3 +83,4 @@ In Progress
 09/06/2026 09:55 - Completed Language Dropdown for Code Editor: replaced free-text language input with Select dropdown (24 languages + Plain text) in NewItemDialog and ItemDrawer edit mode; language selector moved above code editor for immediate visual feedback; selecting a language live-updates Monaco syntax highlighting without saving; 197 tests passing; merged to main
 09/06/2026 10:35 - Completed AI Auto-Tagging: src/lib/gemini.ts (GoogleGenAI singleton + AI_MODEL constant), src/actions/ai.ts (generateAutoTags server action — auth, Pro gate, Zod, 5req/min rate limit, Gemini call, markdown-fence stripping), AiTagSuggestions.tsx (accept/dismiss chip list with Sparkles icon); Suggest Tags button added to NewItemDialog and ItemDrawer edit mode (hidden for free users); isPro threaded via TopBar and DashboardShell; 16 unit tests; 213 tests passing; merged to main
 09/06/2026 11:05 - Completed AI Description Generator: generateDescription server action added to src/actions/ai.ts (auth, Pro gate, Zod, 5req/min rate limit, Gemini call); Generate button (Sparkles icon) added next to Description label in NewItemDialog and ItemDrawer edit mode (Pro-only, hidden for free users); generated description populates textarea directly; 12 unit tests; 225 tests passing; merged to main
+09/06/2026 11:40 - Completed AI Explain Code: explainCode server action (auth, Pro gate, Zod, 5req/min rate limit, Gemini call, markdown response); Explain button (Sparkles) added to CodeEditor header in read-only mode; Crown icon + tooltip for free users; Loader2 spinner while generating; Code/Explain tabs appear after first explanation; explanation rendered via react-markdown in same container; resets on item change; isPro + itemType threaded from ItemDrawer; 11 unit tests; 236 tests passing; merged to main
