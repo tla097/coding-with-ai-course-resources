@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState, useCallback, type DragEvent } from 'react'
+import { useState, useCallback, type DragEvent } from 'react'
 import { Upload, X, File, CheckCircle2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
@@ -36,7 +36,6 @@ interface Props {
 }
 
 export default function FileUpload({ itemType, uploaded, onUploadComplete, onClear }: Props) {
-  const inputRef = useRef<HTMLInputElement>(null)
   const [dragging, setDragging] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [progress, setProgress] = useState(0)
@@ -121,14 +120,14 @@ export default function FileUpload({ itemType, uploaded, onUploadComplete, onCle
     e.target.value = ''
   }
 
-  function handleDrop(e: DragEvent<HTMLDivElement>) {
+  function handleDrop(e: DragEvent<HTMLElement>) {
     e.preventDefault()
     setDragging(false)
     const file = e.dataTransfer.files[0]
     if (file) uploadFile(file)
   }
 
-  function handleDragOver(e: DragEvent<HTMLDivElement>) {
+  function handleDragOver(e: DragEvent<HTMLElement>) {
     e.preventDefault()
     setDragging(true)
   }
@@ -155,8 +154,7 @@ export default function FileUpload({ itemType, uploaded, onUploadComplete, onCle
         onDrop={handleDrop}
         onDragOver={handleDragOver}
         onDragLeave={() => setDragging(false)}
-        onClick={() => !uploading && inputRef.current?.click()}
-        className={`flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed p-8 transition-colors ${
+        className={`relative flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed p-8 transition-colors ${
           uploading
             ? 'pointer-events-none opacity-60 border-border'
             : dragging
@@ -164,16 +162,8 @@ export default function FileUpload({ itemType, uploaded, onUploadComplete, onCle
               : 'border-border hover:border-primary/50 hover:bg-muted/50 cursor-pointer'
         }`}
       >
-        <input
-          ref={inputRef}
-          type="file"
-          accept={accept}
-          className="hidden"
-          onChange={handleInputChange}
-        />
-
         {uploading ? (
-          <>
+          <div className="pointer-events-none flex flex-col items-center gap-2">
             <p className="text-sm text-muted-foreground">Uploading…</p>
             <div className="w-full max-w-48 space-y-1">
               <div className="w-full bg-muted rounded-full h-1.5">
@@ -184,24 +174,34 @@ export default function FileUpload({ itemType, uploaded, onUploadComplete, onCle
               </div>
               <p className="text-center text-xs text-muted-foreground">{progress}%</p>
             </div>
-          </>
+          </div>
         ) : (
           <>
-            <div className="rounded-full bg-muted p-3">
-              {itemType === 'image'
-                ? <Upload className="h-5 w-5 text-muted-foreground" />
-                : <File className="h-5 w-5 text-muted-foreground" />
-              }
-            </div>
-            <div className="text-center">
-              <p className="text-sm font-medium">
-                Drop {itemType === 'image' ? 'an image' : 'a file'} or click to browse
-              </p>
-              <p className="text-xs text-muted-foreground mt-0.5">
+            {/* Transparent overlay — user clicks directly on this input */}
+            <input
+              type="file"
+              accept={accept}
+              className="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
+              onChange={handleInputChange}
+            />
+            {/* Visual content — pointer-events-none so clicks pass through to input */}
+            <div className="pointer-events-none flex flex-col items-center gap-2">
+              <div className="rounded-full bg-muted p-3">
                 {itemType === 'image'
-                  ? 'PNG, JPG, GIF, WebP, SVG — max 5 MB'
-                  : 'PDF, TXT, MD, JSON, YAML, XML, CSV, TOML — max 10 MB'}
-              </p>
+                  ? <Upload className="h-5 w-5 text-muted-foreground" />
+                  : <File className="h-5 w-5 text-muted-foreground" />
+                }
+              </div>
+              <div className="text-center">
+                <p className="text-sm font-medium">
+                  Drop {itemType === 'image' ? 'an image' : 'a file'} or click to browse
+                </p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {itemType === 'image'
+                    ? 'PNG, JPG, GIF, WebP, SVG — max 5 MB'
+                    : 'PDF, TXT, MD, JSON, YAML, XML, CSV, TOML — max 10 MB'}
+                </p>
+              </div>
             </div>
           </>
         )}

@@ -28,6 +28,8 @@ export async function getFavoriteItems(userId: string): Promise<FavoriteItem[]> 
       contentType: true,
       url: true,
       fileUrl: true,
+      fileName: true,
+      fileSize: true,
       itemType: { select: { id: true, name: true, icon: true, color: true } },
       tags: { select: { id: true, name: true } },
     },
