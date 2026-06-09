@@ -1,19 +1,13 @@
-# Current Feature: Image Gallery View
+# Current Feature
 
 ## Status
-In Progress
+Not Started
 
 ## Goals
-- Create an `ImageThumbnailCard` component to replace the standard `ItemCard` on the `/items/images` page
-- Display images in a 3-column grid gallery layout
-- Image thumbnail uses 16:9 aspect ratio (`aspect-video`)
-- Image fills the card using `object-cover` (may crop edges)
-- Subtle hover zoom effect: 5% scale (`scale-105`) with 300ms transition
+<!-- What needs to be built -->
 
 ## Notes
-- Only the `/items/images` page needs this gallery layout — other item type pages keep the existing `ItemCard`
-- The `ImageThumbnailCard` should use `item.fileUrl` for the image `src`
-- Fall back gracefully if `fileUrl` is null (image not yet uploaded)
+<!-- Additional context, constraints, or implementation details -->
 
 ## History
 <!-- Keep this updated. Earliest to Latest. Format: DD/MM/YYYY HH:MM -->
@@ -91,3 +85,4 @@ In Progress
 09/06/2026 11:40 - Completed AI Explain Code: explainCode server action (auth, Pro gate, Zod, 5req/min rate limit, Gemini call, markdown response); Explain button (Sparkles) added to CodeEditor header in read-only mode; Crown icon + tooltip for free users; Loader2 spinner while generating; Code/Explain tabs appear after first explanation; explanation rendered via react-markdown in same container; resets on item change; isPro + itemType threaded from ItemDrawer; 11 unit tests; 236 tests passing; merged to main
 09/06/2026 12:00 - Completed AI Prompt Optimizer: optimizePrompt server action (auth, Pro gate, Zod, 5req/min rate limit, Gemini call); Optimize button (Sparkles) added to MarkdownEditor header in read-only mode for prompt items; Crown icon for free users; Loader2 spinner while optimizing; Original/Optimized tabs appear after optimization; "Use this" button enters edit mode with optimized content pre-filled in ItemDrawer; isPro + itemType + onUseOptimized threaded from ItemDrawer; 10 unit tests; 246 tests passing; merged to main
 09/06/2026 15:25 - Completed File Upload with Supabase Storage: POST /api/upload (signed upload URLs), GET /api/download (auth-gated proxy, RFC 5987 Content-Disposition), FileUpload component (drag-and-drop, MIME/size validation, XHR progress), NewItemDialog supports file and image types, ItemDrawer shows image preview and file info with Download button, deleteItem removes file from Supabase on item deletion; 252 tests passing; merged to main
+09/06/2026 15:55 - Completed Image Gallery View: ImageThumbnailCard component (aspect-video, object-cover, group-hover:scale-105 zoom), image-gallery variant added to ItemsWithDrawer, /items/images uses gallery layout; fileUrl added to ItemWithType and itemSelect; images served via /api/download proxy; merged to main
