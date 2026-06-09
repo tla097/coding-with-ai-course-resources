@@ -1,20 +1,13 @@
-# Current Feature: Quick Copy Button on Item Cards
+# Current Feature
 
 ## Status
-In Progress
+Not Started
 
 ## Goals
-- Add `content` field to `ItemWithType` interface and `itemSelect` so the card has access to it
-- Add a copy icon button to `ItemCard` that is visible on card hover (opacity-0 → group-hover:opacity-100)
-- Copy logic: `content` for TEXT items, `url` for URL items, title as fallback for FILE items
-- Button stops click propagation (does not open drawer)
-- Show a sonner toast on successful copy ("Copied!")
-- Brief `Check` icon flash (1 second) before reverting to `Copy` icon
+<!-- What needs to be built -->
 
 ## Notes
-- `ItemWithType` and `itemSelect` live in `src/lib/db/items.ts` — add `content: string | null` to the interface and `content: true` to itemSelect
-- Copy button sits in the top-right action area alongside the favorite star button
-- `Check` and `Copy` icons from lucide-react; no new dependencies needed
+<!-- Additional context, constraints, or implementation details -->
 
 ## History
 <!-- Keep this updated. Earliest to Latest. Format: DD/MM/YYYY HH:MM -->
@@ -94,3 +87,4 @@ In Progress
 09/06/2026 15:25 - Completed File Upload with Supabase Storage: POST /api/upload (signed upload URLs), GET /api/download (auth-gated proxy, RFC 5987 Content-Disposition), FileUpload component (drag-and-drop, MIME/size validation, XHR progress), NewItemDialog supports file and image types, ItemDrawer shows image preview and file info with Download button, deleteItem removes file from Supabase on item deletion; 252 tests passing; merged to main
 09/06/2026 15:55 - Completed Image Gallery View: ImageThumbnailCard component (aspect-video, object-cover, group-hover:scale-105 zoom), image-gallery variant added to ItemsWithDrawer, /items/images uses gallery layout; fileUrl added to ItemWithType and itemSelect; images served via /api/download proxy; merged to main
 09/06/2026 16:35 - Completed File List View: FileListRow component (file icon by extension, title, filename, size, date, download button), file-list variant added to ItemsWithDrawer, /items/files uses list layout; fileName/fileSize added to ItemWithType and itemSelect; FileUpload fix: transparent z-10 input + pointer-events-none content so file picker opens reliably inside base-ui Dialog; merged to main
+09/06/2026 16:50 - Completed Quick Copy Button on Item Cards: Copy/Check icons from lucide-react, copy button fades in on card hover (group-hover:opacity-100), copies content for TEXT items / url for URL items / title fallback for FILE items, 1-second Check flash on success, sonner toast ("Copied!"), stops propagation; content field added to ItemWithType and itemSelect; favorites.ts select updated to match; merged to main
