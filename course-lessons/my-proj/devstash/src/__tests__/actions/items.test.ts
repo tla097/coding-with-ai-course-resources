@@ -11,6 +11,12 @@ vi.mock('@/lib/db/items', () => ({
 vi.mock('@/lib/usage-limits', () => ({
   checkItemLimit: vi.fn().mockResolvedValue({ allowed: true }),
 }))
+vi.mock('@/lib/supabase/server', () => ({
+  createSupabaseServer: vi.fn(() => ({
+    storage: { from: vi.fn(() => ({ remove: vi.fn().mockResolvedValue({ error: null }) })) },
+  })),
+  SUPABASE_BUCKET: 'my-files',
+}))
 
 import { createItem, updateItem, deleteItem, toggleItemFavorite, toggleItemPin } from '@/actions/items'
 import { auth } from '@/auth'
@@ -21,10 +27,12 @@ import {
   toggleItemFavorite as dbToggleItemFavorite,
   toggleItemPin as dbToggleItemPin,
 } from '@/lib/db/items'
+import { createSupabaseServer } from '@/lib/supabase/server'
 
 const mockAuth = vi.mocked(auth)
 const mockDbCreate = vi.mocked(dbCreateItem)
 const mockDbUpdate = vi.mocked(dbUpdateItem)
+const mockSupabaseServer = vi.mocked(createSupabaseServer)
 const mockDbDelete = vi.mocked(dbDeleteItem)
 const mockDbToggleFavorite = vi.mocked(dbToggleItemFavorite)
 const mockDbTogglePin = vi.mocked(dbToggleItemPin)
@@ -239,6 +247,72 @@ describe('createItem server action', () => {
       expect.objectContaining({ collectionIds: [] }),
     )
   })
+
+  it('sets contentType FILE for file type', async () => {
+    mockAuth.mockResolvedValue(mockSession as never)
+    mockDbCreate.mockResolvedValue({ ...mockCreatedItem, contentType: 'FILE' })
+    await createItem({
+      ...validCreateInput,
+      itemTypeName: 'file',
+      fileUrl: 'user-1/123-test.pdf',
+      fileName: 'test.pdf',
+      fileSize: 1024,
+    })
+    expect(mockDbCreate).toHaveBeenCalledWith(
+      'user-1',
+      expect.objectContaining({ contentType: 'FILE' }),
+    )
+  })
+
+  it('sets contentType FILE for image type', async () => {
+    mockAuth.mockResolvedValue(mockSession as never)
+    mockDbCreate.mockResolvedValue({ ...mockCreatedItem, contentType: 'FILE' })
+    await createItem({
+      ...validCreateInput,
+      itemTypeName: 'image',
+      fileUrl: 'user-1/123-test.png',
+      fileName: 'test.png',
+      fileSize: 2048,
+    })
+    expect(mockDbCreate).toHaveBeenCalledWith(
+      'user-1',
+      expect.objectContaining({ contentType: 'FILE' }),
+    )
+  })
+
+  it('returns validation error when file type has no fileUrl', async () => {
+    mockAuth.mockResolvedValue(mockSession as never)
+    const result = await createItem({
+      ...validCreateInput,
+      itemTypeName: 'file',
+      fileUrl: null,
+    })
+    expect(result.success).toBe(false)
+    if (!result.success && typeof result.error !== 'string') {
+      expect(result.error.fileUrl).toBeDefined()
+    }
+    expect(mockDbCreate).not.toHaveBeenCalled()
+  })
+
+  it('passes fileUrl, fileName, fileSize to db for file type', async () => {
+    mockAuth.mockResolvedValue(mockSession as never)
+    mockDbCreate.mockResolvedValue({ ...mockCreatedItem, contentType: 'FILE' })
+    await createItem({
+      ...validCreateInput,
+      itemTypeName: 'file',
+      fileUrl: 'user-1/123-test.pdf',
+      fileName: 'test.pdf',
+      fileSize: 1024,
+    })
+    expect(mockDbCreate).toHaveBeenCalledWith(
+      'user-1',
+      expect.objectContaining({
+        fileUrl: 'user-1/123-test.pdf',
+        fileName: 'test.pdf',
+        fileSize: 1024,
+      }),
+    )
+  })
 })
 
 describe('deleteItem server action', () => {
@@ -257,23 +331,23 @@ describe('deleteItem server action', () => {
     expect(result).toEqual({ success: false, error: 'Not authenticated.' })
   })
 
-  it('returns item not found when db returns false (ownership mismatch)', async () => {
+  it('returns item not found when db returns null (ownership mismatch)', async () => {
     mockAuth.mockResolvedValue({ user: { id: 'user-1' } } as never)
-    mockDbDelete.mockResolvedValue(false)
+    mockDbDelete.mockResolvedValue(null)
     const result = await deleteItem('item-1')
     expect(result).toEqual({ success: false, error: 'Item not found.' })
   })
 
   it('returns success when item is deleted', async () => {
     mockAuth.mockResolvedValue({ user: { id: 'user-1' } } as never)
-    mockDbDelete.mockResolvedValue(true)
+    mockDbDelete.mockResolvedValue({ fileUrl: null })
     const result = await deleteItem('item-1')
     expect(result).toEqual({ success: true })
   })
 
   it('passes correct itemId and userId to db', async () => {
     mockAuth.mockResolvedValue({ user: { id: 'user-1' } } as never)
-    mockDbDelete.mockResolvedValue(true)
+    mockDbDelete.mockResolvedValue({ fileUrl: null })
     await deleteItem('item-abc')
     expect(mockDbDelete).toHaveBeenCalledWith('item-abc', 'user-1')
   })
@@ -283,6 +357,24 @@ describe('deleteItem server action', () => {
     mockDbDelete.mockRejectedValue(new Error('DB error'))
     const result = await deleteItem('item-1')
     expect(result).toEqual({ success: false, error: 'Failed to delete item.' })
+  })
+
+  it('calls supabase storage remove when deleted item has a fileUrl', async () => {
+    const mockRemove = vi.fn().mockResolvedValue({ error: null })
+    mockSupabaseServer.mockReturnValueOnce({
+      storage: { from: vi.fn(() => ({ remove: mockRemove })) },
+    } as never)
+    mockAuth.mockResolvedValue({ user: { id: 'user-1' } } as never)
+    mockDbDelete.mockResolvedValue({ fileUrl: 'user-1/123-file.pdf' })
+    await deleteItem('item-1')
+    expect(mockRemove).toHaveBeenCalledWith(['user-1/123-file.pdf'])
+  })
+
+  it('does not call supabase when deleted item has no fileUrl', async () => {
+    mockAuth.mockResolvedValue({ user: { id: 'user-1' } } as never)
+    mockDbDelete.mockResolvedValue({ fileUrl: null })
+    await deleteItem('item-1')
+    expect(mockSupabaseServer).not.toHaveBeenCalled()
   })
 })
 

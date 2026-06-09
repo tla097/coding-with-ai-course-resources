@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Star, Pin, Copy, Pencil, Trash2, FolderOpen, Calendar, CalendarCheck, Save, X, Sparkles } from 'lucide-react'
+import { Star, Pin, Copy, Pencil, Trash2, FolderOpen, Calendar, CalendarCheck, Save, X, Sparkles, Download, FileText } from 'lucide-react'
 import { toast } from 'sonner'
 import {
   Sheet,
@@ -96,6 +96,13 @@ const LANGUAGE_TYPES = ['snippet', 'command']
 const CODE_EDITOR_TYPES = ['snippet', 'command']
 const MARKDOWN_EDITOR_TYPES = ['note', 'prompt']
 const URL_TYPES = ['link']
+const FILE_TYPES = ['file', 'image']
+
+function formatBytes(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
 
 export default function ItemDrawer({ itemId, open, onOpenChange, collections, isPro }: Props) {
   const router = useRouter()
@@ -338,6 +345,7 @@ export default function ItemDrawer({ itemId, open, onOpenChange, collections, is
   const showCodeEditor = CODE_EDITOR_TYPES.includes(typeName)
   const showMarkdownEditor = MARKDOWN_EDITOR_TYPES.includes(typeName)
   const showUrl = URL_TYPES.includes(typeName)
+  const showFile = FILE_TYPES.includes(typeName) && !!item?.fileUrl
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -419,6 +427,16 @@ export default function ItemDrawer({ itemId, open, onOpenChange, collections, is
                     <Copy className="h-4 w-4" />
                     Copy
                   </Button>
+                  {showFile && item?.fileUrl && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      render={<a href={`/api/download?path=${encodeURIComponent(item.fileUrl)}`} download={item.fileName ?? undefined} />}
+                    >
+                      <Download className="h-4 w-4" />
+                      Download
+                    </Button>
+                  )}
                   <div className="ml-auto flex items-center gap-0.5">
                     <Button variant="ghost" size="icon-sm" onClick={handleEditStart}>
                       <Pencil className="h-4 w-4" />
@@ -658,6 +676,34 @@ export default function ItemDrawer({ itemId, open, onOpenChange, collections, is
                       >
                         {item.url}
                       </a>
+                    </section>
+                  )}
+
+                  {showFile && item.fileUrl && (
+                    <section>
+                      <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
+                        {typeName === 'image' ? 'Image' : 'File'}
+                      </h3>
+                      {typeName === 'image' ? (
+                        <div className="rounded-lg overflow-hidden border border-border bg-muted/50">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={`/api/download?path=${encodeURIComponent(item.fileUrl)}&preview=true`}
+                            alt={item.fileName ?? item.title}
+                            className="max-w-full h-auto"
+                          />
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-3 rounded-lg border border-border bg-muted/50 p-3">
+                          <FileText className="h-8 w-8 shrink-0 text-muted-foreground" />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium truncate">{item.fileName ?? 'File'}</p>
+                            {item.fileSize !== null && item.fileSize !== undefined && (
+                              <p className="text-xs text-muted-foreground">{formatBytes(item.fileSize)}</p>
+                            )}
+                          </div>
+                        </div>
+                      )}
                     </section>
                   )}
 

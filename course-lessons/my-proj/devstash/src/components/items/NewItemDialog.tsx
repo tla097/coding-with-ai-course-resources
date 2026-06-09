@@ -29,6 +29,7 @@ import { createItem } from '@/actions/items'
 import { generateAutoTags, generateDescription } from '@/actions/ai'
 import CollectionPicker from '@/components/items/CollectionPicker'
 import AiTagSuggestions from '@/components/items/AiTagSuggestions'
+import FileUpload, { type UploadResult } from '@/components/items/FileUpload'
 import type { SidebarItemType } from '@/lib/db/sidebar'
 
 const LANGUAGES = [
@@ -58,11 +59,12 @@ const LANGUAGES = [
   { value: 'graphql', label: 'GraphQL' },
 ]
 
-const CREATABLE_TYPES = ['snippet', 'prompt', 'command', 'note', 'link']
+const CREATABLE_TYPES = ['snippet', 'prompt', 'command', 'note', 'link', 'file', 'image']
 const CONTENT_TYPES = ['snippet', 'prompt', 'command', 'note']
 const LANGUAGE_TYPES = ['snippet', 'command']
 const CODE_EDITOR_TYPES = ['snippet', 'command']
 const MARKDOWN_EDITOR_TYPES = ['note', 'prompt']
+const FILE_UPLOAD_TYPES = ['file', 'image']
 
 interface Props {
   itemTypes: SidebarItemType[]
@@ -98,6 +100,7 @@ export default function NewItemDialog({ itemTypes, collections, isPro }: Props) 
   const [tagSuggestions, setTagSuggestions] = useState<string[]>([])
   const [suggestingTags, setSuggestingTags] = useState(false)
   const [generatingDescription, setGeneratingDescription] = useState(false)
+  const [uploadedFile, setUploadedFile] = useState<UploadResult | null>(null)
 
   const creatableTypes = itemTypes.filter(t => CREATABLE_TYPES.includes(t.name))
   const selectedType = creatableTypes.find(t => t.id === selectedTypeId) ?? null
@@ -110,6 +113,7 @@ export default function NewItemDialog({ itemTypes, collections, isPro }: Props) 
     setTagSuggestions([])
     setSaving(false)
     setGeneratingDescription(false)
+    setUploadedFile(null)
     setOpen(true)
   }
 
@@ -171,11 +175,13 @@ export default function NewItemDialog({ itemTypes, collections, isPro }: Props) 
   const showCodeEditor = selectedType ? CODE_EDITOR_TYPES.includes(selectedType.name) : false
   const showMarkdownEditor = selectedType ? MARKDOWN_EDITOR_TYPES.includes(selectedType.name) : false
   const showUrl = selectedType?.name === 'link'
+  const showFileUpload = selectedType ? FILE_UPLOAD_TYPES.includes(selectedType.name) : false
 
   const canSubmit =
     !!selectedType &&
     form.title.trim().length > 0 &&
-    (!showUrl || form.url.trim().length > 0)
+    (!showUrl || form.url.trim().length > 0) &&
+    (!showFileUpload || uploadedFile !== null)
 
   async function handleSubmit() {
     if (!selectedType || !canSubmit) return
@@ -195,7 +201,10 @@ export default function NewItemDialog({ itemTypes, collections, isPro }: Props) 
       tags,
       collectionIds: selectedCollectionIds,
       itemTypeId: selectedType.id,
-      itemTypeName: selectedType.name as 'snippet' | 'prompt' | 'command' | 'note' | 'link',
+      itemTypeName: selectedType.name as 'snippet' | 'prompt' | 'command' | 'note' | 'link' | 'file' | 'image',
+      fileUrl: uploadedFile?.path ?? null,
+      fileName: uploadedFile?.fileName ?? null,
+      fileSize: uploadedFile?.fileSize ?? null,
     })
 
     setSaving(false)
@@ -239,7 +248,7 @@ export default function NewItemDialog({ itemTypes, collections, isPro }: Props) 
                     key={type.id}
                     type="button"
                     aria-pressed={isSelected}
-                    onClick={() => setSelectedTypeId(type.id)}
+                    onClick={() => { setSelectedTypeId(type.id); setUploadedFile(null) }}
                     className="flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm transition-colors"
                     style={
                       isSelected
@@ -357,6 +366,21 @@ export default function NewItemDialog({ itemTypes, collections, isPro }: Props) 
                   value={form.url}
                   onChange={e => setForm(f => ({ ...f, url: e.target.value }))}
                   placeholder="https://…"
+                />
+              </div>
+            )}
+
+            {showFileUpload && selectedType && (
+              <div className="space-y-1.5">
+                <Label>
+                  {selectedType.name === 'image' ? 'Image' : 'File'}{' '}
+                  <span className="text-destructive">*</span>
+                </Label>
+                <FileUpload
+                  itemType={selectedType.name as 'file' | 'image'}
+                  uploaded={uploadedFile}
+                  onUploadComplete={setUploadedFile}
+                  onClear={() => setUploadedFile(null)}
                 />
               </div>
             )}

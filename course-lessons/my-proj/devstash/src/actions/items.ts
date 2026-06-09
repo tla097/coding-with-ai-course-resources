@@ -10,6 +10,7 @@ import {
   toggleItemFavorite as dbToggleItemFavorite,
   toggleItemPin as dbToggleItemPin,
 } from '@/lib/db/items'
+import { createSupabaseServer, SUPABASE_BUCKET } from '@/lib/supabase/server'
 
 const updateItemSchema = z.object({
   title: z.string().trim().min(1, 'Title is required'),
@@ -21,21 +22,36 @@ const updateItemSchema = z.object({
   collectionIds: z.array(z.string()).default([]),
 })
 
-const ITEM_TYPE_NAMES = ['snippet', 'prompt', 'command', 'note', 'link'] as const
+const ITEM_TYPE_NAMES = ['snippet', 'prompt', 'command', 'note', 'link', 'file', 'image'] as const
 
 const createItemSchema = z.object({
   title: z.string().trim().min(1, 'Title is required'),
   description: z.string().trim().optional().nullable().transform(v => v ?? null),
   content: z.string().optional().nullable().transform(v => v ?? null),
-  url: z.url('Invalid URL').optional().nullable().transform(v => v ?? null),
+  url: z.string().optional().nullable().transform(v => v ?? null),
   language: z.string().trim().optional().nullable().transform(v => v ?? null),
   tags: z.array(z.string().trim().min(1)).default([]),
   collectionIds: z.array(z.string()).default([]),
   itemTypeId: z.string().min(1, 'Item type is required'),
   itemTypeName: z.enum(ITEM_TYPE_NAMES),
+  fileUrl: z.string().optional().nullable().transform(v => v ?? null),
+  fileName: z.string().optional().nullable().transform(v => v ?? null),
+  fileSize: z.number().optional().nullable().transform(v => v ?? null),
 }).superRefine((data, ctx) => {
-  if (data.itemTypeName === 'link' && !data.url) {
-    ctx.addIssue({ code: 'custom', message: 'URL is required', path: ['url'] })
+  if (data.itemTypeName === 'link') {
+    if (!data.url) {
+      ctx.addIssue({ code: 'custom', message: 'URL is required', path: ['url'] })
+    } else {
+      const urlCheck = z.url().safeParse(data.url)
+      if (!urlCheck.success) {
+        ctx.addIssue({ code: 'custom', message: 'Invalid URL', path: ['url'] })
+      }
+    }
+  }
+  if (data.itemTypeName === 'file' || data.itemTypeName === 'image') {
+    if (!data.fileUrl) {
+      ctx.addIssue({ code: 'custom', message: 'File upload is required', path: ['fileUrl'] })
+    }
   }
 })
 
@@ -55,12 +71,15 @@ export async function createItem(data: CreateItemInput) {
     return { success: false as const, error: limitCheck.error, limitReached: limitCheck.limitReached }
   }
 
-  const { title, description, content, url, language, tags, collectionIds, itemTypeId, itemTypeName } = parsed.data
-  const contentType: 'TEXT' | 'URL' = itemTypeName === 'link' ? 'URL' : 'TEXT'
+  const { title, description, content, url, language, tags, collectionIds, itemTypeId, itemTypeName, fileUrl, fileName, fileSize } = parsed.data
+  const contentType: 'TEXT' | 'URL' | 'FILE' =
+    itemTypeName === 'link' ? 'URL' :
+    (itemTypeName === 'file' || itemTypeName === 'image') ? 'FILE' : 'TEXT'
 
   try {
     const created = await dbCreateItem(session.user.id, {
       title, description, content, url, language, tags, collectionIds, itemTypeId, contentType,
+      fileUrl, fileName, fileSize,
     })
     return { success: true as const, data: created }
   } catch {
@@ -95,6 +114,12 @@ export async function deleteItem(itemId: string) {
   try {
     const deleted = await dbDeleteItem(itemId, session.user.id)
     if (!deleted) return { success: false as const, error: 'Item not found.' }
+
+    if (deleted.fileUrl) {
+      const supabase = createSupabaseServer()
+      await supabase.storage.from(SUPABASE_BUCKET).remove([deleted.fileUrl])
+    }
+
     return { success: true as const }
   } catch {
     return { success: false as const, error: 'Failed to delete item.' }
