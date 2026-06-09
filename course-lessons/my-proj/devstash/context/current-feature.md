@@ -1,15 +1,15 @@
-# Current Feature
+# Current Feature: Language Dropdown for Code Editor
 
 ## Status
 <!-- Not Started|In Progress|Completed -->
-Completed
+In Progress
 
 ## Goals
-- Add "Upgrade" ghost button in TopBar, visible only to free users, linking to /upgrade
-- Create /upgrade page inside the dashboard layout with a pricing comparison (Free vs Pro)
-- Monthly/yearly toggle matching the homepage PricingSection style ($8/mo or $72/yr)
-- Clicking upgrade on the /upgrade page initiates Stripe checkout via existing /api/stripe/checkout
-- Pro users are redirected away from /upgrade (to /dashboard)
+- Replace the language text input with a Select dropdown in the New Item dialog (snippet and command types)
+- Replace the language text input with a Select dropdown in the Item Drawer edit mode (snippet and command types)
+- Move the language selector above the code editor so the selection is visible before the content area
+- Support 24 common languages: TypeScript, JavaScript, Python, Rust, Go, Java, C#, C++, C, Bash/Shell, PowerShell, HTML, CSS, JSON, YAML, Markdown, SQL, PHP, Ruby, Swift, Kotlin, Dockerfile, GraphQL, plus Plain text as default
+- Selecting a language live-updates Monaco syntax highlighting immediately without requiring a save
 
 ## Notes
 <!-- Any extra notes -->
@@ -85,4 +85,4 @@ Completed
 08/06/2026 15:15 - Completed Stripe Integration Phase 1: stripe installed, src/lib/stripe.ts singleton (apiVersion 2026-05-27.dahlia), isPro: boolean added to Session + JWT types, JWT always-sync callback reads isPro from DB on every refresh, FREE_TIER_ITEM_LIMIT=50 + FREE_TIER_COLLECTION_LIMIT=3 added to constants, src/lib/usage-limits.ts (checkItemLimit + checkCollectionLimit), free tier enforced in createItem + createCollection actions; 8 new unit tests; 173 tests passing; merged to main
 08/06/2026 15:30 - Completed Stripe Integration Phase 2: webhook handler (/api/webhooks/stripe) for checkout.session.completed, customer.subscription.updated, customer.subscription.deleted; checkout route (/api/stripe/checkout) with Customer create/reuse and server-side price ID validation; billing portal route (/api/stripe/portal); BillingSection component (Free/Pro badge, upgrade buttons, manage subscription); UpgradeToast client component; settings page updated with searchParams and parallel billing fetch; env vars renamed to NEXT_PUBLIC_*; 173 tests passing; merged to main
 08/06/2026 15:45 - ProGate upgrade page for /items/files and /items/images (free users see Crown icon, description, upgrade buttons instead of item list); seed reduced to 3 collections + 10 items to match free tier limits; 24 new unit tests for checkout, portal, and webhook route handlers; 197 tests passing
-08/06/2026 17:00 - Upgrade page: /upgrade route with pricing comparison UI (Free vs Pro, monthly/yearly toggle matching homepage), ghost "Upgrade" button in TopBar for free users only, Pro users redirected to /dashboard; isPro threaded from session through DashboardShell → TopBar; build passing
+08/06/2026 16:35 - Upgrade page: /upgrade route with pricing comparison UI (Free vs Pro, monthly/yearly toggle matching homepage), ghost "Upgrade" button in TopBar for free users only, Pro users redirected to /dashboard; isPro threaded from session through DashboardShell → TopBar; build passing

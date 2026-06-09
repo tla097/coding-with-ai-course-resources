@@ -17,10 +17,44 @@ import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import CodeEditor from '@/components/ui/CodeEditor'
 import MarkdownEditor from '@/components/ui/MarkdownEditor'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { ICON_MAP } from '@/lib/icon-map'
 import { createItem } from '@/actions/items'
 import CollectionPicker from '@/components/items/CollectionPicker'
 import type { SidebarItemType } from '@/lib/db/sidebar'
+
+const LANGUAGES = [
+  { value: 'plaintext', label: 'Plain text' },
+  { value: 'typescript', label: 'TypeScript' },
+  { value: 'javascript', label: 'JavaScript' },
+  { value: 'python', label: 'Python' },
+  { value: 'rust', label: 'Rust' },
+  { value: 'go', label: 'Go' },
+  { value: 'java', label: 'Java' },
+  { value: 'csharp', label: 'C#' },
+  { value: 'cpp', label: 'C++' },
+  { value: 'c', label: 'C' },
+  { value: 'bash', label: 'Bash / Shell' },
+  { value: 'powershell', label: 'PowerShell' },
+  { value: 'html', label: 'HTML' },
+  { value: 'css', label: 'CSS' },
+  { value: 'json', label: 'JSON' },
+  { value: 'yaml', label: 'YAML' },
+  { value: 'markdown', label: 'Markdown' },
+  { value: 'sql', label: 'SQL' },
+  { value: 'php', label: 'PHP' },
+  { value: 'ruby', label: 'Ruby' },
+  { value: 'swift', label: 'Swift' },
+  { value: 'kotlin', label: 'Kotlin' },
+  { value: 'dockerfile', label: 'Dockerfile' },
+  { value: 'graphql', label: 'GraphQL' },
+]
 
 const CREATABLE_TYPES = ['snippet', 'prompt', 'command', 'note', 'link']
 const CONTENT_TYPES = ['snippet', 'prompt', 'command', 'note']
@@ -47,7 +81,7 @@ const EMPTY_FORM: FormState = {
   description: '',
   content: '',
   url: '',
-  language: '',
+  language: 'plaintext',
   tags: '',
 }
 
@@ -100,7 +134,7 @@ export default function NewItemDialog({ itemTypes, collections }: Props) {
       description: form.description || null,
       content: form.content || null,
       url: form.url || null,
-      language: form.language || null,
+      language: form.language === 'plaintext' ? null : form.language || null,
       tags,
       collectionIds: selectedCollectionIds,
       itemTypeId: selectedType.id,
@@ -193,6 +227,27 @@ export default function NewItemDialog({ itemTypes, collections }: Props) {
               />
             </div>
 
+            {showLanguage && (
+              <div className="space-y-1.5">
+                <Label htmlFor="new-language">Language</Label>
+                <Select
+                  value={form.language}
+                  onValueChange={v => setForm(f => ({ ...f, language: v ?? 'plaintext' }))}
+                >
+                  <SelectTrigger id="new-language" className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {LANGUAGES.map(lang => (
+                      <SelectItem key={lang.value} value={lang.value}>
+                        {lang.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
             {showContent && (
               <div className="space-y-1.5">
                 <Label>Content</Label>
@@ -200,7 +255,7 @@ export default function NewItemDialog({ itemTypes, collections }: Props) {
                   <CodeEditor
                     value={form.content}
                     onChange={v => setForm(f => ({ ...f, content: v }))}
-                    language={form.language || null}
+                    language={form.language === 'plaintext' ? null : form.language || null}
                   />
                 ) : showMarkdownEditor ? (
                   <MarkdownEditor
@@ -216,18 +271,6 @@ export default function NewItemDialog({ itemTypes, collections }: Props) {
                     rows={6}
                   />
                 )}
-              </div>
-            )}
-
-            {showLanguage && (
-              <div className="space-y-1.5">
-                <Label htmlFor="new-language">Language</Label>
-                <Input
-                  id="new-language"
-                  value={form.language}
-                  onChange={e => setForm(f => ({ ...f, language: e.target.value }))}
-                  placeholder="e.g. typescript, python"
-                />
               </div>
             )}
 

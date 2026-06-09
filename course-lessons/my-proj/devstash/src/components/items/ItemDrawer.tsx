@@ -27,10 +27,44 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { ICON_MAP } from '@/lib/icon-map'
 import CollectionPicker from '@/components/items/CollectionPicker'
 import type { ItemDetail } from '@/lib/db/items'
 import { updateItem, deleteItem, toggleItemFavorite, toggleItemPin } from '@/actions/items'
+
+const LANGUAGES = [
+  { value: 'plaintext', label: 'Plain text' },
+  { value: 'typescript', label: 'TypeScript' },
+  { value: 'javascript', label: 'JavaScript' },
+  { value: 'python', label: 'Python' },
+  { value: 'rust', label: 'Rust' },
+  { value: 'go', label: 'Go' },
+  { value: 'java', label: 'Java' },
+  { value: 'csharp', label: 'C#' },
+  { value: 'cpp', label: 'C++' },
+  { value: 'c', label: 'C' },
+  { value: 'bash', label: 'Bash / Shell' },
+  { value: 'powershell', label: 'PowerShell' },
+  { value: 'html', label: 'HTML' },
+  { value: 'css', label: 'CSS' },
+  { value: 'json', label: 'JSON' },
+  { value: 'yaml', label: 'YAML' },
+  { value: 'markdown', label: 'Markdown' },
+  { value: 'sql', label: 'SQL' },
+  { value: 'php', label: 'PHP' },
+  { value: 'ruby', label: 'Ruby' },
+  { value: 'swift', label: 'Swift' },
+  { value: 'kotlin', label: 'Kotlin' },
+  { value: 'dockerfile', label: 'Dockerfile' },
+  { value: 'graphql', label: 'GraphQL' },
+]
 
 interface ItemDetailResponse extends Omit<ItemDetail, 'createdAt' | 'updatedAt'> {
   createdAt: string
@@ -109,7 +143,7 @@ export default function ItemDrawer({ itemId, open, onOpenChange, collections }: 
       description: item.description ?? '',
       content: item.content ?? '',
       url: item.url ?? '',
-      language: item.language ?? '',
+      language: item.language || 'plaintext',
       tags: item.tags.map(t => t.name).join(', '),
       collectionIds: item.collections.map(c => c.collection.id),
     })
@@ -134,7 +168,7 @@ export default function ItemDrawer({ itemId, open, onOpenChange, collections }: 
         description: editForm.description || null,
         content: editForm.content || null,
         url: editForm.url || null,
-        language: editForm.language || null,
+        language: editForm.language === 'plaintext' ? null : editForm.language || null,
         tags,
         collectionIds: editForm.collectionIds,
       })
@@ -381,6 +415,27 @@ export default function ItemDrawer({ itemId, open, onOpenChange, collections }: 
                     />
                   </div>
 
+                  {showLanguage && (
+                    <div className="space-y-1.5">
+                      <Label htmlFor="edit-language">Language</Label>
+                      <Select
+                        value={editForm.language}
+                        onValueChange={v => setEditForm(f => ({ ...f, language: v ?? 'plaintext' }))}
+                      >
+                        <SelectTrigger id="edit-language" className="w-full">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {LANGUAGES.map(lang => (
+                            <SelectItem key={lang.value} value={lang.value}>
+                              {lang.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+
                   {showContent && (
                     <div className="space-y-1.5">
                       <Label>Content</Label>
@@ -388,7 +443,7 @@ export default function ItemDrawer({ itemId, open, onOpenChange, collections }: 
                         <CodeEditor
                           value={editForm.content}
                           onChange={v => setEditForm(f => ({ ...f, content: v }))}
-                          language={editForm.language || null}
+                          language={editForm.language === 'plaintext' ? null : editForm.language || null}
                         />
                       ) : showMarkdownEditor ? (
                         <MarkdownEditor
@@ -404,18 +459,6 @@ export default function ItemDrawer({ itemId, open, onOpenChange, collections }: 
                           rows={8}
                         />
                       )}
-                    </div>
-                  )}
-
-                  {showLanguage && (
-                    <div className="space-y-1.5">
-                      <Label htmlFor="edit-language">Language</Label>
-                      <Input
-                        id="edit-language"
-                        value={editForm.language}
-                        onChange={e => setEditForm(f => ({ ...f, language: e.target.value }))}
-                        placeholder="e.g. typescript, python"
-                      />
                     </div>
                   )}
 
