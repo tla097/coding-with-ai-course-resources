@@ -1,29 +1,12 @@
-# Current Feature: AI Description Generator
+# Current Feature
 
 ## Status
-In Progress
+<!-- Not Started|In Progress|Completed -->
 
 ## Goals
 
-- Add a Sparkles icon button next to the Description label in both NewItemDialog and ItemDrawer edit mode
-- Clicking the button calls a new `generateDescription` server action that uses Gemini to produce a 1–2 sentence summary
-- The action looks at the current title, content/url (whatever is available), and item type
-- The generated description is inserted directly into the description textarea — no accept/dismiss flow needed
-- Button is Pro-only (hidden for free users), matching the auto-tag pattern
-- Loading state on the button while generating ("Generating…")
-- Error handling via toast on failure
-- Rate limited: 5 requests per minute per user (same config as auto-tags)
-- Unit tests for the new server action
-
 ## Notes
-
-- Project uses Google Gemini (`gemini-2.5-flash-lite`) via `@google/genai` SDK. See `src/lib/gemini.ts`.
-- `generateAutoTags` in `src/actions/ai.ts` is the pattern to follow — same auth, Pro gating, Zod validation, rate limit, and Gemini call shape.
-- The Suggest Tags button pattern in NewItemDialog and ItemDrawer is the UI pattern to follow for the Generate Description button.
-- No new component needed — just a button inline with the Description label (same as the Suggest Tags button is inline with the Tags label).
-- For link items, use the URL field as "content" input since there is no text content.
-- Content should be truncated to 2000 chars before the API call.
-- `isPro` is already threaded to both NewItemDialog and ItemDrawer via existing props.
+<!-- Any extra notes -->
 
 ## History
 <!-- Keep this updated. Earliest to Latest. Format: DD/MM/YYYY HH:MM -->
@@ -99,3 +82,4 @@ In Progress
 08/06/2026 16:35 - Upgrade page: /upgrade route with pricing comparison UI (Free vs Pro, monthly/yearly toggle matching homepage), ghost "Upgrade" button in TopBar for free users only, Pro users redirected to /dashboard; isPro threaded from session through DashboardShell → TopBar; build passing
 09/06/2026 09:55 - Completed Language Dropdown for Code Editor: replaced free-text language input with Select dropdown (24 languages + Plain text) in NewItemDialog and ItemDrawer edit mode; language selector moved above code editor for immediate visual feedback; selecting a language live-updates Monaco syntax highlighting without saving; 197 tests passing; merged to main
 09/06/2026 10:35 - Completed AI Auto-Tagging: src/lib/gemini.ts (GoogleGenAI singleton + AI_MODEL constant), src/actions/ai.ts (generateAutoTags server action — auth, Pro gate, Zod, 5req/min rate limit, Gemini call, markdown-fence stripping), AiTagSuggestions.tsx (accept/dismiss chip list with Sparkles icon); Suggest Tags button added to NewItemDialog and ItemDrawer edit mode (hidden for free users); isPro threaded via TopBar and DashboardShell; 16 unit tests; 213 tests passing; merged to main
+09/06/2026 11:05 - Completed AI Description Generator: generateDescription server action added to src/actions/ai.ts (auth, Pro gate, Zod, 5req/min rate limit, Gemini call); Generate button (Sparkles icon) added next to Description label in NewItemDialog and ItemDrawer edit mode (Pro-only, hidden for free users); generated description populates textarea directly; 12 unit tests; 225 tests passing; merged to main
