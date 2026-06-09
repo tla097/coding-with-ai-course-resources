@@ -9,7 +9,7 @@ vi.mock('@/lib/gemini', () => ({
   AI_MODEL: 'gemini-2.5-flash-lite',
 }))
 
-import { generateAutoTags } from '@/actions/ai'
+import { generateAutoTags, generateDescription } from '@/actions/ai'
 import { auth } from '@/auth'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { gemini } from '@/lib/gemini'
@@ -146,5 +146,98 @@ describe('generateAutoTags', () => {
     await generateAutoTags({ ...validInput, content: 'x'.repeat(5000) })
     const call = mockGenerateContent.mock.calls[0][0] as { contents: string }
     expect(call.contents).not.toContain('x'.repeat(2001))
+  })
+})
+
+const validDescInput = {
+  title: 'React hooks guide',
+  content: 'A guide to useState and useEffect in React.',
+  url: '',
+  itemType: 'snippet',
+}
+
+describe('generateDescription', () => {
+  beforeEach(() => vi.clearAllMocks())
+
+  it('returns error when not authenticated', async () => {
+    mockAuth.mockResolvedValueOnce(null)
+    const result = await generateDescription(validDescInput)
+    expect(result).toEqual({ success: false, error: 'Not authenticated.' })
+  })
+
+  it('returns error for free users', async () => {
+    mockAuth.mockResolvedValueOnce(mockFreeSession as never)
+    const result = await generateDescription(validDescInput)
+    expect(result).toEqual({ success: false, error: 'Pro plan required.' })
+  })
+
+  it('returns error when title is empty', async () => {
+    mockAuth.mockResolvedValueOnce(mockProSession as never)
+    const result = await generateDescription({ ...validDescInput, title: '' })
+    expect(result).toEqual({ success: false, error: 'Invalid input.' })
+  })
+
+  it('returns error when title exceeds max length', async () => {
+    mockAuth.mockResolvedValueOnce(mockProSession as never)
+    const result = await generateDescription({ ...validDescInput, title: 'a'.repeat(201) })
+    expect(result).toEqual({ success: false, error: 'Invalid input.' })
+  })
+
+  it('returns error when rate limit is exceeded', async () => {
+    mockAuth.mockResolvedValueOnce(mockProSession as never)
+    mockCheckRateLimit.mockResolvedValueOnce({ success: false, remaining: 0, reset: Date.now() + 60000 })
+    const result = await generateDescription(validDescInput)
+    expect(result).toEqual({ success: false, error: 'Rate limit reached. Try again later.' })
+  })
+
+  it('calls checkRateLimit with correct key and limits', async () => {
+    mockAuth.mockResolvedValueOnce(mockProSession as never)
+    mockGenerateContent.mockResolvedValueOnce({ text: 'A great description.' } as never)
+    await generateDescription(validDescInput)
+    expect(mockCheckRateLimit).toHaveBeenCalledWith('ai:description:user-1', 5, '1 m')
+  })
+
+  it('returns description on successful call', async () => {
+    mockAuth.mockResolvedValueOnce(mockProSession as never)
+    mockGenerateContent.mockResolvedValueOnce({ text: 'A concise guide to React hooks.' } as never)
+    const result = await generateDescription(validDescInput)
+    expect(result).toEqual({ success: true, data: { description: 'A concise guide to React hooks.' } })
+  })
+
+  it('returns error when model returns empty string', async () => {
+    mockAuth.mockResolvedValueOnce(mockProSession as never)
+    mockGenerateContent.mockResolvedValueOnce({ text: '' } as never)
+    const result = await generateDescription(validDescInput)
+    expect(result).toEqual({ success: false, error: 'Failed to generate description.' })
+  })
+
+  it('returns error when model throws', async () => {
+    mockAuth.mockResolvedValueOnce(mockProSession as never)
+    mockGenerateContent.mockRejectedValueOnce(new Error('API error'))
+    const result = await generateDescription(validDescInput)
+    expect(result).toEqual({ success: false, error: 'Failed to generate description.' })
+  })
+
+  it('uses url as content fallback for link items', async () => {
+    mockAuth.mockResolvedValueOnce(mockProSession as never)
+    mockGenerateContent.mockResolvedValueOnce({ text: 'A useful link.' } as never)
+    await generateDescription({ title: 'GitHub', content: '', url: 'https://github.com', itemType: 'link' })
+    const call = mockGenerateContent.mock.calls[0][0] as { contents: string }
+    expect(call.contents).toContain('https://github.com')
+  })
+
+  it('truncates content to 2000 chars before sending', async () => {
+    mockAuth.mockResolvedValueOnce(mockProSession as never)
+    mockGenerateContent.mockResolvedValueOnce({ text: 'A description.' } as never)
+    await generateDescription({ ...validDescInput, content: 'x'.repeat(5000) })
+    const call = mockGenerateContent.mock.calls[0][0] as { contents: string }
+    expect(call.contents).not.toContain('x'.repeat(2001))
+  })
+
+  it('handles missing content gracefully', async () => {
+    mockAuth.mockResolvedValueOnce(mockProSession as never)
+    mockGenerateContent.mockResolvedValueOnce({ text: 'A note about something.' } as never)
+    const result = await generateDescription({ title: 'My note', itemType: 'note' })
+    expect(result).toEqual({ success: true, data: { description: 'A note about something.' } })
   })
 })

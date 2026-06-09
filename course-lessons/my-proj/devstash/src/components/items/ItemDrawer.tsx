@@ -39,7 +39,7 @@ import CollectionPicker from '@/components/items/CollectionPicker'
 import AiTagSuggestions from '@/components/items/AiTagSuggestions'
 import type { ItemDetail } from '@/lib/db/items'
 import { updateItem, deleteItem, toggleItemFavorite, toggleItemPin } from '@/actions/items'
-import { generateAutoTags } from '@/actions/ai'
+import { generateAutoTags, generateDescription } from '@/actions/ai'
 
 const LANGUAGES = [
   { value: 'plaintext', label: 'Plain text' },
@@ -119,6 +119,7 @@ export default function ItemDrawer({ itemId, open, onOpenChange, collections, is
   const [pinning, setPinning] = useState(false)
   const [tagSuggestions, setTagSuggestions] = useState<string[]>([])
   const [suggestingTags, setSuggestingTags] = useState(false)
+  const [generatingDescription, setGeneratingDescription] = useState(false)
 
   useEffect(() => {
     if (!itemId || !open) return
@@ -153,12 +154,30 @@ export default function ItemDrawer({ itemId, open, onOpenChange, collections, is
       collectionIds: item.collections.map(c => c.collection.id),
     })
     setTagSuggestions([])
+    setGeneratingDescription(false)
     setIsEditing(true)
   }
 
   function handleCancelEdit() {
     setTagSuggestions([])
     setIsEditing(false)
+  }
+
+  async function handleGenerateDescription() {
+    if (!item) return
+    setGeneratingDescription(true)
+    const result = await generateDescription({
+      title: editForm.title || item.title,
+      content: editForm.content.slice(0, 2000),
+      url: editForm.url,
+      itemType: item.itemType.name,
+    })
+    setGeneratingDescription(false)
+    if (!result.success) {
+      toast.error(result.error)
+      return
+    }
+    setEditForm(f => ({ ...f, description: result.data.description }))
   }
 
   async function handleSuggestTags() {
@@ -443,7 +462,22 @@ export default function ItemDrawer({ itemId, open, onOpenChange, collections, is
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label htmlFor="edit-description">Description</Label>
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="edit-description">Description</Label>
+                      {isPro && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="h-auto py-0.5 px-2 text-xs text-muted-foreground gap-1"
+                          onClick={handleGenerateDescription}
+                          disabled={generatingDescription}
+                        >
+                          <Sparkles className="h-3 w-3" />
+                          {generatingDescription ? 'Generating…' : 'Generate'}
+                        </Button>
+                      )}
+                    </div>
                     <Textarea
                       id="edit-description"
                       value={editForm.description}
