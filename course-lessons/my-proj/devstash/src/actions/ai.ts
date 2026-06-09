@@ -26,9 +26,14 @@ const explainCodeSchema = z.object({
   language: z.string().trim().optional(),
 })
 
+const optimizePromptSchema = z.object({
+  content: z.string().trim().min(1).max(50000),
+})
+
 export type GenerateDescriptionInput = z.input<typeof generateDescriptionSchema>
 export type GenerateAutoTagsInput = z.input<typeof generateAutoTagsSchema>
 export type ExplainCodeInput = z.input<typeof explainCodeSchema>
+export type OptimizePromptInput = z.input<typeof optimizePromptSchema>
 
 export async function generateDescription(data: GenerateDescriptionInput) {
   const session = await auth()
@@ -99,6 +104,43 @@ Return a clear explanation in markdown format.`,
     return { success: true as const, data: { explanation } }
   } catch {
     return { success: false as const, error: 'Failed to generate explanation.' }
+  }
+}
+
+export async function optimizePrompt(data: OptimizePromptInput) {
+  const session = await auth()
+  if (!session?.user?.id) return { success: false as const, error: 'Not authenticated.' }
+  if (!session.user.isPro) return { success: false as const, error: 'Pro plan required.' }
+
+  const parsed = optimizePromptSchema.safeParse(data)
+  if (!parsed.success) return { success: false as const, error: 'Invalid input.' }
+
+  const limit = await checkRateLimit(`ai:optimize:${session.user.id}`, 5, '1 m')
+  if (!limit.success) return { success: false as const, error: 'Rate limit reached. Try again later.' }
+
+  const { content } = parsed.data
+  const sanitizedContent = content
+    .trim()
+    .slice(0, MAX_CONTENT_LENGTH)
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '')
+
+  try {
+    const response = await gemini.models.generateContent({
+      model: AI_MODEL,
+      contents: `You are a prompt engineering expert. Analyze the following AI prompt and improve it for clarity, specificity, and effectiveness. If the prompt is already well-written, return it with only minor improvements.
+
+Original prompt:
+${sanitizedContent}
+
+Return ONLY the improved prompt text, no explanation or commentary.`,
+    })
+
+    const optimized = response.text?.trim() ?? ''
+    if (!optimized) return { success: false as const, error: 'Failed to optimize prompt.' }
+
+    return { success: true as const, data: { optimized } }
+  } catch {
+    return { success: false as const, error: 'Failed to optimize prompt.' }
   }
 }
 

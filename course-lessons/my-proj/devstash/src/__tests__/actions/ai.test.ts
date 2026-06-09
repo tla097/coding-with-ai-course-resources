@@ -9,7 +9,7 @@ vi.mock('@/lib/gemini', () => ({
   AI_MODEL: 'gemini-2.5-flash-lite',
 }))
 
-import { generateAutoTags, generateDescription, explainCode } from '@/actions/ai'
+import { generateAutoTags, generateDescription, explainCode, optimizePrompt } from '@/actions/ai'
 import { auth } from '@/auth'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { gemini } from '@/lib/gemini'
@@ -325,5 +325,82 @@ describe('explainCode', () => {
     await explainCode({ ...validExplainInput, content: 'x'.repeat(5000) })
     const call = mockGenerateContent.mock.calls[0][0] as { contents: string }
     expect(call.contents).not.toContain('x'.repeat(2001))
+  })
+})
+
+const validOptimizeInput = {
+  content: 'Write me code that does something.',
+}
+
+describe('optimizePrompt', () => {
+  beforeEach(() => vi.clearAllMocks())
+
+  it('returns error when not authenticated', async () => {
+    mockAuth.mockResolvedValueOnce(null)
+    const result = await optimizePrompt(validOptimizeInput)
+    expect(result).toEqual({ success: false, error: 'Not authenticated.' })
+  })
+
+  it('returns error for free users', async () => {
+    mockAuth.mockResolvedValueOnce(mockFreeSession as never)
+    const result = await optimizePrompt(validOptimizeInput)
+    expect(result).toEqual({ success: false, error: 'Pro plan required.' })
+  })
+
+  it('returns error when content is empty', async () => {
+    mockAuth.mockResolvedValueOnce(mockProSession as never)
+    const result = await optimizePrompt({ content: '' })
+    expect(result).toEqual({ success: false, error: 'Invalid input.' })
+  })
+
+  it('returns error when rate limit is exceeded', async () => {
+    mockAuth.mockResolvedValueOnce(mockProSession as never)
+    mockCheckRateLimit.mockResolvedValueOnce({ success: false, remaining: 0, reset: Date.now() + 60000 })
+    const result = await optimizePrompt(validOptimizeInput)
+    expect(result).toEqual({ success: false, error: 'Rate limit reached. Try again later.' })
+  })
+
+  it('calls checkRateLimit with correct key and limits', async () => {
+    mockAuth.mockResolvedValueOnce(mockProSession as never)
+    mockGenerateContent.mockResolvedValueOnce({ text: 'An improved prompt.' } as never)
+    await optimizePrompt(validOptimizeInput)
+    expect(mockCheckRateLimit).toHaveBeenCalledWith('ai:optimize:user-1', 5, '1 m')
+  })
+
+  it('returns optimized prompt on successful call', async () => {
+    mockAuth.mockResolvedValueOnce(mockProSession as never)
+    mockGenerateContent.mockResolvedValueOnce({ text: 'Write production-quality code that achieves X.' } as never)
+    const result = await optimizePrompt(validOptimizeInput)
+    expect(result).toEqual({ success: true, data: { optimized: 'Write production-quality code that achieves X.' } })
+  })
+
+  it('returns error when model returns empty string', async () => {
+    mockAuth.mockResolvedValueOnce(mockProSession as never)
+    mockGenerateContent.mockResolvedValueOnce({ text: '' } as never)
+    const result = await optimizePrompt(validOptimizeInput)
+    expect(result).toEqual({ success: false, error: 'Failed to optimize prompt.' })
+  })
+
+  it('returns error when model throws', async () => {
+    mockAuth.mockResolvedValueOnce(mockProSession as never)
+    mockGenerateContent.mockRejectedValueOnce(new Error('API error'))
+    const result = await optimizePrompt(validOptimizeInput)
+    expect(result).toEqual({ success: false, error: 'Failed to optimize prompt.' })
+  })
+
+  it('truncates content to 2000 chars before sending', async () => {
+    mockAuth.mockResolvedValueOnce(mockProSession as never)
+    mockGenerateContent.mockResolvedValueOnce({ text: 'An improved prompt.' } as never)
+    await optimizePrompt({ content: 'x'.repeat(5000) })
+    const call = mockGenerateContent.mock.calls[0][0] as { contents: string }
+    expect(call.contents).not.toContain('x'.repeat(2001))
+  })
+
+  it('includes original prompt in the AI request', async () => {
+    mockAuth.mockResolvedValueOnce(mockProSession as never)
+    mockGenerateContent.mockResolvedValueOnce({ text: 'An improved prompt.' } as never)
+    await optimizePrompt({ content: 'Do something useful.' })
+    const call = mockGenerateContent.mock.calls[0][0] as { contents: string }
+    expect(call.contents).toContain('Do something useful.')
   })
 })
