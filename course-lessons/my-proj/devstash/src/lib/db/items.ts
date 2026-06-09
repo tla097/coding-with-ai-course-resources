@@ -11,6 +11,8 @@ export interface ItemWithType {
   contentType: string
   url: string | null
   fileUrl: string | null
+  fileName: string | null
+  fileSize: number | null
   itemType: { id: string; name: string; icon: string; color: string }
   tags: Array<{ id: string; name: string }>
 }
@@ -45,6 +47,8 @@ const itemSelect = {
   contentType: true,
   url: true,
   fileUrl: true,
+  fileName: true,
+  fileSize: true,
   itemType: {
     select: { id: true, name: true, icon: true, color: true },
   },

@@ -3,13 +3,14 @@
 import { useState } from 'react'
 import ItemCard from '@/components/dashboard/ItemCard'
 import ImageThumbnailCard from '@/components/items/ImageThumbnailCard'
+import FileListRow from '@/components/items/FileListRow'
 import ItemDrawer from '@/components/items/ItemDrawer'
 import type { ItemWithType } from '@/lib/db/items'
 
 interface Props {
   items: ItemWithType[]
   collections: { id: string; name: string }[]
-  variant?: 'list' | 'grid' | 'image-gallery'
+  variant?: 'list' | 'grid' | 'image-gallery' | 'file-list'
   isPro?: boolean
 }
 
@@ -27,6 +28,8 @@ export default function ItemsWithDrawer({ items, collections, variant = 'list', 
       ? 'grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3'
       : variant === 'grid'
       ? 'grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3'
+      : variant === 'file-list'
+      ? 'flex flex-col gap-2'
       : 'space-y-2'
 
   return (
@@ -35,6 +38,8 @@ export default function ItemsWithDrawer({ items, collections, variant = 'list', 
         {items.map(item =>
           variant === 'image-gallery' ? (
             <ImageThumbnailCard key={item.id} item={item} onClick={() => handleCardClick(item.id)} />
+          ) : variant === 'file-list' ? (
+            <FileListRow key={item.id} item={item} onClick={() => handleCardClick(item.id)} />
           ) : (
             <ItemCard key={item.id} item={item} onClick={() => handleCardClick(item.id)} />
           )

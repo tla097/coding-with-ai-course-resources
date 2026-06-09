@@ -1,13 +1,22 @@
-# Current Feature
+# Current Feature: File List View
 
 ## Status
-Not Started
+In Progress
 
 ## Goals
-<!-- What needs to be built -->
+- Update `/items/files` to display as a single-column list (like Google Drive/Dropbox) instead of grid cards
+- Each row shows: file icon (by extension), file name, file size, upload date, download button
+- Row hover highlight
+- Click row opens ItemDrawer
+- Download button triggers direct download (stop propagation)
+- Responsive: stack info vertically on mobile
 
 ## Notes
-<!-- Additional context, constraints, or implementation details -->
+- `/items/images` already uses the `image-gallery` variant in `ItemsWithDrawer` — a similar pattern will be needed for files (`file-list` variant or equivalent)
+- File icon should vary by extension (e.g. PDF, ZIP, DOC, etc.) — can use Lucide icons
+- Download button calls `/api/download` route (already exists from file upload feature)
+- File size is stored as bytes in `item.fileSize` — format for display (KB/MB)
+- Upload date is `item.createdAt`
 
 ## History
 <!-- Keep this updated. Earliest to Latest. Format: DD/MM/YYYY HH:MM -->

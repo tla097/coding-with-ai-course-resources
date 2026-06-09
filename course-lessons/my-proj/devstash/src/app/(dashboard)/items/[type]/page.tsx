@@ -74,7 +74,12 @@ export default async function ItemsTypePage({ params, searchParams }: Props) {
         </div>
       ) : (
         <>
-          <ItemsWithDrawer items={items} collections={collectionList} variant={typeName === 'image' ? 'image-gallery' : 'grid'} isPro={session?.user?.isPro ?? false} />
+          <ItemsWithDrawer
+            items={items}
+            collections={collectionList}
+            variant={typeName === 'image' ? 'image-gallery' : typeName === 'file' ? 'file-list' : 'grid'}
+            isPro={session?.user?.isPro ?? false}
+          />
           <Pagination page={page} totalPages={totalPages} basePath={`/items/${type}`} />
         </>
       )}
