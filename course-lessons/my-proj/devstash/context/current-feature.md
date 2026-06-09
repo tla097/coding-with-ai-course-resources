@@ -1,32 +1,13 @@
-# Current Feature: File Upload with Supabase Storage
+# Current Feature
 
 ## Status
-In Progress
+Not Started
 
 ## Goals
-
-- Create upload API route (`POST /api/upload`) using Supabase Storage signed upload URLs
-- Keep all Prisma/DB functions in `src/lib/db/items.ts`
-- Create `FileUpload` component with drag-and-drop, file validation, and upload progress indicator
-- Update `NewItemDialog` to use `FileUpload` for `file` and `image` item types
-- Display image preview for image items and file info (name, size) for file items in `ItemDrawer`
-- Add download button in `ItemDrawer` for file/image types
-- Create download proxy API route (`GET /api/download`) to avoid CORS issues with signed URLs
-- Delete files from Supabase Storage when items are deleted
+<!-- What needs to be built -->
 
 ## Notes
-
-- Storage provider: Supabase Storage (R2 excluded — requires payment card)
-- `.env` already contains the necessary Supabase keys (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY`)
-- Upload approach: server generates signed upload URL → client uploads directly to Supabase (avoids Next.js 1 MB body limit)
-- Download approach: server generates signed URL (1 hour expiry) proxied via API route
-- File constraints:
-  - Images: max 5 MB — `.png`, `.jpg`, `.jpeg`, `.gif`, `.webp`, `.svg`
-  - Files: max 10 MB — `.pdf`, `.txt`, `.md`, `.json`, `.yaml`, `.yml`, `.xml`, `.csv`, `.toml`, `.ini`
-- Install: `@supabase/supabase-js @supabase/ssr`
-- Supabase clients: `src/lib/supabase/client.ts` (browser) and `src/lib/supabase/server.ts` (server, uses secret key)
-- Item fields already in schema: `fileUrl`, `fileName`, `fileSize` — no migration needed
-- Reference: `devstash/docs/proton-drive-integration-plan.md` (Supabase section)
+<!-- Additional context, constraints, or implementation details -->
 
 ## History
 <!-- Keep this updated. Earliest to Latest. Format: DD/MM/YYYY HH:MM -->
@@ -91,17 +72,16 @@ In Progress
 08/06/2026 10:45 - Completed Favorites Page: /favorites route (protected), getFavoriteItems + getFavoriteCollections DB queries (updatedAt desc), FavoritesView compact monospace list (type icon/badge/date rows, two sections with counts), ItemDrawer on item click, collection rows navigate to /collections/[id], empty state, star icon in TopBar, 10 unit tests; merged to main
 08/06/2026 11:10 - Completed Favourite Toggle Button: toggleItemFavorite and toggleCollectionFavorite DB functions and server actions (ownership checked, { success, data, error } pattern); star toggle button on ItemCard (top-right, stops propagation), ItemDrawer action bar (Favorite/Unfavorite label), CollectionCard (star button + dropdown item), CollectionActions on /collections/[id]; local optimistic state + router.refresh() on all surfaces; 12 unit tests; merged to main
 08/06/2026 11:35 - Completed Favourites Sortable Columns: client-side sort by Name/Type/Date on items section and Name/Date on collections section; SortHeader component with active bg-accent highlight and ChevronUp/Down direction indicator; sort toggles asc↔desc on repeat click; defaults to Date descending; no server or DB changes; merged to main
-08/06/2026 12:55 - Started Pinned Items: created feature/pinned-items branch
-08/06/2026 13:00 - Implemented Pinned Items: toggleItemPin DB function and server action (ownership checked, { success, data, error } pattern); Pin button in ItemDrawer wired (optimistic update, Pin/Unpin label, toast on success); pinned items sort to top of /items/[type] and /collections/[id] listings (isPinned desc, createdAt desc); 11 unit tests; build passing
 08/06/2026 13:00 - Completed Pinned Items: toggleItemPin DB function and server action; Pin button wired in ItemDrawer with optimistic UI and toast; pinned items sort to top of type/collection listings; 11 unit tests; merged to main
 08/06/2026 13:30 - Completed Marketing Homepage: standalone prototype at prototypes/homepage/ (index.html, styles.css, script.js); navbar, hero chaos/arrow/dashboard visual with animated bouncing icons and mouse repel, features grid, AI section, pricing with monthly/yearly toggle, CTA, footer; scroll fade-in animations; responsive mobile layout; merged to main
 08/06/2026 13:50 - Completed Marketing Homepage (Next.js): src/app/page.tsx (server, auth redirect), Navbar.tsx (client, sticky scroll bg, mobile hamburger), HeroVisual.tsx (client, chaos canvas with labelled bubbles + mouse repel, arrow, static dashboard mockup), PricingSection.tsx (client, monthly/yearly toggle, $8/$6 Pro pricing); Features grid, AI section with code editor mockup, CTA, Footer all inline server components; build passing, 165 tests passing; merged to main
 08/06/2026 15:15 - Completed Stripe Integration Phase 1: stripe installed, src/lib/stripe.ts singleton (apiVersion 2026-05-27.dahlia), isPro: boolean added to Session + JWT types, JWT always-sync callback reads isPro from DB on every refresh, FREE_TIER_ITEM_LIMIT=50 + FREE_TIER_COLLECTION_LIMIT=3 added to constants, src/lib/usage-limits.ts (checkItemLimit + checkCollectionLimit), free tier enforced in createItem + createCollection actions; 8 new unit tests; 173 tests passing; merged to main
 08/06/2026 15:30 - Completed Stripe Integration Phase 2: webhook handler (/api/webhooks/stripe) for checkout.session.completed, customer.subscription.updated, customer.subscription.deleted; checkout route (/api/stripe/checkout) with Customer create/reuse and server-side price ID validation; billing portal route (/api/stripe/portal); BillingSection component (Free/Pro badge, upgrade buttons, manage subscription); UpgradeToast client component; settings page updated with searchParams and parallel billing fetch; env vars renamed to NEXT_PUBLIC_*; 173 tests passing; merged to main
-08/06/2026 15:45 - ProGate upgrade page for /items/files and /items/images (free users see Crown icon, description, upgrade buttons instead of item list); seed reduced to 3 collections + 10 items to match free tier limits; 24 new unit tests for checkout, portal, and webhook route handlers; 197 tests passing
-08/06/2026 16:35 - Upgrade page: /upgrade route with pricing comparison UI (Free vs Pro, monthly/yearly toggle matching homepage), ghost "Upgrade" button in TopBar for free users only, Pro users redirected to /dashboard; isPro threaded from session through DashboardShell → TopBar; build passing
+08/06/2026 15:45 - ProGate upgrade page for /items/files and /items/images (free users see Crown icon, description, upgrade buttons instead of item list); seed reduced to 3 collections + 10 items to match free tier limits; 24 new unit tests for checkout, portal, and webhook route handlers; 197 tests passing; merged to main
+08/06/2026 16:35 - Completed Upgrade page: /upgrade route with pricing comparison UI (Free vs Pro, monthly/yearly toggle matching homepage), ghost "Upgrade" button in TopBar for free users only, Pro users redirected to /dashboard; isPro threaded from session through DashboardShell → TopBar; build passing; merged to main
 09/06/2026 09:55 - Completed Language Dropdown for Code Editor: replaced free-text language input with Select dropdown (24 languages + Plain text) in NewItemDialog and ItemDrawer edit mode; language selector moved above code editor for immediate visual feedback; selecting a language live-updates Monaco syntax highlighting without saving; 197 tests passing; merged to main
 09/06/2026 10:35 - Completed AI Auto-Tagging: src/lib/gemini.ts (GoogleGenAI singleton + AI_MODEL constant), src/actions/ai.ts (generateAutoTags server action — auth, Pro gate, Zod, 5req/min rate limit, Gemini call, markdown-fence stripping), AiTagSuggestions.tsx (accept/dismiss chip list with Sparkles icon); Suggest Tags button added to NewItemDialog and ItemDrawer edit mode (hidden for free users); isPro threaded via TopBar and DashboardShell; 16 unit tests; 213 tests passing; merged to main
 09/06/2026 11:05 - Completed AI Description Generator: generateDescription server action added to src/actions/ai.ts (auth, Pro gate, Zod, 5req/min rate limit, Gemini call); Generate button (Sparkles icon) added next to Description label in NewItemDialog and ItemDrawer edit mode (Pro-only, hidden for free users); generated description populates textarea directly; 12 unit tests; 225 tests passing; merged to main
 09/06/2026 11:40 - Completed AI Explain Code: explainCode server action (auth, Pro gate, Zod, 5req/min rate limit, Gemini call, markdown response); Explain button (Sparkles) added to CodeEditor header in read-only mode; Crown icon + tooltip for free users; Loader2 spinner while generating; Code/Explain tabs appear after first explanation; explanation rendered via react-markdown in same container; resets on item change; isPro + itemType threaded from ItemDrawer; 11 unit tests; 236 tests passing; merged to main
 09/06/2026 12:00 - Completed AI Prompt Optimizer: optimizePrompt server action (auth, Pro gate, Zod, 5req/min rate limit, Gemini call); Optimize button (Sparkles) added to MarkdownEditor header in read-only mode for prompt items; Crown icon for free users; Loader2 spinner while optimizing; Original/Optimized tabs appear after optimization; "Use this" button enters edit mode with optimized content pre-filled in ItemDrawer; isPro + itemType + onUseOptimized threaded from ItemDrawer; 10 unit tests; 246 tests passing; merged to main
+09/06/2026 15:25 - Completed File Upload with Supabase Storage: POST /api/upload (signed upload URLs), GET /api/download (auth-gated proxy, RFC 5987 Content-Disposition), FileUpload component (drag-and-drop, MIME/size validation, XHR progress), NewItemDialog supports file and image types, ItemDrawer shows image preview and file info with Download button, deleteItem removes file from Supabase on item deletion; 252 tests passing; merged to main
