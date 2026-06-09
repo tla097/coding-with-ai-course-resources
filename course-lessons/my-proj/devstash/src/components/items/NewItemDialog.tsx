@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Plus } from 'lucide-react'
+import { Plus, Sparkles } from 'lucide-react'
 import { toast } from 'sonner'
 import {
   Dialog,
@@ -26,7 +26,9 @@ import {
 } from '@/components/ui/select'
 import { ICON_MAP } from '@/lib/icon-map'
 import { createItem } from '@/actions/items'
+import { generateAutoTags } from '@/actions/ai'
 import CollectionPicker from '@/components/items/CollectionPicker'
+import AiTagSuggestions from '@/components/items/AiTagSuggestions'
 import type { SidebarItemType } from '@/lib/db/sidebar'
 
 const LANGUAGES = [
@@ -65,6 +67,7 @@ const MARKDOWN_EDITOR_TYPES = ['note', 'prompt']
 interface Props {
   itemTypes: SidebarItemType[]
   collections: { id: string; name: string }[]
+  isPro?: boolean
 }
 
 interface FormState {
@@ -85,13 +88,15 @@ const EMPTY_FORM: FormState = {
   tags: '',
 }
 
-export default function NewItemDialog({ itemTypes, collections }: Props) {
+export default function NewItemDialog({ itemTypes, collections, isPro }: Props) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [saving, setSaving] = useState(false)
   const [selectedTypeId, setSelectedTypeId] = useState<string | null>(null)
   const [form, setForm] = useState<FormState>(EMPTY_FORM)
   const [selectedCollectionIds, setSelectedCollectionIds] = useState<string[]>([])
+  const [tagSuggestions, setTagSuggestions] = useState<string[]>([])
+  const [suggestingTags, setSuggestingTags] = useState(false)
 
   const creatableTypes = itemTypes.filter(t => CREATABLE_TYPES.includes(t.name))
   const selectedType = creatableTypes.find(t => t.id === selectedTypeId) ?? null
@@ -101,8 +106,41 @@ export default function NewItemDialog({ itemTypes, collections }: Props) {
     setSelectedTypeId(defaultType?.id ?? null)
     setForm(EMPTY_FORM)
     setSelectedCollectionIds([])
+    setTagSuggestions([])
     setSaving(false)
     setOpen(true)
+  }
+
+  async function handleSuggestTags() {
+    if (!selectedType) return
+    setSuggestingTags(true)
+    const result = await generateAutoTags({
+      title: form.title || 'Untitled',
+      content: form.content.slice(0, 2000),
+      itemType: selectedType.name,
+    })
+    setSuggestingTags(false)
+    if (!result.success) {
+      toast.error(result.error)
+      return
+    }
+    const existing = form.tags.split(',').map(t => t.trim()).filter(Boolean)
+    const fresh = result.data.tags.filter(t => !existing.includes(t))
+    setTagSuggestions(fresh)
+  }
+
+  function handleAcceptTag(tag: string) {
+    setTagSuggestions(prev => prev.filter(t => t !== tag))
+    setForm(f => {
+      const existing = f.tags.split(',').map(t => t.trim()).filter(Boolean)
+      if (existing.includes(tag)) return f
+      const updated = [...existing, tag].join(', ')
+      return { ...f, tags: updated }
+    })
+  }
+
+  function handleDismissTag(tag: string) {
+    setTagSuggestions(prev => prev.filter(t => t !== tag))
   }
 
   function handleClose(value: boolean) {
@@ -290,7 +328,22 @@ export default function NewItemDialog({ itemTypes, collections }: Props) {
             )}
 
             <div className="space-y-1.5">
-              <Label htmlFor="new-tags">Tags</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="new-tags">Tags</Label>
+                {isPro && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-auto py-0.5 px-2 text-xs text-muted-foreground gap-1"
+                    onClick={handleSuggestTags}
+                    disabled={suggestingTags}
+                  >
+                    <Sparkles className="h-3 w-3" />
+                    {suggestingTags ? 'Suggesting…' : 'Suggest Tags'}
+                  </Button>
+                )}
+              </div>
               <Input
                 id="new-tags"
                 value={form.tags}
@@ -298,6 +351,11 @@ export default function NewItemDialog({ itemTypes, collections }: Props) {
                 placeholder="react, typescript, hooks"
               />
               <p className="text-xs text-muted-foreground">Comma-separated</p>
+              <AiTagSuggestions
+                suggestions={tagSuggestions}
+                onAccept={handleAcceptTag}
+                onDismiss={handleDismissTag}
+              />
             </div>
 
             {collections.length > 0 && (
