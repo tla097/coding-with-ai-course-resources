@@ -61,7 +61,7 @@ export default function TopBar({ onMenuToggle, itemTypes, collections, onSearchC
           <Star className="h-5 w-5" />
         </Link>
         <NewCollectionDialog />
-        <NewItemDialog itemTypes={itemTypes} collections={collections} />
+        <NewItemDialog itemTypes={itemTypes} collections={collections} isPro={isPro} />
       </div>
     </header>
   )

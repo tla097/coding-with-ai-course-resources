@@ -98,6 +98,7 @@ export default function DashboardShell({ children, sidebarData, searchData, user
         open={drawerOpen}
         onOpenChange={setDrawerOpen}
         collections={sidebarData.allCollections}
+        isPro={isPro}
       />
     </div>
     </EditorPreferencesProvider>

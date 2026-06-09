@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Star, Pin, Copy, Pencil, Trash2, FolderOpen, Calendar, CalendarCheck, Save, X } from 'lucide-react'
+import { Star, Pin, Copy, Pencil, Trash2, FolderOpen, Calendar, CalendarCheck, Save, X, Sparkles } from 'lucide-react'
 import { toast } from 'sonner'
 import {
   Sheet,
@@ -36,8 +36,10 @@ import {
 } from '@/components/ui/select'
 import { ICON_MAP } from '@/lib/icon-map'
 import CollectionPicker from '@/components/items/CollectionPicker'
+import AiTagSuggestions from '@/components/items/AiTagSuggestions'
 import type { ItemDetail } from '@/lib/db/items'
 import { updateItem, deleteItem, toggleItemFavorite, toggleItemPin } from '@/actions/items'
+import { generateAutoTags } from '@/actions/ai'
 
 const LANGUAGES = [
   { value: 'plaintext', label: 'Plain text' },
@@ -86,6 +88,7 @@ interface Props {
   open: boolean
   onOpenChange: (open: boolean) => void
   collections: { id: string; name: string }[]
+  isPro?: boolean
 }
 
 const CONTENT_TYPES = ['snippet', 'prompt', 'command', 'note']
@@ -94,7 +97,7 @@ const CODE_EDITOR_TYPES = ['snippet', 'command']
 const MARKDOWN_EDITOR_TYPES = ['note', 'prompt']
 const URL_TYPES = ['link']
 
-export default function ItemDrawer({ itemId, open, onOpenChange, collections }: Props) {
+export default function ItemDrawer({ itemId, open, onOpenChange, collections, isPro }: Props) {
   const router = useRouter()
   const [item, setItem] = useState<ItemDetailResponse | null>(null)
   const [loading, setLoading] = useState(false)
@@ -114,6 +117,8 @@ export default function ItemDrawer({ itemId, open, onOpenChange, collections }: 
   const [deleting, setDeleting] = useState(false)
   const [favoriting, setFavoriting] = useState(false)
   const [pinning, setPinning] = useState(false)
+  const [tagSuggestions, setTagSuggestions] = useState<string[]>([])
+  const [suggestingTags, setSuggestingTags] = useState(false)
 
   useEffect(() => {
     if (!itemId || !open) return
@@ -147,11 +152,44 @@ export default function ItemDrawer({ itemId, open, onOpenChange, collections }: 
       tags: item.tags.map(t => t.name).join(', '),
       collectionIds: item.collections.map(c => c.collection.id),
     })
+    setTagSuggestions([])
     setIsEditing(true)
   }
 
   function handleCancelEdit() {
+    setTagSuggestions([])
     setIsEditing(false)
+  }
+
+  async function handleSuggestTags() {
+    if (!item) return
+    setSuggestingTags(true)
+    const result = await generateAutoTags({
+      title: editForm.title || item.title,
+      content: editForm.content.slice(0, 2000),
+      itemType: item.itemType.name,
+    })
+    setSuggestingTags(false)
+    if (!result.success) {
+      toast.error(result.error)
+      return
+    }
+    const existing = editForm.tags.split(',').map(t => t.trim()).filter(Boolean)
+    const fresh = result.data.tags.filter(t => !existing.includes(t))
+    setTagSuggestions(fresh)
+  }
+
+  function handleAcceptTag(tag: string) {
+    setTagSuggestions(prev => prev.filter(t => t !== tag))
+    setEditForm(f => {
+      const existing = f.tags.split(',').map(t => t.trim()).filter(Boolean)
+      if (existing.includes(tag)) return f
+      return { ...f, tags: [...existing, tag].join(', ') }
+    })
+  }
+
+  function handleDismissTag(tag: string) {
+    setTagSuggestions(prev => prev.filter(t => t !== tag))
   }
 
   async function handleSave() {
@@ -476,7 +514,22 @@ export default function ItemDrawer({ itemId, open, onOpenChange, collections }: 
                   )}
 
                   <div className="space-y-1.5">
-                    <Label htmlFor="edit-tags">Tags</Label>
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="edit-tags">Tags</Label>
+                      {isPro && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="h-auto py-0.5 px-2 text-xs text-muted-foreground gap-1"
+                          onClick={handleSuggestTags}
+                          disabled={suggestingTags}
+                        >
+                          <Sparkles className="h-3 w-3" />
+                          {suggestingTags ? 'Suggesting…' : 'Suggest Tags'}
+                        </Button>
+                      )}
+                    </div>
                     <Input
                       id="edit-tags"
                       value={editForm.tags}
@@ -484,6 +537,11 @@ export default function ItemDrawer({ itemId, open, onOpenChange, collections }: 
                       placeholder="react, typescript, hooks"
                     />
                     <p className="text-xs text-muted-foreground">Comma-separated</p>
+                    <AiTagSuggestions
+                      suggestions={tagSuggestions}
+                      onAccept={handleAcceptTag}
+                      onDismiss={handleDismissTag}
+                    />
                   </div>
 
                   {collections.length > 0 && (
