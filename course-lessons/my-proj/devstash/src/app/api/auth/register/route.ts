@@ -47,10 +47,6 @@ export async function POST(req: NextRequest) {
     const baseUrl = new URL(req.url).origin
     const verifyUrl = `${baseUrl}/verify-email?token=${token}`
 
-    if (process.env.NODE_ENV === "development") {
-      console.log(`\n[verify-email] ${verifyUrl}\n`)
-    }
-
     await sendVerificationEmail(email, name, verifyUrl)
   }
 

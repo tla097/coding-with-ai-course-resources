@@ -39,10 +39,6 @@ export async function POST(req: NextRequest) {
   const baseUrl = new URL(req.url).origin
   const verifyUrl = `${baseUrl}/verify-email?token=${token}`
 
-  if (process.env.NODE_ENV === 'development') {
-    console.log(`\n[resend-verification] ${verifyUrl}\n`)
-  }
-
   await sendVerificationEmail(email, user.name ?? 'there', verifyUrl)
 
   return Response.json({ success: true })

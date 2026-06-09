@@ -41,10 +41,6 @@ export async function requestPasswordReset(email: string) {
   const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http'
   const resetUrl = `${protocol}://${host}/reset-password?token=${token}`
 
-  if (process.env.NODE_ENV === 'development') {
-    console.log(`\n[reset-password] ${resetUrl}\n`)
-  }
-
   await sendPasswordResetEmail(email, resetUrl)
 
   return { success: true }
