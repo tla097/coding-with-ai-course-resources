@@ -1,13 +1,20 @@
-# Current Feature
+# Current Feature: Quick Copy Button on Item Cards
 
 ## Status
-Not Started
+In Progress
 
 ## Goals
-<!-- What needs to be built -->
+- Add `content` field to `ItemWithType` interface and `itemSelect` so the card has access to it
+- Add a copy icon button to `ItemCard` that is visible on card hover (opacity-0 → group-hover:opacity-100)
+- Copy logic: `content` for TEXT items, `url` for URL items, title as fallback for FILE items
+- Button stops click propagation (does not open drawer)
+- Show a sonner toast on successful copy ("Copied!")
+- Brief `Check` icon flash (1 second) before reverting to `Copy` icon
 
 ## Notes
-<!-- Additional context, constraints, or implementation details -->
+- `ItemWithType` and `itemSelect` live in `src/lib/db/items.ts` — add `content: string | null` to the interface and `content: true` to itemSelect
+- Copy button sits in the top-right action area alongside the favorite star button
+- `Check` and `Copy` icons from lucide-react; no new dependencies needed
 
 ## History
 <!-- Keep this updated. Earliest to Latest. Format: DD/MM/YYYY HH:MM -->

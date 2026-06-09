@@ -9,6 +9,7 @@ export interface ItemWithType {
   isPinned: boolean
   createdAt: Date
   contentType: string
+  content: string | null
   url: string | null
   fileUrl: string | null
   fileName: string | null
@@ -45,6 +46,7 @@ const itemSelect = {
   isPinned: true,
   createdAt: true,
   contentType: true,
+  content: true,
   url: true,
   fileUrl: true,
   fileName: true,
