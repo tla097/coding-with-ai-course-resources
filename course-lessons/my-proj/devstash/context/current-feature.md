@@ -1,12 +1,20 @@
-# Current Feature
+# Current Feature: AI Prompt Optimizer
 
 ## Status
-<!-- Not Started|In Progress|Completed -->
+In Progress
 
 ## Goals
+- Add `optimizePrompt` server action to `src/actions/ai.ts` (auth, Pro gate, Zod, rate limit, Gemini call returning improved prompt text)
+- Add "Optimize" button to MarkdownEditor header for read-only prompt items — Pro users get Sparkles button, free users get disabled Crown button
+- Show "Original" / "Optimized" tabs in MarkdownEditor after optimization runs (mirrors Code/Explain pattern in CodeEditor)
+- "Use this" button in the header when Optimized tab is active — calls `onUseOptimized` callback with the optimized text
+- ItemDrawer threads `isPro` and `itemType` into MarkdownEditor (read-only view only) and handles `onUseOptimized` by entering edit mode with optimized content pre-filled
+- Unit tests for `optimizePrompt` action
 
 ## Notes
-<!-- Any extra notes -->
+- Only applies to items with `itemType === 'prompt'` in read-only (view) mode — not in edit mode, not for notes
+- Mirrors the Explain button pattern in CodeEditor exactly (placement, loading state, tab switching)
+- Reset optimization state (optimized text + active tab) when `value` prop changes (useEffect)
 
 ## History
 <!-- Keep this updated. Earliest to Latest. Format: DD/MM/YYYY HH:MM -->

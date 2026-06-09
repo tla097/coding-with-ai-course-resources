@@ -1,16 +1,20 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-import { Copy, Check } from 'lucide-react'
+import { Copy, Check, Sparkles, Loader2, Crown } from 'lucide-react'
 import { toast } from 'sonner'
 import type { Components } from 'react-markdown'
+import { optimizePrompt } from '@/actions/ai'
 
 interface Props {
   value: string
   onChange?: (value: string) => void
   readOnly?: boolean
+  isPro?: boolean
+  itemType?: string
+  onUseOptimized?: (text: string) => void
 }
 
 const MIN_HEIGHT = 120
@@ -45,9 +49,17 @@ const MD_COMPONENTS: Components = {
   img: ({ src, alt }) => <img src={src} alt={alt} style={{ maxWidth: '100%', borderRadius: 4 }} />,
 }
 
-export default function MarkdownEditor({ value, onChange, readOnly = false }: Props) {
+export default function MarkdownEditor({ value, onChange, readOnly = false, isPro, itemType, onUseOptimized }: Props) {
   const [tab, setTab] = useState<'write' | 'preview'>(readOnly ? 'preview' : 'write')
+  const [activeTab, setActiveTab] = useState<'original' | 'optimized'>('original')
+  const [optimized, setOptimized] = useState<string | null>(null)
+  const [optimizing, setOptimizing] = useState(false)
   const [copied, setCopied] = useState(false)
+
+  useEffect(() => {
+    setOptimized(null)
+    setActiveTab('original')
+  }, [value])
 
   const textareaHeight = useMemo(() => {
     const lines = value ? value.split('\n').length : 1
@@ -56,12 +68,29 @@ export default function MarkdownEditor({ value, onChange, readOnly = false }: Pr
   }, [value])
 
   function handleCopy() {
-    navigator.clipboard.writeText(value).then(() => {
+    const text = activeTab === 'optimized' && optimized ? optimized : value
+    navigator.clipboard.writeText(text).then(() => {
       setCopied(true)
       toast.success('Copied to clipboard')
       setTimeout(() => setCopied(false), 2000)
     })
   }
+
+  async function handleOptimize() {
+    if (!value) return
+    setOptimizing(true)
+    const result = await optimizePrompt({ content: value })
+    setOptimizing(false)
+    if (!result.success) {
+      toast.error(result.error)
+      return
+    }
+    setOptimized(result.data.optimized)
+    setActiveTab('optimized')
+  }
+
+  const showOptimizeControls = readOnly && itemType === 'prompt'
+  const displayValue = activeTab === 'optimized' && optimized ? optimized : value
 
   return (
     <div className="rounded-lg border border-[#3c3c3c] overflow-hidden">
@@ -94,23 +123,87 @@ export default function MarkdownEditor({ value, onChange, readOnly = false }: Pr
               </button>
             </>
           )}
-          {readOnly && (
+          {readOnly && optimized ? (
+            <>
+              <button
+                type="button"
+                onClick={() => setActiveTab('original')}
+                className={`text-[11px] px-2 py-0.5 rounded transition-colors ${
+                  activeTab === 'original'
+                    ? 'bg-[#3c3c3c] text-[#cccccc]'
+                    : 'text-[#858585] hover:text-[#cccccc]'
+                }`}
+              >
+                Original
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab('optimized')}
+                className={`text-[11px] px-2 py-0.5 rounded transition-colors ${
+                  activeTab === 'optimized'
+                    ? 'bg-[#3c3c3c] text-[#cccccc]'
+                    : 'text-[#858585] hover:text-[#cccccc]'
+                }`}
+              >
+                Optimized
+              </button>
+            </>
+          ) : readOnly ? (
             <span className="text-[11px] text-[#858585]">Preview</span>
-          )}
+          ) : null}
         </div>
-        <button
-          type="button"
-          onClick={handleCopy}
-          className="flex items-center gap-1 text-[11px] text-[#858585] hover:text-[#cccccc] transition-colors"
-          title="Copy to clipboard"
-        >
-          {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
-          {copied ? 'Copied' : 'Copy'}
-        </button>
+        <div className="flex items-center gap-2.5">
+          {showOptimizeControls && (
+            isPro ? (
+              <button
+                type="button"
+                onClick={handleOptimize}
+                disabled={optimizing}
+                className="flex items-center gap-1 text-[11px] text-[#858585] hover:text-[#cccccc] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Optimize this prompt with AI"
+              >
+                {optimizing
+                  ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  : <Sparkles className="h-3.5 w-3.5" />
+                }
+                {optimizing ? 'Optimizing…' : 'Optimize'}
+              </button>
+            ) : (
+              <button
+                type="button"
+                disabled
+                className="flex items-center gap-1 text-[11px] text-[#858585] opacity-50 cursor-not-allowed"
+                title="AI features require Pro subscription"
+              >
+                <Crown className="h-3.5 w-3.5" />
+                Optimize
+              </button>
+            )
+          )}
+          {activeTab === 'optimized' && optimized && onUseOptimized && (
+            <button
+              type="button"
+              onClick={() => onUseOptimized(optimized)}
+              className="flex items-center gap-1 text-[11px] text-[#858585] hover:text-[#cccccc] transition-colors"
+              title="Use the optimized prompt"
+            >
+              Use this
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={handleCopy}
+            className="flex items-center gap-1 text-[11px] text-[#858585] hover:text-[#cccccc] transition-colors"
+            title="Copy to clipboard"
+          >
+            {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+            {copied ? 'Copied' : 'Copy'}
+          </button>
+        </div>
       </div>
 
       {/* Write tab */}
-      {tab === 'write' && (
+      {!readOnly && tab === 'write' && (
         <textarea
           value={value}
           onChange={e => onChange?.(e.target.value)}
@@ -120,15 +213,15 @@ export default function MarkdownEditor({ value, onChange, readOnly = false }: Pr
         />
       )}
 
-      {/* Preview tab */}
-      {tab === 'preview' && (
+      {/* Preview / Original / Optimized tab */}
+      {(readOnly || tab === 'preview') && (
         <div
           style={{ minHeight: MIN_HEIGHT, maxHeight: MAX_HEIGHT }}
           className="overflow-y-auto bg-[#1e1e1e] px-4 py-3"
         >
-          {value ? (
+          {displayValue ? (
             <ReactMarkdown remarkPlugins={[remarkGfm]} components={MD_COMPONENTS}>
-              {value}
+              {displayValue}
             </ReactMarkdown>
           ) : (
             <p className="text-sm text-[#555] italic">Nothing to preview.</p>

@@ -158,6 +158,22 @@ export default function ItemDrawer({ itemId, open, onOpenChange, collections, is
     setIsEditing(true)
   }
 
+  function handleUseOptimized(text: string) {
+    if (!item) return
+    setEditForm({
+      title: item.title,
+      description: item.description ?? '',
+      content: text,
+      url: item.url ?? '',
+      language: item.language || 'plaintext',
+      tags: item.tags.map(t => t.name).join(', '),
+      collectionIds: item.collections.map(c => c.collection.id),
+    })
+    setTagSuggestions([])
+    setGeneratingDescription(false)
+    setIsEditing(true)
+  }
+
   function handleCancelEdit() {
     setTagSuggestions([])
     setIsEditing(false)
@@ -617,6 +633,9 @@ export default function ItemDrawer({ itemId, open, onOpenChange, collections, is
                         <MarkdownEditor
                           value={item.content}
                           readOnly
+                          isPro={isPro}
+                          itemType={typeName}
+                          onUseOptimized={typeName === 'prompt' ? handleUseOptimized : undefined}
                         />
                       ) : (
                         <pre className="text-xs bg-muted rounded-md p-3 overflow-x-auto whitespace-pre-wrap break-words font-mono leading-relaxed">
