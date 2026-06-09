@@ -610,6 +610,8 @@ export default function ItemDrawer({ itemId, open, onOpenChange, collections, is
                           value={item.content}
                           language={item.language}
                           readOnly
+                          isPro={isPro}
+                          itemType={typeName}
                         />
                       ) : showMarkdownEditor ? (
                         <MarkdownEditor

@@ -9,7 +9,7 @@ vi.mock('@/lib/gemini', () => ({
   AI_MODEL: 'gemini-2.5-flash-lite',
 }))
 
-import { generateAutoTags, generateDescription } from '@/actions/ai'
+import { generateAutoTags, generateDescription, explainCode } from '@/actions/ai'
 import { auth } from '@/auth'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { gemini } from '@/lib/gemini'
@@ -239,5 +239,91 @@ describe('generateDescription', () => {
     mockGenerateContent.mockResolvedValueOnce({ text: 'A note about something.' } as never)
     const result = await generateDescription({ title: 'My note', itemType: 'note' })
     expect(result).toEqual({ success: true, data: { description: 'A note about something.' } })
+  })
+})
+
+const validExplainInput = {
+  content: 'const x = arr.filter(Boolean)',
+  itemType: 'snippet',
+  language: 'javascript',
+}
+
+describe('explainCode', () => {
+  beforeEach(() => vi.clearAllMocks())
+
+  it('returns error when not authenticated', async () => {
+    mockAuth.mockResolvedValueOnce(null)
+    const result = await explainCode(validExplainInput)
+    expect(result).toEqual({ success: false, error: 'Not authenticated.' })
+  })
+
+  it('returns error for free users', async () => {
+    mockAuth.mockResolvedValueOnce(mockFreeSession as never)
+    const result = await explainCode(validExplainInput)
+    expect(result).toEqual({ success: false, error: 'Pro plan required.' })
+  })
+
+  it('returns error when content is empty', async () => {
+    mockAuth.mockResolvedValueOnce(mockProSession as never)
+    const result = await explainCode({ ...validExplainInput, content: '' })
+    expect(result).toEqual({ success: false, error: 'Invalid input.' })
+  })
+
+  it('returns error when rate limit is exceeded', async () => {
+    mockAuth.mockResolvedValueOnce(mockProSession as never)
+    mockCheckRateLimit.mockResolvedValueOnce({ success: false, remaining: 0, reset: Date.now() + 60000 })
+    const result = await explainCode(validExplainInput)
+    expect(result).toEqual({ success: false, error: 'Rate limit reached. Try again later.' })
+  })
+
+  it('calls checkRateLimit with correct key and limits', async () => {
+    mockAuth.mockResolvedValueOnce(mockProSession as never)
+    mockGenerateContent.mockResolvedValueOnce({ text: 'This filters falsy values.' } as never)
+    await explainCode(validExplainInput)
+    expect(mockCheckRateLimit).toHaveBeenCalledWith('ai:explain:user-1', 5, '1 m')
+  })
+
+  it('returns explanation on successful call', async () => {
+    mockAuth.mockResolvedValueOnce(mockProSession as never)
+    mockGenerateContent.mockResolvedValueOnce({ text: 'This filters falsy values from an array.' } as never)
+    const result = await explainCode(validExplainInput)
+    expect(result).toEqual({ success: true, data: { explanation: 'This filters falsy values from an array.' } })
+  })
+
+  it('returns error when model returns empty string', async () => {
+    mockAuth.mockResolvedValueOnce(mockProSession as never)
+    mockGenerateContent.mockResolvedValueOnce({ text: '' } as never)
+    const result = await explainCode(validExplainInput)
+    expect(result).toEqual({ success: false, error: 'Failed to generate explanation.' })
+  })
+
+  it('returns error when model throws', async () => {
+    mockAuth.mockResolvedValueOnce(mockProSession as never)
+    mockGenerateContent.mockRejectedValueOnce(new Error('API error'))
+    const result = await explainCode(validExplainInput)
+    expect(result).toEqual({ success: false, error: 'Failed to generate explanation.' })
+  })
+
+  it('includes language in the prompt when provided', async () => {
+    mockAuth.mockResolvedValueOnce(mockProSession as never)
+    mockGenerateContent.mockResolvedValueOnce({ text: 'An explanation.' } as never)
+    await explainCode(validExplainInput)
+    const call = mockGenerateContent.mock.calls[0][0] as { contents: string }
+    expect(call.contents).toContain('javascript')
+  })
+
+  it('works without language field', async () => {
+    mockAuth.mockResolvedValueOnce(mockProSession as never)
+    mockGenerateContent.mockResolvedValueOnce({ text: 'An explanation.' } as never)
+    const result = await explainCode({ content: 'echo hello', itemType: 'command' })
+    expect(result).toEqual({ success: true, data: { explanation: 'An explanation.' } })
+  })
+
+  it('truncates content to 2000 chars before sending', async () => {
+    mockAuth.mockResolvedValueOnce(mockProSession as never)
+    mockGenerateContent.mockResolvedValueOnce({ text: 'An explanation.' } as never)
+    await explainCode({ ...validExplainInput, content: 'x'.repeat(5000) })
+    const call = mockGenerateContent.mock.calls[0][0] as { contents: string }
+    expect(call.contents).not.toContain('x'.repeat(2001))
   })
 })

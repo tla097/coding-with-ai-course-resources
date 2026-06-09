@@ -1,12 +1,28 @@
-# Current Feature
+# Current Feature: AI Explain Code
 
 ## Status
-<!-- Not Started|In Progress|Completed -->
+In Progress
 
 ## Goals
 
+- `explainCode` server action with auth, Pro gating, Zod validation, rate limiting
+- "Explain" button (Sparkles icon) in code editor window controls header (next to Copy)
+- Only visible for snippet and command types in the item drawer read view
+- After generating: Code/Explain tabs toggle between code and explanation views
+- Explanation rendered as markdown in the same container space as the code editor
+- Explanation is concise (~200-300 words) covering what the code does and key concepts
+- Loading state: Loader2 spinner while generating
+- Pro gating in UI: Crown icon + tooltip for free users
+- Error handling via toast (Pro gating, rate limit, AI service errors)
+- Unit tests for server action
+
 ## Notes
-<!-- Any extra notes -->
+
+- Model: `gemini-2.5-flash-lite` (via existing `src/lib/gemini.ts`)
+- Explanations not saved to DB — regenerated on each click
+- Not available in create/edit forms — item drawer read view only
+- `isPro` already threaded to ItemDrawer from previous work
+- Follow existing patterns in `src/actions/ai.ts` and `src/components/ui/CodeEditor.tsx`
 
 ## History
 <!-- Keep this updated. Earliest to Latest. Format: DD/MM/YYYY HH:MM -->

@@ -20,9 +20,15 @@ const generateDescriptionSchema = z.object({
   itemType: z.string().trim().min(1),
 })
 
-export type GenerateDescriptionInput = z.input<typeof generateDescriptionSchema>
+const explainCodeSchema = z.object({
+  content: z.string().trim().min(1).max(50000),
+  itemType: z.string().trim().min(1),
+  language: z.string().trim().optional(),
+})
 
+export type GenerateDescriptionInput = z.input<typeof generateDescriptionSchema>
 export type GenerateAutoTagsInput = z.input<typeof generateAutoTagsSchema>
+export type ExplainCodeInput = z.input<typeof explainCodeSchema>
 
 export async function generateDescription(data: GenerateDescriptionInput) {
   const session = await auth()
@@ -57,6 +63,42 @@ Return ONLY the description text, no extra formatting or explanation.`,
     return { success: true as const, data: { description } }
   } catch {
     return { success: false as const, error: 'Failed to generate description.' }
+  }
+}
+
+export async function explainCode(data: ExplainCodeInput) {
+  const session = await auth()
+  if (!session?.user?.id) return { success: false as const, error: 'Not authenticated.' }
+  if (!session.user.isPro) return { success: false as const, error: 'Pro plan required.' }
+
+  const parsed = explainCodeSchema.safeParse(data)
+  if (!parsed.success) return { success: false as const, error: 'Invalid input.' }
+
+  const limit = await checkRateLimit(`ai:explain:${session.user.id}`, 5, '1 m')
+  if (!limit.success) return { success: false as const, error: 'Rate limit reached. Try again later.' }
+
+  const { content, itemType, language } = parsed.data
+  const sanitizedContent = content
+    .trim()
+    .slice(0, MAX_CONTENT_LENGTH)
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '')
+
+  try {
+    const response = await gemini.models.generateContent({
+      model: AI_MODEL,
+      contents: `Explain this ${language ? `${language} ` : ''}${itemType} in plain English. Be concise (~200-300 words). Cover what it does and any key concepts or patterns used.
+
+${sanitizedContent}
+
+Return a clear explanation in markdown format.`,
+    })
+
+    const explanation = response.text?.trim() ?? ''
+    if (!explanation) return { success: false as const, error: 'Failed to generate explanation.' }
+
+    return { success: true as const, data: { explanation } }
+  } catch {
+    return { success: false as const, error: 'Failed to generate explanation.' }
   }
 }
 
