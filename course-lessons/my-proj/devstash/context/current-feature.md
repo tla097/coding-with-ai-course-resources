@@ -1,15 +1,10 @@
-# Current Feature: Language Dropdown for Code Editor
+# Current Feature
 
 ## Status
 <!-- Not Started|In Progress|Completed -->
-In Progress
+Completed
 
 ## Goals
-- Replace the language text input with a Select dropdown in the New Item dialog (snippet and command types)
-- Replace the language text input with a Select dropdown in the Item Drawer edit mode (snippet and command types)
-- Move the language selector above the code editor so the selection is visible before the content area
-- Support 24 common languages: TypeScript, JavaScript, Python, Rust, Go, Java, C#, C++, C, Bash/Shell, PowerShell, HTML, CSS, JSON, YAML, Markdown, SQL, PHP, Ruby, Swift, Kotlin, Dockerfile, GraphQL, plus Plain text as default
-- Selecting a language live-updates Monaco syntax highlighting immediately without requiring a save
 
 ## Notes
 <!-- Any extra notes -->
@@ -86,3 +81,4 @@ In Progress
 08/06/2026 15:30 - Completed Stripe Integration Phase 2: webhook handler (/api/webhooks/stripe) for checkout.session.completed, customer.subscription.updated, customer.subscription.deleted; checkout route (/api/stripe/checkout) with Customer create/reuse and server-side price ID validation; billing portal route (/api/stripe/portal); BillingSection component (Free/Pro badge, upgrade buttons, manage subscription); UpgradeToast client component; settings page updated with searchParams and parallel billing fetch; env vars renamed to NEXT_PUBLIC_*; 173 tests passing; merged to main
 08/06/2026 15:45 - ProGate upgrade page for /items/files and /items/images (free users see Crown icon, description, upgrade buttons instead of item list); seed reduced to 3 collections + 10 items to match free tier limits; 24 new unit tests for checkout, portal, and webhook route handlers; 197 tests passing
 08/06/2026 16:35 - Upgrade page: /upgrade route with pricing comparison UI (Free vs Pro, monthly/yearly toggle matching homepage), ghost "Upgrade" button in TopBar for free users only, Pro users redirected to /dashboard; isPro threaded from session through DashboardShell → TopBar; build passing
+09/06/2026 09:55 - Completed Language Dropdown for Code Editor: replaced free-text language input with Select dropdown (24 languages + Plain text) in NewItemDialog and ItemDrawer edit mode; language selector moved above code editor for immediate visual feedback; selecting a language live-updates Monaco syntax highlighting without saving; 197 tests passing; merged to main
