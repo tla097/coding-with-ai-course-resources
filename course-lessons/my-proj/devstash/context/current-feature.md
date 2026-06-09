@@ -1,22 +1,13 @@
-# Current Feature: File List View
+# Current Feature
 
 ## Status
-In Progress
+Not Started
 
 ## Goals
-- Update `/items/files` to display as a single-column list (like Google Drive/Dropbox) instead of grid cards
-- Each row shows: file icon (by extension), file name, file size, upload date, download button
-- Row hover highlight
-- Click row opens ItemDrawer
-- Download button triggers direct download (stop propagation)
-- Responsive: stack info vertically on mobile
+<!-- What needs to be built -->
 
 ## Notes
-- `/items/images` already uses the `image-gallery` variant in `ItemsWithDrawer` — a similar pattern will be needed for files (`file-list` variant or equivalent)
-- File icon should vary by extension (e.g. PDF, ZIP, DOC, etc.) — can use Lucide icons
-- Download button calls `/api/download` route (already exists from file upload feature)
-- File size is stored as bytes in `item.fileSize` — format for display (KB/MB)
-- Upload date is `item.createdAt`
+<!-- Additional context, constraints, or implementation details -->
 
 ## History
 <!-- Keep this updated. Earliest to Latest. Format: DD/MM/YYYY HH:MM -->
@@ -95,3 +86,4 @@ In Progress
 09/06/2026 12:00 - Completed AI Prompt Optimizer: optimizePrompt server action (auth, Pro gate, Zod, 5req/min rate limit, Gemini call); Optimize button (Sparkles) added to MarkdownEditor header in read-only mode for prompt items; Crown icon for free users; Loader2 spinner while optimizing; Original/Optimized tabs appear after optimization; "Use this" button enters edit mode with optimized content pre-filled in ItemDrawer; isPro + itemType + onUseOptimized threaded from ItemDrawer; 10 unit tests; 246 tests passing; merged to main
 09/06/2026 15:25 - Completed File Upload with Supabase Storage: POST /api/upload (signed upload URLs), GET /api/download (auth-gated proxy, RFC 5987 Content-Disposition), FileUpload component (drag-and-drop, MIME/size validation, XHR progress), NewItemDialog supports file and image types, ItemDrawer shows image preview and file info with Download button, deleteItem removes file from Supabase on item deletion; 252 tests passing; merged to main
 09/06/2026 15:55 - Completed Image Gallery View: ImageThumbnailCard component (aspect-video, object-cover, group-hover:scale-105 zoom), image-gallery variant added to ItemsWithDrawer, /items/images uses gallery layout; fileUrl added to ItemWithType and itemSelect; images served via /api/download proxy; merged to main
+09/06/2026 16:35 - Completed File List View: FileListRow component (file icon by extension, title, filename, size, date, download button), file-list variant added to ItemsWithDrawer, /items/files uses list layout; fileName/fileSize added to ItemWithType and itemSelect; FileUpload fix: transparent z-10 input + pointer-events-none content so file picker opens reliably inside base-ui Dialog; merged to main
