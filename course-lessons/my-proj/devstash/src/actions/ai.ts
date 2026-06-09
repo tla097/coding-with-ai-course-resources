@@ -13,7 +13,52 @@ const generateAutoTagsSchema = z.object({
   itemType: z.string().trim().min(1),
 })
 
+const generateDescriptionSchema = z.object({
+  title: z.string().trim().min(1).max(200),
+  content: z.string().trim().max(50000).optional().default(''),
+  url: z.string().trim().max(2000).optional().default(''),
+  itemType: z.string().trim().min(1),
+})
+
+export type GenerateDescriptionInput = z.input<typeof generateDescriptionSchema>
+
 export type GenerateAutoTagsInput = z.input<typeof generateAutoTagsSchema>
+
+export async function generateDescription(data: GenerateDescriptionInput) {
+  const session = await auth()
+  if (!session?.user?.id) return { success: false as const, error: 'Not authenticated.' }
+  if (!session.user.isPro) return { success: false as const, error: 'Pro plan required.' }
+
+  const parsed = generateDescriptionSchema.safeParse(data)
+  if (!parsed.success) return { success: false as const, error: 'Invalid input.' }
+
+  const limit = await checkRateLimit(`ai:description:${session.user.id}`, 5, '1 m')
+  if (!limit.success) return { success: false as const, error: 'Rate limit reached. Try again later.' }
+
+  const { title, content, url, itemType } = parsed.data
+  const sanitizedContent = (content || url)
+    .trim()
+    .slice(0, MAX_CONTENT_LENGTH)
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '')
+
+  try {
+    const response = await gemini.models.generateContent({
+      model: AI_MODEL,
+      contents: `Write a concise 1-2 sentence description for this ${itemType} item.
+Title: ${title}
+${sanitizedContent ? `Content: ${sanitizedContent}` : ''}
+
+Return ONLY the description text, no extra formatting or explanation.`,
+    })
+
+    const description = response.text?.trim() ?? ''
+    if (!description) return { success: false as const, error: 'Failed to generate description.' }
+
+    return { success: true as const, data: { description } }
+  } catch {
+    return { success: false as const, error: 'Failed to generate description.' }
+  }
+}
 
 export async function generateAutoTags(data: GenerateAutoTagsInput) {
   const session = await auth()

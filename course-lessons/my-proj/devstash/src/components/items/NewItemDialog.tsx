@@ -26,7 +26,7 @@ import {
 } from '@/components/ui/select'
 import { ICON_MAP } from '@/lib/icon-map'
 import { createItem } from '@/actions/items'
-import { generateAutoTags } from '@/actions/ai'
+import { generateAutoTags, generateDescription } from '@/actions/ai'
 import CollectionPicker from '@/components/items/CollectionPicker'
 import AiTagSuggestions from '@/components/items/AiTagSuggestions'
 import type { SidebarItemType } from '@/lib/db/sidebar'
@@ -97,6 +97,7 @@ export default function NewItemDialog({ itemTypes, collections, isPro }: Props) 
   const [selectedCollectionIds, setSelectedCollectionIds] = useState<string[]>([])
   const [tagSuggestions, setTagSuggestions] = useState<string[]>([])
   const [suggestingTags, setSuggestingTags] = useState(false)
+  const [generatingDescription, setGeneratingDescription] = useState(false)
 
   const creatableTypes = itemTypes.filter(t => CREATABLE_TYPES.includes(t.name))
   const selectedType = creatableTypes.find(t => t.id === selectedTypeId) ?? null
@@ -108,7 +109,25 @@ export default function NewItemDialog({ itemTypes, collections, isPro }: Props) 
     setSelectedCollectionIds([])
     setTagSuggestions([])
     setSaving(false)
+    setGeneratingDescription(false)
     setOpen(true)
+  }
+
+  async function handleGenerateDescription() {
+    if (!selectedType) return
+    setGeneratingDescription(true)
+    const result = await generateDescription({
+      title: form.title || 'Untitled',
+      content: form.content.slice(0, 2000),
+      url: form.url,
+      itemType: selectedType.name,
+    })
+    setGeneratingDescription(false)
+    if (!result.success) {
+      toast.error(result.error)
+      return
+    }
+    setForm(f => ({ ...f, description: result.data.description }))
   }
 
   async function handleSuggestTags() {
@@ -255,7 +274,22 @@ export default function NewItemDialog({ itemTypes, collections, isPro }: Props) 
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="new-description">Description</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="new-description">Description</Label>
+                {isPro && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-auto py-0.5 px-2 text-xs text-muted-foreground gap-1"
+                    onClick={handleGenerateDescription}
+                    disabled={generatingDescription}
+                  >
+                    <Sparkles className="h-3 w-3" />
+                    {generatingDescription ? 'Generating…' : 'Generate'}
+                  </Button>
+                )}
+              </div>
               <Textarea
                 id="new-description"
                 value={form.description}

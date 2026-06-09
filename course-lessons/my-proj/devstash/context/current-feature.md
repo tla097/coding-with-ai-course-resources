@@ -1,13 +1,29 @@
-# Current Feature
+# Current Feature: AI Description Generator
 
 ## Status
-<!-- Not Started|In Progress|Completed -->
-Completed
+In Progress
 
 ## Goals
 
+- Add a Sparkles icon button next to the Description label in both NewItemDialog and ItemDrawer edit mode
+- Clicking the button calls a new `generateDescription` server action that uses Gemini to produce a 1–2 sentence summary
+- The action looks at the current title, content/url (whatever is available), and item type
+- The generated description is inserted directly into the description textarea — no accept/dismiss flow needed
+- Button is Pro-only (hidden for free users), matching the auto-tag pattern
+- Loading state on the button while generating ("Generating…")
+- Error handling via toast on failure
+- Rate limited: 5 requests per minute per user (same config as auto-tags)
+- Unit tests for the new server action
+
 ## Notes
-<!-- Any extra notes -->
+
+- Project uses Google Gemini (`gemini-2.5-flash-lite`) via `@google/genai` SDK. See `src/lib/gemini.ts`.
+- `generateAutoTags` in `src/actions/ai.ts` is the pattern to follow — same auth, Pro gating, Zod validation, rate limit, and Gemini call shape.
+- The Suggest Tags button pattern in NewItemDialog and ItemDrawer is the UI pattern to follow for the Generate Description button.
+- No new component needed — just a button inline with the Description label (same as the Suggest Tags button is inline with the Tags label).
+- For link items, use the URL field as "content" input since there is no text content.
+- Content should be truncated to 2000 chars before the API call.
+- `isPro` is already threaded to both NewItemDialog and ItemDrawer via existing props.
 
 ## History
 <!-- Keep this updated. Earliest to Latest. Format: DD/MM/YYYY HH:MM -->
