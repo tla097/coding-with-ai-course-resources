@@ -184,7 +184,10 @@ export interface CreateItemData {
   tags: string[]
   collectionIds: string[]
   itemTypeId: string
-  contentType: 'TEXT' | 'URL'
+  contentType: 'TEXT' | 'URL' | 'FILE'
+  fileUrl?: string | null
+  fileName?: string | null
+  fileSize?: number | null
 }
 
 export async function createItem(userId: string, data: CreateItemData): Promise<ItemDetail> {
@@ -196,6 +199,9 @@ export async function createItem(userId: string, data: CreateItemData): Promise<
       url: data.url,
       language: data.language,
       contentType: data.contentType,
+      fileUrl: data.fileUrl ?? null,
+      fileName: data.fileName ?? null,
+      fileSize: data.fileSize ?? null,
       userId,
       itemTypeId: data.itemTypeId,
       tags: {
@@ -270,12 +276,12 @@ export async function getItemsByCollectionPaginated(
   return { items, total }
 }
 
-export async function deleteItem(id: string, userId: string): Promise<boolean> {
-  const existing = await prisma.item.findFirst({ where: { id, userId }, select: { id: true } })
-  if (!existing) return false
+export async function deleteItem(id: string, userId: string): Promise<{ fileUrl: string | null } | null> {
+  const existing = await prisma.item.findFirst({ where: { id, userId }, select: { id: true, fileUrl: true } })
+  if (!existing) return null
 
   await prisma.item.delete({ where: { id } })
-  return true
+  return { fileUrl: existing.fileUrl }
 }
 
 export async function toggleItemFavorite(id: string, userId: string): Promise<boolean | null> {

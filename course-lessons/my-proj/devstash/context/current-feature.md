@@ -1,12 +1,32 @@
-# Current Feature
+# Current Feature: File Upload with Supabase Storage
 
 ## Status
-<!-- Not Started|In Progress|Completed -->
+In Progress
 
 ## Goals
 
+- Create upload API route (`POST /api/upload`) using Supabase Storage signed upload URLs
+- Keep all Prisma/DB functions in `src/lib/db/items.ts`
+- Create `FileUpload` component with drag-and-drop, file validation, and upload progress indicator
+- Update `NewItemDialog` to use `FileUpload` for `file` and `image` item types
+- Display image preview for image items and file info (name, size) for file items in `ItemDrawer`
+- Add download button in `ItemDrawer` for file/image types
+- Create download proxy API route (`GET /api/download`) to avoid CORS issues with signed URLs
+- Delete files from Supabase Storage when items are deleted
+
 ## Notes
-<!-- Any extra notes -->
+
+- Storage provider: Supabase Storage (R2 excluded — requires payment card)
+- `.env` already contains the necessary Supabase keys (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY`)
+- Upload approach: server generates signed upload URL → client uploads directly to Supabase (avoids Next.js 1 MB body limit)
+- Download approach: server generates signed URL (1 hour expiry) proxied via API route
+- File constraints:
+  - Images: max 5 MB — `.png`, `.jpg`, `.jpeg`, `.gif`, `.webp`, `.svg`
+  - Files: max 10 MB — `.pdf`, `.txt`, `.md`, `.json`, `.yaml`, `.yml`, `.xml`, `.csv`, `.toml`, `.ini`
+- Install: `@supabase/supabase-js @supabase/ssr`
+- Supabase clients: `src/lib/supabase/client.ts` (browser) and `src/lib/supabase/server.ts` (server, uses secret key)
+- Item fields already in schema: `fileUrl`, `fileName`, `fileSize` — no migration needed
+- Reference: `devstash/docs/proton-drive-integration-plan.md` (Supabase section)
 
 ## History
 <!-- Keep this updated. Earliest to Latest. Format: DD/MM/YYYY HH:MM -->

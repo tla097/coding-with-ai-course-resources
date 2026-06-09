@@ -184,22 +184,22 @@ describe('createItem', () => {
 describe('deleteItem', () => {
   beforeEach(() => vi.clearAllMocks())
 
-  it('returns false when item does not exist or belongs to another user', async () => {
+  it('returns null when item does not exist or belongs to another user', async () => {
     const { prisma } = await import('@/lib/prisma')
     vi.mocked(prisma.item.findFirst).mockResolvedValue(null)
 
     const result = await deleteItem('item-1', 'user-1')
-    expect(result).toBe(false)
+    expect(result).toBe(null)
     expect(prisma.item.delete).not.toHaveBeenCalled()
   })
 
-  it('deletes the item and returns true when found for the correct user', async () => {
+  it('deletes the item and returns fileUrl when found for the correct user', async () => {
     const { prisma } = await import('@/lib/prisma')
-    vi.mocked(prisma.item.findFirst).mockResolvedValue({ id: 'item-1' } as never)
+    vi.mocked(prisma.item.findFirst).mockResolvedValue({ id: 'item-1', fileUrl: null } as never)
     vi.mocked(prisma.item.delete).mockResolvedValue({} as never)
 
     const result = await deleteItem('item-1', 'user-1')
-    expect(result).toBe(true)
+    expect(result).toEqual({ fileUrl: null })
     expect(prisma.item.delete).toHaveBeenCalledWith({ where: { id: 'item-1' } })
   })
 
