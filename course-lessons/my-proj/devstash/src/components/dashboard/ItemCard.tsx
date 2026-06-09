@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Star, Pin } from 'lucide-react'
+import { Star, Pin, Copy, Check } from 'lucide-react'
 import { toast } from 'sonner'
 import type { ItemWithType } from '@/lib/db/items'
 import { ICON_MAP } from '@/lib/icon-map'
@@ -18,6 +18,7 @@ export default function ItemCard({ item, onClick }: ItemCardProps) {
   const Icon = ICON_MAP[item.itemType.icon] ?? null
   const [isFavorite, setIsFavorite] = useState(item.isFavorite)
   const [favoriting, setFavoriting] = useState(false)
+  const [copied, setCopied] = useState(false)
 
   useEffect(() => {
     setIsFavorite(item.isFavorite)
@@ -27,6 +28,15 @@ export default function ItemCard({ item, onClick }: ItemCardProps) {
     month: 'short',
     day: 'numeric',
   })
+
+  async function handleCopy(e: React.MouseEvent) {
+    e.stopPropagation()
+    const text = item.contentType === 'URL' ? (item.url ?? item.title) : (item.content ?? item.title)
+    await navigator.clipboard.writeText(text)
+    toast.success('Copied!')
+    setCopied(true)
+    setTimeout(() => setCopied(false), 1000)
+  }
 
   async function handleToggleFavorite(e: React.MouseEvent) {
     e.stopPropagation()
@@ -49,7 +59,7 @@ export default function ItemCard({ item, onClick }: ItemCardProps) {
     <div
       role="button"
       tabIndex={0}
-      className="flex gap-4 rounded-lg border border-border border-l-[3px] bg-card p-4 hover:bg-accent/20 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className="group flex gap-4 rounded-lg border border-border border-l-[3px] bg-card p-4 hover:bg-accent/20 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       style={{ borderLeftColor: item.itemType.color }}
       onClick={onClick}
       onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick?.() } }}
@@ -71,6 +81,13 @@ export default function ItemCard({ item, onClick }: ItemCardProps) {
             )}
           </div>
           <div className="flex items-center gap-1.5 shrink-0">
+            <button
+              onClick={handleCopy}
+              aria-label="Copy to clipboard"
+              className="flex h-8 w-8 items-center justify-center rounded transition-colors text-muted-foreground/40 hover:text-foreground opacity-0 group-hover:opacity-100"
+            >
+              {copied ? <Check className="h-3.5 w-3.5 text-green-500" /> : <Copy className="h-3.5 w-3.5" />}
+            </button>
             <button
               onClick={handleToggleFavorite}
               disabled={favoriting}

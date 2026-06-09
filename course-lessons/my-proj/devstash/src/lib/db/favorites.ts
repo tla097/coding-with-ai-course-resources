@@ -26,6 +26,7 @@ export async function getFavoriteItems(userId: string): Promise<FavoriteItem[]> 
       createdAt: true,
       updatedAt: true,
       contentType: true,
+      content: true,
       url: true,
       fileUrl: true,
       fileName: true,
