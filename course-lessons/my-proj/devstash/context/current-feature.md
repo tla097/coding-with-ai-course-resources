@@ -1,20 +1,12 @@
-# Current Feature: AI Prompt Optimizer
+# Current Feature
 
 ## Status
-In Progress
+<!-- Not Started|In Progress|Completed -->
 
 ## Goals
-- Add `optimizePrompt` server action to `src/actions/ai.ts` (auth, Pro gate, Zod, rate limit, Gemini call returning improved prompt text)
-- Add "Optimize" button to MarkdownEditor header for read-only prompt items — Pro users get Sparkles button, free users get disabled Crown button
-- Show "Original" / "Optimized" tabs in MarkdownEditor after optimization runs (mirrors Code/Explain pattern in CodeEditor)
-- "Use this" button in the header when Optimized tab is active — calls `onUseOptimized` callback with the optimized text
-- ItemDrawer threads `isPro` and `itemType` into MarkdownEditor (read-only view only) and handles `onUseOptimized` by entering edit mode with optimized content pre-filled
-- Unit tests for `optimizePrompt` action
 
 ## Notes
-- Only applies to items with `itemType === 'prompt'` in read-only (view) mode — not in edit mode, not for notes
-- Mirrors the Explain button pattern in CodeEditor exactly (placement, loading state, tab switching)
-- Reset optimization state (optimized text + active tab) when `value` prop changes (useEffect)
+<!-- Any extra notes -->
 
 ## History
 <!-- Keep this updated. Earliest to Latest. Format: DD/MM/YYYY HH:MM -->
@@ -92,3 +84,4 @@ In Progress
 09/06/2026 10:35 - Completed AI Auto-Tagging: src/lib/gemini.ts (GoogleGenAI singleton + AI_MODEL constant), src/actions/ai.ts (generateAutoTags server action — auth, Pro gate, Zod, 5req/min rate limit, Gemini call, markdown-fence stripping), AiTagSuggestions.tsx (accept/dismiss chip list with Sparkles icon); Suggest Tags button added to NewItemDialog and ItemDrawer edit mode (hidden for free users); isPro threaded via TopBar and DashboardShell; 16 unit tests; 213 tests passing; merged to main
 09/06/2026 11:05 - Completed AI Description Generator: generateDescription server action added to src/actions/ai.ts (auth, Pro gate, Zod, 5req/min rate limit, Gemini call); Generate button (Sparkles icon) added next to Description label in NewItemDialog and ItemDrawer edit mode (Pro-only, hidden for free users); generated description populates textarea directly; 12 unit tests; 225 tests passing; merged to main
 09/06/2026 11:40 - Completed AI Explain Code: explainCode server action (auth, Pro gate, Zod, 5req/min rate limit, Gemini call, markdown response); Explain button (Sparkles) added to CodeEditor header in read-only mode; Crown icon + tooltip for free users; Loader2 spinner while generating; Code/Explain tabs appear after first explanation; explanation rendered via react-markdown in same container; resets on item change; isPro + itemType threaded from ItemDrawer; 11 unit tests; 236 tests passing; merged to main
+09/06/2026 12:00 - Completed AI Prompt Optimizer: optimizePrompt server action (auth, Pro gate, Zod, 5req/min rate limit, Gemini call); Optimize button (Sparkles) added to MarkdownEditor header in read-only mode for prompt items; Crown icon for free users; Loader2 spinner while optimizing; Original/Optimized tabs appear after optimization; "Use this" button enters edit mode with optimized content pre-filled in ItemDrawer; isPro + itemType + onUseOptimized threaded from ItemDrawer; 10 unit tests; 246 tests passing; merged to main
