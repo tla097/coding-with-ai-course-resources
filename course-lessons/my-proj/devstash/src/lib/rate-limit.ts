@@ -52,14 +52,9 @@ export function formatRateLimitError(reset: number): string {
 }
 
 export function rateLimitResponse(reset: number): Response {
-  const now = Date.now()
-  const retryAfterMs = Math.max(0, reset - now)
-  const retryAfterSecs = Math.ceil(retryAfterMs / 1000)
-  const minutes = Math.max(1, Math.ceil(retryAfterSecs / 60))
+  const retryAfterSecs = Math.ceil(Math.max(0, reset - Date.now()) / 1000)
   return Response.json(
-    {
-      error: `Too many attempts. Please try again in ${minutes} minute${minutes !== 1 ? 's' : ''}.`,
-    },
+    { error: formatRateLimitError(reset) },
     {
       status: 429,
       headers: { 'Retry-After': String(retryAfterSecs) },

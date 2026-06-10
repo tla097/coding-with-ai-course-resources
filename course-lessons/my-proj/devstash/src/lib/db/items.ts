@@ -1,3 +1,4 @@
+import { Prisma } from '@/generated/prisma/client'
 import { prisma } from '@/lib/prisma'
 import { ITEMS_PER_PAGE, COLLECTIONS_PER_PAGE } from '@/lib/constants'
 
@@ -218,19 +219,26 @@ export interface PaginatedItems {
   total: number
 }
 
+async function paginateItems(
+  where: Prisma.ItemWhereInput,
+  page: number,
+  pageSize: number,
+): Promise<PaginatedItems> {
+  const skip = (page - 1) * pageSize
+  const [items, total] = await Promise.all([
+    prisma.item.findMany({ where, orderBy: [{ isPinned: 'desc' }, { createdAt: 'desc' }], skip, take: pageSize, select: itemSelect }),
+    prisma.item.count({ where }),
+  ])
+  return { items, total }
+}
+
 export async function getItemsByTypePaginated(
   userId: string,
   typeName: string,
   page: number,
   pageSize = ITEMS_PER_PAGE,
 ): Promise<PaginatedItems> {
-  const skip = (page - 1) * pageSize
-  const where = { userId, itemType: { name: typeName } }
-  const [items, total] = await Promise.all([
-    prisma.item.findMany({ where, orderBy: [{ isPinned: 'desc' }, { createdAt: 'desc' }], skip, take: pageSize, select: itemSelect }),
-    prisma.item.count({ where }),
-  ])
-  return { items, total }
+  return paginateItems({ userId, itemType: { name: typeName } }, page, pageSize)
 }
 
 export async function getItemsByCollectionPaginated(
@@ -239,13 +247,7 @@ export async function getItemsByCollectionPaginated(
   page: number,
   pageSize = COLLECTIONS_PER_PAGE,
 ): Promise<PaginatedItems> {
-  const skip = (page - 1) * pageSize
-  const where = { userId, collections: { some: { collectionId } } }
-  const [items, total] = await Promise.all([
-    prisma.item.findMany({ where, orderBy: [{ isPinned: 'desc' }, { createdAt: 'desc' }], skip, take: pageSize, select: itemSelect }),
-    prisma.item.count({ where }),
-  ])
-  return { items, total }
+  return paginateItems({ userId, collections: { some: { collectionId } } }, page, pageSize)
 }
 
 export async function deleteItem(id: string, userId: string): Promise<{ fileUrl: string | null } | null> {
@@ -256,26 +258,30 @@ export async function deleteItem(id: string, userId: string): Promise<{ fileUrl:
   return { fileUrl: existing.fileUrl }
 }
 
-export async function toggleItemFavorite(id: string, userId: string): Promise<boolean | null> {
-  const item = await prisma.item.findFirst({ where: { id, userId }, select: { isFavorite: true } })
+async function toggleItemField(
+  id: string,
+  userId: string,
+  field: 'isFavorite' | 'isPinned',
+): Promise<boolean | null> {
+  const item = await prisma.item.findFirst({
+    where: { id, userId },
+    select: { isFavorite: true, isPinned: true },
+  })
   if (!item) return null
   const updated = await prisma.item.update({
     where: { id, userId },
-    data: { isFavorite: !item.isFavorite },
-    select: { isFavorite: true },
+    data: { [field]: !item[field] },
+    select: { [field]: true },
   })
-  return updated.isFavorite
+  return (updated as unknown as Record<string, boolean>)[field]
+}
+
+export async function toggleItemFavorite(id: string, userId: string): Promise<boolean | null> {
+  return toggleItemField(id, userId, 'isFavorite')
 }
 
 export async function toggleItemPin(id: string, userId: string): Promise<boolean | null> {
-  const item = await prisma.item.findFirst({ where: { id, userId }, select: { isPinned: true } })
-  if (!item) return null
-  const updated = await prisma.item.update({
-    where: { id, userId },
-    data: { isPinned: !item.isPinned },
-    select: { isPinned: true },
-  })
-  return updated.isPinned
+  return toggleItemField(id, userId, 'isPinned')
 }
 
 export async function getItemStats(userId: string) {
