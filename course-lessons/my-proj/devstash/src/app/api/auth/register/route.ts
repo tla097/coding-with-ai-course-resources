@@ -1,8 +1,7 @@
 import { NextRequest } from "next/server"
 import bcrypt from "bcryptjs"
-import { randomBytes } from "crypto"
 import { prisma } from "@/lib/prisma"
-import { sendVerificationEmail } from "@/lib/email"
+import { issueVerificationToken } from "@/lib/auth-tokens"
 import { checkRateLimit, getIpFromHeaders, rateLimitResponse } from "@/lib/rate-limit"
 
 export async function POST(req: NextRequest) {
@@ -38,16 +37,8 @@ export async function POST(req: NextRequest) {
   })
 
   if (!emailVerificationDisabled) {
-    const token = randomBytes(32).toString("hex")
-    const expires = new Date(Date.now() + 24 * 60 * 60 * 1000)
-    await prisma.verificationToken.create({
-      data: { identifier: email, token, expires },
-    })
-
     const baseUrl = new URL(req.url).origin
-    const verifyUrl = `${baseUrl}/api/auth/verify-email?token=${token}`
-
-    await sendVerificationEmail(email, name, verifyUrl)
+    await issueVerificationToken(email, name, baseUrl)
   }
 
   return Response.json({ success: true, verified: emailVerificationDisabled }, { status: 201 })

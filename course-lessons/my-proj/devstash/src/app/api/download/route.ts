@@ -1,13 +1,11 @@
 import { NextRequest } from 'next/server'
-import { auth } from '@/auth'
+import { requireApiAuth } from '@/lib/api-auth'
 import { createSupabaseServer, SUPABASE_BUCKET } from '@/lib/supabase/server'
 import { prisma } from '@/lib/prisma'
 
 export async function GET(request: NextRequest) {
-  const session = await auth()
-  if (!session?.user?.id) {
-    return Response.json({ error: 'Unauthorized' }, { status: 401 })
-  }
+  const { session, error } = await requireApiAuth()
+  if (error) return error
 
   const storagePath = request.nextUrl.searchParams.get('path')
   const preview = request.nextUrl.searchParams.get('preview') === 'true'
@@ -26,11 +24,11 @@ export async function GET(request: NextRequest) {
   }
 
   const supabase = createSupabaseServer()
-  const { data, error } = await supabase.storage
+  const { data, error: storageError } = await supabase.storage
     .from(SUPABASE_BUCKET)
     .download(storagePath)
 
-  if (error || !data) {
+  if (storageError || !data) {
     return Response.json({ error: 'Failed to retrieve file' }, { status: 500 })
   }
 
