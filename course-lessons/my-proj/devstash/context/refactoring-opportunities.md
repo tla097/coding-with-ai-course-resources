@@ -6,18 +6,18 @@ Findings from codebase scan on 10/06/2026. Items marked ✅ are complete.
 
 ## HIGH Impact
 
-### 1. `ItemDrawer.tsx` — 786-line component doing five different jobs
+### 1. ✅ `ItemDrawer.tsx` — 786-line component doing five different jobs
 
 **File:** `src/components/items/ItemDrawer.tsx`
 
 The component mixes data fetching, 8+ async/mutation handlers, read-view JSX, edit-form JSX, and a skeleton sub-component.
 
-**Extract:**
-- `useItemDrawer` hook (`src/hooks/useItemDrawer.ts`) — all state + 9 handler functions (lines 74–305)
-- `ItemDrawerReadView` (`src/components/items/ItemDrawerReadView.tsx`) — read-mode JSX (lines 591–742)
-- `ItemDrawerEditForm` (`src/components/items/ItemDrawerEditForm.tsx`) — edit-mode JSX (lines 449–590)
-- `ItemDrawerActionBar` (`src/components/items/ItemDrawerActionBar.tsx`) — button bar (lines 353–445)
-- Move `DrawerSkeleton` to its own file or a shared skeletons file
+**Extracted:**
+- `useItemDrawer` hook (`src/hooks/useItemDrawer.ts`) — all state + 9 handler functions
+- `ItemDrawerReadView` (`src/components/items/ItemDrawerReadView.tsx`) — read-mode JSX
+- `ItemDrawerEditForm` (`src/components/items/ItemDrawerEditForm.tsx`) — edit-mode JSX
+- `ItemDrawerActionBar` (`src/components/items/ItemDrawerActionBar.tsx`) — button bar
+- `DrawerSkeleton` (`src/components/items/DrawerSkeleton.tsx`) — skeleton component
 
 ---
 
@@ -34,35 +34,35 @@ The component mixes data fetching, 8+ async/mutation handlers, read-view JSX, ed
 
 ---
 
-### 3. `NewItemDialog.tsx` — type-driven field rendering buries the form in one giant component
+### 3. ✅ `NewItemDialog.tsx` — type-driven field rendering buries the form in one giant component
 
 **File:** `src/components/items/NewItemDialog.tsx`
 
 Six conditionally-rendered field sections sit inside a component that also owns open/close state, form state, AI state, and submission logic.
 
-**Extract:**
+**Extracted:**
 - `ItemFormFields` (`src/components/items/ItemFormFields.tsx`) — accepts form state + AI callbacks, renders all conditional fields (title, description, language, content, URL, file upload, tags, collections)
 
 ---
 
-### 4. `app/page.tsx` — five marketing sections with no separation
+### 4. ✅ `app/page.tsx` — five marketing sections with no separation
 
 **File:** `src/app/page.tsx` (346 lines)
 
 Hero, features grid, AI features section, CTA, and footer are all inline. `PricingSection` and `HeroVisual` are already extracted; the rest is not.
 
-**Extract:**
-- `HeroSection` (`src/components/marketing/HeroSection.tsx`) — lines 21–45
-- `FeaturesSection` (`src/components/marketing/FeaturesSection.tsx`) — lines 52–121; move `features` array to a constants file
-- `AiFeaturesSection` (`src/components/marketing/AiFeaturesSection.tsx`) — lines 123–280; the inline code mockup (lines 166–278) could itself become `AiCodeMockup`
-- `CtaSection` (`src/components/marketing/CtaSection.tsx`) — lines 285–297
-- `MarketingFooter` (`src/components/marketing/Footer.tsx`) — lines 299–344
+**Extracted:**
+- `HeroSection` (`src/components/marketing/HeroSection.tsx`) — hero text + HeroVisual wrapper
+- `FeaturesSection` (`src/components/marketing/FeaturesSection.tsx`) — features grid; `features` array defined at module level
+- `AiFeaturesSection` (`src/components/marketing/AiFeaturesSection.tsx`) — AI features list + `AiCodeMockup` (`src/components/marketing/AiCodeMockup.tsx`)
+- `CtaSection` (`src/components/marketing/CtaSection.tsx`) — CTA banner
+- `MarketingFooter` (`src/components/marketing/Footer.tsx`) — site footer
 
 ---
 
 ## MEDIUM Impact
 
-### 5. `CodeEditor.tsx` and `MarkdownEditor.tsx` — duplicate toolbar pattern
+### 5. ✅ `CodeEditor.tsx` and `MarkdownEditor.tsx` — duplicate toolbar pattern
 
 **Files:** `src/components/ui/CodeEditor.tsx`, `src/components/ui/MarkdownEditor.tsx`
 
@@ -76,7 +76,7 @@ Both render a near-identical dark toolbar (macOS dots, tab row, AI action + Copy
 
 ---
 
-### 6. `UpgradePage.tsx` duplicates pricing cards from `PricingSection.tsx`
+### 6. ✅ `UpgradePage.tsx` duplicates pricing cards from `PricingSection.tsx`
 
 **Files:** `src/components/upgrade/UpgradePage.tsx`, `src/components/marketing/PricingSection.tsx`
 
@@ -100,7 +100,7 @@ Free/Pro pricing cards, feature lists, and billing toggle are structurally ident
 
 ---
 
-### 8. `actions/ai.ts` — auth + pro-check + rate-limit preamble repeated in every function
+### 8. ✅ `actions/ai.ts` — auth + pro-check + rate-limit preamble repeated in every function
 
 **File:** `src/actions/ai.ts`
 
