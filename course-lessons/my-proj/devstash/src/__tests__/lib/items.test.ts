@@ -13,7 +13,8 @@ vi.mock('@/lib/prisma', () => ({
   },
 }))
 
-import { createItem, getItemById, deleteItem, getItemsByCollection, getItemsByTypePaginated, getItemsByCollectionPaginated, toggleItemPin } from '@/lib/db/items'
+import { createItem, getItemById, deleteItem, getItemsByCollection, getItemsByTypePaginated, getItemsByCollectionPaginated, toggleItemPin, toggleItemFavorite, updateItem } from '@/lib/db/items'
+import type { UpdateItemData } from '@/lib/db/items'
 
 const mockItem = {
   id: 'item-1',
@@ -453,9 +454,96 @@ describe('toggleItemPin', () => {
 
     expect(prisma.item.update).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: { id: 'item-1' },
+        where: { id: 'item-1', userId: 'user-1' },
         data: { isPinned: true },
       })
+    )
+  })
+})
+
+describe('toggleItemFavorite', () => {
+  beforeEach(() => vi.clearAllMocks())
+
+  it('returns null when item is not found or belongs to another user', async () => {
+    const { prisma } = await import('@/lib/prisma')
+    vi.mocked(prisma.item.findFirst).mockResolvedValue(null)
+
+    const result = await toggleItemFavorite('item-1', 'user-1')
+    expect(result).toBeNull()
+    expect(prisma.item.update).not.toHaveBeenCalled()
+  })
+
+  it('favorites an unfavorited item and returns true', async () => {
+    const { prisma } = await import('@/lib/prisma')
+    vi.mocked(prisma.item.findFirst).mockResolvedValue({ isFavorite: false } as never)
+    vi.mocked(prisma.item.update).mockResolvedValue({ isFavorite: true } as never)
+
+    const result = await toggleItemFavorite('item-1', 'user-1')
+    expect(result).toBe(true)
+  })
+
+  it('unfavorites a favorited item and returns false', async () => {
+    const { prisma } = await import('@/lib/prisma')
+    vi.mocked(prisma.item.findFirst).mockResolvedValue({ isFavorite: true } as never)
+    vi.mocked(prisma.item.update).mockResolvedValue({ isFavorite: false } as never)
+
+    const result = await toggleItemFavorite('item-1', 'user-1')
+    expect(result).toBe(false)
+  })
+
+  it('scopes update to both id and userId to prevent cross-user writes', async () => {
+    const { prisma } = await import('@/lib/prisma')
+    vi.mocked(prisma.item.findFirst).mockResolvedValue({ isFavorite: false } as never)
+    vi.mocked(prisma.item.update).mockResolvedValue({ isFavorite: true } as never)
+
+    await toggleItemFavorite('item-1', 'user-1')
+
+    expect(prisma.item.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: 'item-1', userId: 'user-1' },
+      })
+    )
+  })
+})
+
+describe('updateItem', () => {
+  beforeEach(() => vi.clearAllMocks())
+
+  const updateData: UpdateItemData = {
+    title: 'Updated Title',
+    description: null,
+    content: 'new content',
+    url: null,
+    language: 'typescript',
+    tags: [],
+    collectionIds: [],
+  }
+
+  it('returns null when item is not found (P2025)', async () => {
+    const { prisma } = await import('@/lib/prisma')
+    const p2025 = Object.assign(new Error('Record not found'), { code: 'P2025' })
+    vi.mocked(prisma.item.update).mockRejectedValue(p2025)
+
+    const result = await updateItem('item-1', 'user-1', updateData)
+    expect(result).toBeNull()
+  })
+
+  it('re-throws non-P2025 errors', async () => {
+    const { prisma } = await import('@/lib/prisma')
+    const dbError = new Error('connection lost')
+    vi.mocked(prisma.item.update).mockRejectedValue(dbError)
+
+    await expect(updateItem('item-1', 'user-1', updateData)).rejects.toThrow('connection lost')
+  })
+
+  it('scopes update to both id and userId to prevent cross-user writes', async () => {
+    const { prisma } = await import('@/lib/prisma')
+    vi.mocked(prisma.item.update).mockResolvedValue(mockItem as never)
+
+    await updateItem('item-1', 'user-1', updateData)
+
+    expect(prisma.item.update).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { id: 'item-1', userId: 'user-1' } })
     )
   })
 })
