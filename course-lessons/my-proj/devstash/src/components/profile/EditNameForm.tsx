@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { updateName } from '@/actions/profile'
+import { getActionErrorMessage } from '@/lib/actions/action-error'
 
 interface Props {
   currentName: string | null
@@ -23,7 +24,7 @@ export default function EditNameForm({ currentName }: Props) {
     try {
       const result = await updateName(name)
       if (!result.success) {
-        toast.error(typeof result.error === 'string' ? result.error : 'Failed to update name.')
+        toast.error(getActionErrorMessage(result.error, 'Failed to update name.'))
         return
       }
       toast.success('Name updated')

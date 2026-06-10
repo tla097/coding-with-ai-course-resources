@@ -1,10 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Crown, ExternalLink } from 'lucide-react'
+import { redirectToCheckout, redirectToBillingPortal } from '@/lib/stripe-client'
 
 interface BillingSectionProps {
   isPro: boolean
@@ -17,19 +17,7 @@ export default function BillingSection({ isPro, hasStripeCustomer }: BillingSect
   async function handleUpgrade(priceId: string) {
     setLoading(true)
     try {
-      const res = await fetch('/api/stripe/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ priceId }),
-      })
-      const data = await res.json()
-      if (data.url) {
-        window.location.href = data.url
-      } else {
-        toast.error('Failed to start checkout')
-      }
-    } catch {
-      toast.error('Something went wrong')
+      await redirectToCheckout(priceId)
     } finally {
       setLoading(false)
     }
@@ -38,15 +26,7 @@ export default function BillingSection({ isPro, hasStripeCustomer }: BillingSect
   async function handleManageBilling() {
     setLoading(true)
     try {
-      const res = await fetch('/api/stripe/portal', { method: 'POST' })
-      const data = await res.json()
-      if (data.url) {
-        window.location.href = data.url
-      } else {
-        toast.error('Failed to open billing portal')
-      }
-    } catch {
-      toast.error('Something went wrong')
+      await redirectToBillingPortal()
     } finally {
       setLoading(false)
     }

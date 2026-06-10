@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { validateNewPassword } from '@/lib/actions/validate-password'
 import { parseActionInput } from '@/lib/actions/parse-action-input'
 import { formatRateLimitError } from '@/lib/rate-limit'
+import { getActionErrorMessage } from '@/lib/actions/action-error'
 
 // ─── validateNewPassword ──────────────────────────────────────────────────────
 
@@ -90,5 +91,33 @@ describe('formatRateLimitError', () => {
   it('returns at least 1 minute for an already-elapsed reset time', () => {
     const msg = formatRateLimitError(Date.now() - 10_000)
     expect(msg).toBe('Too many attempts. Please try again in 1 minute.')
+  })
+})
+
+// ─── getActionErrorMessage ────────────────────────────────────────────────────
+
+describe('getActionErrorMessage', () => {
+  it('returns the error string when error is a string', () => {
+    expect(getActionErrorMessage('Something specific went wrong.', 'fallback')).toBe('Something specific went wrong.')
+  })
+
+  it('returns the fallback when error is undefined', () => {
+    expect(getActionErrorMessage(undefined, 'Default error.')).toBe('Default error.')
+  })
+
+  it('returns the fallback when error is an object', () => {
+    expect(getActionErrorMessage({ code: 'E001' }, 'Default error.')).toBe('Default error.')
+  })
+
+  it('returns the fallback when error is null', () => {
+    expect(getActionErrorMessage(null, 'Default error.')).toBe('Default error.')
+  })
+
+  it('returns the fallback when error is a number', () => {
+    expect(getActionErrorMessage(500, 'Default error.')).toBe('Default error.')
+  })
+
+  it('returns empty string when error is an empty string', () => {
+    expect(getActionErrorMessage('', 'fallback')).toBe('')
   })
 })

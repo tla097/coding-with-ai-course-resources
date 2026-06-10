@@ -16,6 +16,8 @@ import { Label } from '@/components/ui/label'
 import { ICON_MAP } from '@/lib/icon-map'
 import { CONTENT_TYPES, LANGUAGE_TYPES, CODE_EDITOR_TYPES, MARKDOWN_EDITOR_TYPES } from '@/lib/languages'
 import { createItem } from '@/actions/items'
+import { getActionErrorMessage } from '@/lib/actions/action-error'
+import { useDialogSubmit } from '@/hooks/useDialogSubmit'
 import ItemFormFields, { type FormState } from '@/components/items/ItemFormFields'
 import type { UploadResult } from '@/components/items/FileUpload'
 import { useAiTagSuggestions } from '@/hooks/useAiTagSuggestions'
@@ -43,7 +45,7 @@ const EMPTY_FORM: FormState = {
 export default function NewItemDialog({ itemTypes, collections, isPro }: Props) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
-  const [saving, setSaving] = useState(false)
+  const { inProgress: saving, setInProgress: setSaving, guardedOpenChange } = useDialogSubmit()
   const [selectedTypeId, setSelectedTypeId] = useState<string | null>(null)
   const [form, setForm] = useState<FormState>(EMPTY_FORM)
   const [selectedCollectionIds, setSelectedCollectionIds] = useState<string[]>([])
@@ -77,13 +79,12 @@ export default function NewItemDialog({ itemTypes, collections, isPro }: Props) 
     setSelectedCollectionIds([])
     clearSuggestions()
     clearGenerating()
-    setSaving(false)
     setUploadedFile(null)
     setOpen(true)
   }
 
   function handleClose(value: boolean) {
-    if (!saving) setOpen(value)
+    guardedOpenChange(value, setOpen)
   }
 
   const showContent = selectedType ? CONTENT_TYPES.includes(selectedType.name) : false
@@ -126,11 +127,7 @@ export default function NewItemDialog({ itemTypes, collections, isPro }: Props) 
     setSaving(false)
 
     if (!result.success) {
-      const msg =
-        typeof result.error === 'string'
-          ? result.error
-          : 'Validation failed. Please check your inputs.'
-      toast.error(msg)
+      toast.error(getActionErrorMessage(result.error, 'Validation failed. Please check your inputs.'))
       return
     }
 

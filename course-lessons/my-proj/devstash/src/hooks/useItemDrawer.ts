@@ -6,6 +6,7 @@ import { toast } from 'sonner'
 import { ICON_MAP } from '@/lib/icon-map'
 import { CONTENT_TYPES, LANGUAGE_TYPES, CODE_EDITOR_TYPES, MARKDOWN_EDITOR_TYPES } from '@/lib/languages'
 import { updateItem, deleteItem, toggleItemFavorite, toggleItemPin } from '@/actions/items'
+import { getActionErrorMessage } from '@/lib/actions/action-error'
 import { useAiTagSuggestions } from '@/hooks/useAiTagSuggestions'
 import { useAiDescription } from '@/hooks/useAiDescription'
 import type { ItemDetail } from '@/lib/db/items'
@@ -163,11 +164,7 @@ export function useItemDrawer({ itemId, open, onOpenChange }: Options) {
       })
 
       if (!result.success) {
-        const errorMsg =
-          typeof result.error === 'string'
-            ? result.error
-            : 'Validation failed. Please check your inputs.'
-        toast.error(errorMsg)
+        toast.error(getActionErrorMessage(result.error, 'Validation failed. Please check your inputs.'))
         return
       }
 
@@ -191,7 +188,7 @@ export function useItemDrawer({ itemId, open, onOpenChange }: Options) {
     try {
       const result = await deleteItem(itemId)
       if (!result.success) {
-        toast.error(typeof result.error === 'string' ? result.error : 'Failed to delete item.')
+        toast.error(getActionErrorMessage(result.error, 'Failed to delete item.'))
         return
       }
       toast.success('Item deleted')
@@ -211,7 +208,7 @@ export function useItemDrawer({ itemId, open, onOpenChange }: Options) {
       const result = await toggleItemFavorite(itemId)
       if (!result.success) {
         setIsFavorite(!optimistic)
-        toast.error(typeof result.error === 'string' ? result.error : 'Failed to update favorite.')
+        toast.error(getActionErrorMessage(result.error, 'Failed to update favorite.'))
         return
       }
       router.refresh()
@@ -229,7 +226,7 @@ export function useItemDrawer({ itemId, open, onOpenChange }: Options) {
       const result = await toggleItemPin(itemId)
       if (!result.success) {
         setIsPinned(!optimistic)
-        toast.error(typeof result.error === 'string' ? result.error : 'Failed to update pin.')
+        toast.error(getActionErrorMessage(result.error, 'Failed to update pin.'))
         return
       }
       toast.success(optimistic ? 'Item pinned' : 'Item unpinned')

@@ -30,6 +30,7 @@ export interface FormState {
 }
 
 interface Props {
+  idPrefix?: string
   form: FormState
   setForm: Dispatch<SetStateAction<FormState>>
   isPro?: boolean
@@ -38,14 +39,16 @@ interface Props {
   showCodeEditor: boolean
   showMarkdownEditor: boolean
   showUrl: boolean
-  showFileUpload: boolean
+  urlRequired?: boolean
+  showFileUpload?: boolean
   selectedTypeName?: string
+  descriptionRows?: number
   collections: { id: string; name: string }[]
   selectedCollectionIds: string[]
   onCollectionChange: (ids: string[]) => void
-  uploadedFile: UploadResult | null
-  onUploadComplete: (result: UploadResult) => void
-  onClearUpload: () => void
+  uploadedFile?: UploadResult | null
+  onUploadComplete?: (result: UploadResult) => void
+  onClearUpload?: () => void
   tagSuggestions: string[]
   suggestingTags: boolean
   generatingDescription: boolean
@@ -56,6 +59,7 @@ interface Props {
 }
 
 export default function ItemFormFields({
+  idPrefix = 'new',
   form,
   setForm,
   isPro,
@@ -64,12 +68,14 @@ export default function ItemFormFields({
   showCodeEditor,
   showMarkdownEditor,
   showUrl,
-  showFileUpload,
+  urlRequired = true,
+  showFileUpload = false,
   selectedTypeName,
+  descriptionRows = 2,
   collections,
   selectedCollectionIds,
   onCollectionChange,
-  uploadedFile,
+  uploadedFile = null,
   onUploadComplete,
   onClearUpload,
   tagSuggestions,
@@ -83,11 +89,11 @@ export default function ItemFormFields({
   return (
     <div className="space-y-4">
       <div className="space-y-1.5">
-        <Label htmlFor="new-title">
+        <Label htmlFor={`${idPrefix}-title`}>
           Title <span className="text-destructive">*</span>
         </Label>
         <Input
-          id="new-title"
+          id={`${idPrefix}-title`}
           value={form.title}
           onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
           placeholder="Title"
@@ -97,7 +103,7 @@ export default function ItemFormFields({
 
       <div className="space-y-1.5">
         <div className="flex items-center justify-between">
-          <Label htmlFor="new-description">Description</Label>
+          <Label htmlFor={`${idPrefix}-description`}>Description</Label>
           {isPro && (
             <Button
               type="button"
@@ -113,22 +119,22 @@ export default function ItemFormFields({
           )}
         </div>
         <Textarea
-          id="new-description"
+          id={`${idPrefix}-description`}
           value={form.description}
           onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
           placeholder="Description (optional)"
-          rows={2}
+          rows={descriptionRows}
         />
       </div>
 
       {showLanguage && (
         <div className="space-y-1.5">
-          <Label htmlFor="new-language">Language</Label>
+          <Label htmlFor={`${idPrefix}-language`}>Language</Label>
           <Select
             value={form.language}
             onValueChange={v => setForm(f => ({ ...f, language: v ?? 'plaintext' }))}
           >
-            <SelectTrigger id="new-language" className="w-full">
+            <SelectTrigger id={`${idPrefix}-language`} className="w-full">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -158,7 +164,7 @@ export default function ItemFormFields({
             />
           ) : (
             <Textarea
-              id="new-content"
+              id={`${idPrefix}-content`}
               value={form.content}
               onChange={e => setForm(f => ({ ...f, content: e.target.value }))}
               placeholder="Content"
@@ -170,11 +176,11 @@ export default function ItemFormFields({
 
       {showUrl && (
         <div className="space-y-1.5">
-          <Label htmlFor="new-url">
-            URL <span className="text-destructive">*</span>
+          <Label htmlFor={`${idPrefix}-url`}>
+            URL{urlRequired && <span className="text-destructive"> *</span>}
           </Label>
           <Input
-            id="new-url"
+            id={`${idPrefix}-url`}
             type="url"
             value={form.url}
             onChange={e => setForm(f => ({ ...f, url: e.target.value }))}
@@ -183,7 +189,7 @@ export default function ItemFormFields({
         </div>
       )}
 
-      {showFileUpload && selectedTypeName && (
+      {showFileUpload && selectedTypeName && onUploadComplete && onClearUpload && (
         <div className="space-y-1.5">
           <Label>
             {selectedTypeName === 'image' ? 'Image' : 'File'}{' '}
@@ -199,7 +205,7 @@ export default function ItemFormFields({
       )}
 
       <TagsField
-        id="new-tags"
+        id={`${idPrefix}-tags`}
         value={form.tags}
         onChange={v => setForm(f => ({ ...f, tags: v }))}
         isPro={isPro}

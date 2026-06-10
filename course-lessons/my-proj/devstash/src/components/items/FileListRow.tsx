@@ -11,6 +11,8 @@ import {
   Download,
 } from 'lucide-react'
 import type { ItemWithType } from '@/lib/db/items'
+import { formatBytes } from '@/lib/utils'
+import { useKeyboardClick } from '@/hooks/useKeyboardClick'
 
 const TEXT_EXTS = new Set(['pdf', 'doc', 'docx', 'txt', 'rtf', 'odt', 'pages'])
 const CODE_EXTS = new Set(['js', 'ts', 'tsx', 'jsx', 'py', 'rb', 'go', 'rs', 'java', 'c', 'cpp', 'h', 'cs', 'php', 'html', 'css', 'json', 'xml', 'yaml', 'yml', 'sh', 'md'])
@@ -31,13 +33,6 @@ function getFileIcon(fileName: string | null) {
   return File
 }
 
-function formatFileSize(bytes: number | null): string {
-  if (!bytes) return '—'
-  if (bytes < 1024) return `${bytes} B`
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
-}
-
 function formatDate(date: Date): string {
   return new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(date))
 }
@@ -49,6 +44,7 @@ interface Props {
 
 export default function FileListRow({ item, onClick }: Props) {
   const Icon = getFileIcon(item.fileName)
+  const handleKeyDown = useKeyboardClick(onClick)
 
   function handleDownload(e: React.MouseEvent) {
     e.stopPropagation()
@@ -65,9 +61,7 @@ export default function FileListRow({ item, onClick }: Props) {
       tabIndex={0}
       className="group flex cursor-pointer items-center gap-4 rounded-lg border border-border bg-card px-4 py-3 transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       onClick={onClick}
-      onKeyDown={e => {
-        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick?.() }
-      }}
+      onKeyDown={handleKeyDown}
     >
       {/* File icon */}
       <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-muted">
@@ -81,7 +75,7 @@ export default function FileListRow({ item, onClick }: Props) {
           {item.fileName && (
             <span className="truncate">{item.fileName}</span>
           )}
-          <span className="shrink-0">{formatFileSize(item.fileSize)}</span>
+          <span className="shrink-0">{formatBytes(item.fileSize)}</span>
           <span className="shrink-0">{formatDate(item.createdAt)}</span>
         </div>
       </div>

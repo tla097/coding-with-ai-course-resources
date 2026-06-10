@@ -1,10 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { MoreHorizontal, Pencil, Trash2, Star } from 'lucide-react'
-import { toast } from 'sonner'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,17 +14,20 @@ import { ICON_MAP } from '@/lib/icon-map'
 import EditCollectionDialog from '@/components/collections/EditCollectionDialog'
 import DeleteCollectionDialog from '@/components/collections/DeleteCollectionDialog'
 import { toggleCollectionFavorite } from '@/actions/collections'
+import { useFavoriteToggle } from '@/hooks/useFavoriteToggle'
 
 interface CollectionCardProps {
   collection: CollectionWithStats
 }
 
 export default function CollectionCard({ collection }: CollectionCardProps) {
-  const router = useRouter()
   const [editOpen, setEditOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
-  const [isFavorite, setIsFavorite] = useState(collection.isFavorite)
-  const [favoriting, setFavoriting] = useState(false)
+  const { isFavorite, favoriting, toggle } = useFavoriteToggle(
+    collection.isFavorite,
+    toggleCollectionFavorite,
+    collection.id
+  )
 
   const borderStyle = collection.dominantType
     ? { borderLeftColor: collection.dominantType.color }
@@ -36,21 +37,9 @@ export default function CollectionCard({ collection }: CollectionCardProps) {
     e.stopPropagation()
   }
 
-  async function handleToggleFavorite(e: React.MouseEvent) {
+  function handleToggleFavorite(e: React.MouseEvent) {
     e.stopPropagation()
-    if (favoriting) return
-    setFavoriting(true)
-    try {
-      const result = await toggleCollectionFavorite(collection.id)
-      if (!result.success) {
-        toast.error(typeof result.error === 'string' ? result.error : 'Failed to update favorite.')
-        return
-      }
-      setIsFavorite(result.data.isFavorite)
-      router.refresh()
-    } finally {
-      setFavoriting(false)
-    }
+    toggle()
   }
 
   return (

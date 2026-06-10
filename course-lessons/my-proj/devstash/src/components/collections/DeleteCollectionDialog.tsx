@@ -12,6 +12,8 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { deleteCollection } from '@/actions/collections'
+import { getActionErrorMessage } from '@/lib/actions/action-error'
+import { useDialogSubmit } from '@/hooks/useDialogSubmit'
 
 interface DeleteCollectionDialogProps {
   open: boolean
@@ -27,10 +29,10 @@ export default function DeleteCollectionDialog({
   redirectAfterDelete,
 }: DeleteCollectionDialogProps) {
   const router = useRouter()
-  const [deleting, setDeleting] = useState(false)
+  const { inProgress: deleting, setInProgress: setDeleting, guardedOpenChange } = useDialogSubmit()
 
   function handleOpenChange(value: boolean) {
-    if (!deleting) onOpenChange(value)
+    guardedOpenChange(value, onOpenChange)
   }
 
   async function handleDelete() {
@@ -39,7 +41,7 @@ export default function DeleteCollectionDialog({
     setDeleting(false)
 
     if (!result.success) {
-      toast.error(typeof result.error === 'string' ? result.error : 'Failed to delete collection.')
+      toast.error(getActionErrorMessage(result.error, 'Failed to delete collection.'))
       return
     }
 
