@@ -32,10 +32,21 @@ export async function POST(req: NextRequest) {
         const userId = session.metadata?.userId
         if (!userId) break
 
+        const user = await prisma.user.findUnique({
+          where: { id: userId },
+          select: { id: true, stripeCustomerId: true },
+        })
+        if (!user) break
+
+        // On first checkout stripeCustomerId may be null — allow it through.
+        // On subsequent events the stored ID must match the Stripe customer.
+        if (user.stripeCustomerId && user.stripeCustomerId !== session.customer) break
+
         await prisma.user.update({
           where: { id: userId },
           data: {
             isPro: true,
+            stripeCustomerId: session.customer as string,
             stripeSubscriptionId: session.subscription as string,
           },
         })

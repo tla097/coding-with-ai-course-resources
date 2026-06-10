@@ -9,7 +9,10 @@ vi.mock('@/lib/stripe', () => ({
 }))
 vi.mock('@/lib/prisma', () => ({
   prisma: {
-    user: { update: vi.fn() },
+    user: {
+      findUnique: vi.fn(),
+      update: vi.fn(),
+    },
   },
 }))
 
@@ -19,6 +22,7 @@ import { prisma } from '@/lib/prisma'
 
 const mockConstructEvent = vi.mocked(stripe.webhooks.constructEvent)
 const mockRetrieve = vi.mocked(stripe.customers.retrieve)
+const mockFindUnique = vi.mocked(prisma.user.findUnique)
 const mockUpdate = vi.mocked(prisma.user.update)
 
 function makeRequest(body = 'raw-body', sig?: string) {
@@ -55,32 +59,64 @@ describe('POST /api/webhooks/stripe', () => {
   })
 
   describe('checkout.session.completed', () => {
-    it('sets isPro=true and stripeSubscriptionId when mode is subscription', async () => {
-      mockConstructEvent.mockReturnValue({
+    function makeCheckoutEvent(overrides: Partial<Stripe.Checkout.Session> = {}) {
+      return {
         type: 'checkout.session.completed',
         data: {
           object: {
             mode: 'subscription',
             metadata: { userId: 'user-1' },
+            customer: 'cus-abc',
             subscription: 'sub-abc',
+            ...overrides,
           } as Stripe.Checkout.Session,
         },
-      } as Stripe.Event)
+      } as Stripe.Event
+    }
+
+    it('sets isPro=true, stripeCustomerId, and stripeSubscriptionId on first checkout (no stored customer)', async () => {
+      mockConstructEvent.mockReturnValue(makeCheckoutEvent())
+      mockFindUnique.mockResolvedValue({ id: 'user-1', stripeCustomerId: null } as never)
       mockUpdate.mockResolvedValue({} as never)
 
       const res = await POST(makeRequest('body', 't=1,v1=sig'))
       expect(res.status).toBe(200)
       expect(mockUpdate).toHaveBeenCalledWith({
         where: { id: 'user-1' },
-        data: { isPro: true, stripeSubscriptionId: 'sub-abc' },
+        data: { isPro: true, stripeCustomerId: 'cus-abc', stripeSubscriptionId: 'sub-abc' },
       })
     })
 
+    it('sets isPro=true when stored stripeCustomerId matches session.customer', async () => {
+      mockConstructEvent.mockReturnValue(makeCheckoutEvent())
+      mockFindUnique.mockResolvedValue({ id: 'user-1', stripeCustomerId: 'cus-abc' } as never)
+      mockUpdate.mockResolvedValue({} as never)
+
+      const res = await POST(makeRequest('body', 't=1,v1=sig'))
+      expect(res.status).toBe(200)
+      expect(mockUpdate).toHaveBeenCalled()
+    })
+
+    it('does not update DB when stored stripeCustomerId does not match session.customer', async () => {
+      mockConstructEvent.mockReturnValue(makeCheckoutEvent({ customer: 'cus-different' }))
+      mockFindUnique.mockResolvedValue({ id: 'user-1', stripeCustomerId: 'cus-abc' } as never)
+
+      const res = await POST(makeRequest('body', 't=1,v1=sig'))
+      expect(res.status).toBe(200)
+      expect(mockUpdate).not.toHaveBeenCalled()
+    })
+
+    it('does not update DB when user is not found', async () => {
+      mockConstructEvent.mockReturnValue(makeCheckoutEvent())
+      mockFindUnique.mockResolvedValue(null as never)
+
+      const res = await POST(makeRequest('body', 't=1,v1=sig'))
+      expect(res.status).toBe(200)
+      expect(mockUpdate).not.toHaveBeenCalled()
+    })
+
     it('does not update DB when session mode is not subscription', async () => {
-      mockConstructEvent.mockReturnValue({
-        type: 'checkout.session.completed',
-        data: { object: { mode: 'payment', metadata: { userId: 'user-1' } } as Stripe.Checkout.Session },
-      } as Stripe.Event)
+      mockConstructEvent.mockReturnValue(makeCheckoutEvent({ mode: 'payment' }))
 
       const res = await POST(makeRequest('body', 't=1,v1=sig'))
       expect(res.status).toBe(200)
@@ -88,10 +124,7 @@ describe('POST /api/webhooks/stripe', () => {
     })
 
     it('does not update DB when userId is missing from metadata', async () => {
-      mockConstructEvent.mockReturnValue({
-        type: 'checkout.session.completed',
-        data: { object: { mode: 'subscription', metadata: {}, subscription: 'sub-abc' } as Stripe.Checkout.Session },
-      } as Stripe.Event)
+      mockConstructEvent.mockReturnValue(makeCheckoutEvent({ metadata: {} }))
 
       const res = await POST(makeRequest('body', 't=1,v1=sig'))
       expect(res.status).toBe(200)

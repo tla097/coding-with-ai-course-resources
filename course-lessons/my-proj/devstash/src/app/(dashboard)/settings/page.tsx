@@ -56,7 +56,7 @@ export default async function SettingsPage({
           <h2 className="text-base font-semibold text-destructive">Danger Zone</h2>
           <p className="text-sm text-muted-foreground mt-1">Irreversible and destructive actions.</p>
         </div>
-        <DeleteAccountButton />
+        <DeleteAccountButton hasPassword={profile.hasPassword} />
       </div>
     </div>
   )

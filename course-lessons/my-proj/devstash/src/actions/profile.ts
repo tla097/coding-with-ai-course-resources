@@ -58,9 +58,26 @@ export async function changePassword(
   return { success: true }
 }
 
-export async function deleteAccount() {
+export async function deleteAccount(confirmation: string) {
   const session = await auth()
   if (!session?.user?.id) return { success: false, error: 'Not authenticated.' }
+
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { email: true, password: true },
+  })
+  if (!user) return { success: false, error: 'User not found.' }
+
+  if (user.password) {
+    // Credentials user — verify current password
+    const valid = await bcrypt.compare(confirmation, user.password)
+    if (!valid) return { success: false, error: 'Incorrect password.' }
+  } else {
+    // OAuth user — require typing their email address
+    if (confirmation.trim().toLowerCase() !== user.email?.toLowerCase()) {
+      return { success: false, error: 'Email address does not match.' }
+    }
+  }
 
   await prisma.user.delete({ where: { id: session.user.id } })
 
