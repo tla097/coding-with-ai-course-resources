@@ -1,21 +1,13 @@
-# Current Feature: Refactor - Extract Shared Select, AI Hooks & TagsField
+# Current Feature
 
 ## Status
-In Progress
+Not Started
 
 ## Goals
-- Extract `itemDetailSelect` constant in `src/lib/db/items.ts` — the identical 14-field Prisma select object is repeated in `getItemById`, `updateItem`, and `createItem`; define it once at module level and reference it in all three
-- Extract `useAiTagSuggestions` hook (`src/hooks/useAiTagSuggestions.ts`) — encapsulates `tagSuggestions`, `suggestingTags`, `handleSuggestTags`, `handleAcceptTag`, `handleDismissTag` which are duplicated across `NewItemDialog.tsx` and `ItemDrawer.tsx`
-- Extract `useAiDescription` hook (`src/hooks/useAiDescription.ts`) — encapsulates `generatingDescription` and `handleGenerateDescription`, duplicated across both components
-- Extract `TagsField` component (`src/components/items/TagsField.tsx`) — identical label + input + helper text + `AiTagSuggestions` JSX block used in both `NewItemDialog.tsx` and `ItemDrawer.tsx`
-- All existing tests pass; build passes with no errors
+<!-- What needs to be built -->
 
 ## Notes
-- Finding #7: `src/lib/db/items.ts` — `itemDetail` select object repeated at ~lines 95–119, 160–180, and 228–250; should follow the same pattern as the existing `itemSelect` constant
-- Finding #2: `NewItemDialog.tsx` (lines 90–137) and `ItemDrawer.tsx` (lines 154–199) share near-identical AI + tag logic and JSX
-- Hooks live in `src/hooks/` — create the directory if it doesn't exist
-- `TagsField` takes: `tags` (string), `onTagsChange`, `tagSuggestions`, `onSuggestTags`, `onAcceptTag`, `onDismissTag`, `isPro`, `suggestingTags` — derive exact props from existing usage
-- No new functionality — pure extraction refactor; behaviour must be identical after
+<!-- Additional context, constraints, or implementation details -->
 
 ## History
 <!-- Keep this updated. Earliest to Latest. Format: DD/MM/YYYY HH:MM -->
@@ -99,3 +91,4 @@ In Progress
 10/06/2026 10:00 - Completed Security Fixes HIGH Severity: JWT isPro DB fetch moved to sign-in only, Stripe webhook customer cross-check added, rate limiting fixed to use rightmost x-forwarded-for IP, deleteAccount requires server-side password/email confirmation, email HTML injection prevented via escapeHtml(); 277 tests passing; merged to main
 10/06/2026 10:25 - Completed Security & Performance Fixes MEDIUM Severity: emailVerified enforced in credentials authorize, TOCTOU collapsed in updateItem/toggleItemFavorite/toggleItemPin to single where:{id,userId} update, verify-email DB writes moved to GET route handler, getSearchData capped at 500 items with content field dropped, collections _count for itemCount, sidebar deep join replaced with lean collection query + separate itemCollection color query; 296 tests passing; merged to main
 10/06/2026 10:45 - Completed Code Duplication & Config Fixes LOW Severity: LANGUAGES array and item type constants extracted to src/lib/languages.ts, formatBytes moved to src/lib/utils.ts, BASE_MD_COMPONENTS shared base extracted to src/lib/markdown-components.tsx, stripe.ts and resend.ts throw at runtime when key is missing; 299 tests passing; merged to main
+10/06/2026 11:05 - Completed Refactor - Extract Shared Select, AI Hooks & TagsField: itemDetailSelect constant extracted in src/lib/db/items.ts (replaces 3× repeated Prisma select); useAiTagSuggestions and useAiDescription hooks created in src/hooks/; TagsField component created in src/components/items/; NewItemDialog and ItemDrawer updated to use all three; 299 tests passing; merged to main
