@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useLayoutEffect } from 'react'
+import { useState } from 'react'
 import TopBar from '@/components/layout/TopBar'
 import Sidebar from '@/components/layout/Sidebar'
 import CommandPalette from '@/components/search/CommandPalette'
@@ -9,6 +9,8 @@ import { EditorPreferencesProvider } from '@/contexts/EditorPreferencesContext'
 import { type SidebarData } from '@/lib/db/sidebar'
 import { type SearchData } from '@/lib/db/search'
 import { type EditorPreferences } from '@/types/editor-preferences'
+import { usePersistentBoolean } from '@/hooks/usePersistentBoolean'
+import { useKeyboardShortcut } from '@/hooks/useKeyboardShortcut'
 
 type User = {
   id?: string
@@ -27,39 +29,15 @@ interface Props {
 }
 
 export default function DashboardShell({ children, sidebarData, searchData, user, editorPreferences, isPro }: Props) {
-  const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [sidebarOpen, setSidebarOpen] = usePersistentBoolean('sidebar-open', true)
   const [paletteOpen, setPaletteOpen] = useState(false)
   const [drawerItemId, setDrawerItemId] = useState<string | null>(null)
   const [drawerOpen, setDrawerOpen] = useState(false)
 
-  useLayoutEffect(() => {
-    const saved = localStorage.getItem('sidebar-open')
-    if (saved !== null) setSidebarOpen(saved === 'true')
-  }, [])
+  useKeyboardShortcut('k', () => setPaletteOpen(open => !open), { ctrlOrMeta: true })
 
-  useEffect(() => {
-    function handleKeyDown(e: KeyboardEvent) {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-        e.preventDefault()
-        setPaletteOpen(open => !open)
-      }
-    }
-    document.addEventListener('keydown', handleKeyDown)
-    return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [])
-
-  const handleToggle = () => {
-    setSidebarOpen(prev => {
-      const next = !prev
-      localStorage.setItem('sidebar-open', String(next))
-      return next
-    })
-  }
-
-  const handleClose = () => {
-    setSidebarOpen(false)
-    localStorage.setItem('sidebar-open', 'false')
-  }
+  const handleToggle = () => setSidebarOpen(prev => !prev)
+  const handleClose = () => setSidebarOpen(false)
 
   function handleSelectItem(itemId: string) {
     setDrawerItemId(itemId)
