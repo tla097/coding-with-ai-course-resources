@@ -114,35 +114,34 @@ Every exported function performs the same four-step prologue: auth check, Pro ch
 
 ## LOW Impact
 
-### 9. `HeroVisual.tsx` — 110-line `useEffect` mixes physics, resize, and event binding
+### 9. ✅ `HeroVisual.tsx` — 110-line `useEffect` mixes physics, resize, and event binding
 
 **File:** `src/components/marketing/HeroVisual.tsx` (lines 24–149)
 
 Single `useEffect` initialises particles, defines resize handler, defines the per-frame `step` function (repel physics + boundary bounce + canvas rendering), and registers three event listeners.
 
-**Extract:**
-- `useParticleAnimation` hook (`src/hooks/useParticleAnimation.ts`) — accepts `canvasRef` and `mouseRef`, owns the full `useEffect`
-- Within the hook, split `step` into a `drawParticle(ctx, p)` helper
+**Extracted:**
+- `useParticleAnimation` hook (`src/hooks/useParticleAnimation.ts`) — accepts `canvasRef` and `mouseRef`, owns the full `useEffect`; `step` split into a `drawParticle(ctx, p)` helper
 
 ---
 
-### 10. `FavoritesView.tsx` — sort state duplicated for items and collections
+### 10. ✅ `FavoritesView.tsx` — sort state duplicated for items and collections
 
 **File:** `src/components/favorites/FavoritesView.tsx` (lines 62–115)
 
 `handleItemSort` / `handleColSort` are structurally identical. The `useMemo` sort logic follows the same toggle-direction pattern for both sections.
 
-**Extract:**
+**Extracted:**
 - `useSortState` hook (`src/hooks/useSortState.ts`) — generic hook: `useSortState<K>(defaultKey, defaultDir?)` returning `{ key, dir, toggle }`
 
 ---
 
-### 11. `DashboardShell.tsx` — sidebar persistence and keyboard shortcut inline
+### 11. ✅ `DashboardShell.tsx` — sidebar persistence and keyboard shortcut inline
 
 **File:** `src/components/layout/DashboardShell.tsx` (lines 35–57)
 
 `useLayoutEffect` for sidebar persistence and `useEffect` for `Ctrl+K` shortcut are simple enough to extract.
 
-**Extract:**
+**Extracted:**
 - `usePersistentBoolean` hook (`src/hooks/usePersistentBoolean.ts`) — boolean state backed by `localStorage`
-- Keyboard shortcut logic into a generic `useKeyboardShortcut` hook
+- `useKeyboardShortcut` hook (`src/hooks/useKeyboardShortcut.ts`) — generic keyboard shortcut binding
