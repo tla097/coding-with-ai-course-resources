@@ -6,6 +6,7 @@ import remarkGfm from 'remark-gfm'
 import { Copy, Check, Sparkles, Loader2, Crown } from 'lucide-react'
 import { toast } from 'sonner'
 import type { Components } from 'react-markdown'
+import { BASE_MD_COMPONENTS } from '@/lib/markdown-components'
 import { optimizePrompt } from '@/actions/ai'
 
 interface Props {
@@ -20,28 +21,15 @@ interface Props {
 const MIN_HEIGHT = 120
 const MAX_HEIGHT = 400
 
-// Inline styles for markdown elements — bypasses Tailwind CSS processing entirely
 const MD_COMPONENTS: Components = {
+  ...BASE_MD_COMPONENTS,
   h1: ({ children }) => <h1 style={{ fontSize: '1.5rem', fontWeight: 600, color: '#e8e8e8', marginTop: '1.25em', marginBottom: '0.5em', lineHeight: 1.3 }}>{children}</h1>,
   h2: ({ children }) => <h2 style={{ fontSize: '1.25rem', fontWeight: 600, color: '#e8e8e8', marginTop: '1.25em', marginBottom: '0.5em', lineHeight: 1.3 }}>{children}</h2>,
   h3: ({ children }) => <h3 style={{ fontSize: '1.125rem', fontWeight: 600, color: '#e8e8e8', marginTop: '1.25em', marginBottom: '0.5em', lineHeight: 1.3 }}>{children}</h3>,
   h4: ({ children }) => <h4 style={{ fontSize: '1rem', fontWeight: 600, color: '#e8e8e8', marginTop: '1.25em', marginBottom: '0.5em', lineHeight: 1.3 }}>{children}</h4>,
   h5: ({ children }) => <h5 style={{ fontSize: '0.875rem', fontWeight: 600, color: '#e8e8e8', marginTop: '1.25em', marginBottom: '0.5em', lineHeight: 1.3 }}>{children}</h5>,
   h6: ({ children }) => <h6 style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#858585', marginTop: '1.25em', marginBottom: '0.5em', lineHeight: 1.3 }}>{children}</h6>,
-  p: ({ children }) => <p style={{ marginBottom: '0.75em', fontSize: '0.875rem', color: '#cccccc', lineHeight: 1.6 }}>{children}</p>,
   a: ({ href, children }) => <a href={href} target="_blank" rel="noopener noreferrer" style={{ color: '#4fa3e3', textDecoration: 'none' }} onMouseOver={e => (e.currentTarget.style.textDecoration = 'underline')} onMouseOut={e => (e.currentTarget.style.textDecoration = 'none')}>{children}</a>,
-  strong: ({ children }) => <strong style={{ fontWeight: 700, color: '#e8e8e8' }}>{children}</strong>,
-  em: ({ children }) => <em style={{ fontStyle: 'italic' }}>{children}</em>,
-  code: ({ children, className }) => {
-    const isBlock = className?.startsWith('language-')
-    if (isBlock) return <code style={{ fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace', fontSize: '0.8125rem', color: '#cccccc' }}>{children}</code>
-    return <code style={{ background: '#2a2a2a', border: '1px solid #3c3c3c', borderRadius: 3, padding: '0.1em 0.4em', fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace', fontSize: '0.8125rem', color: '#ce9178' }}>{children}</code>
-  },
-  pre: ({ children }) => <pre style={{ background: '#1a1a1a', border: '1px solid #3c3c3c', borderRadius: 6, padding: '0.75rem 1rem', overflowX: 'auto', marginBottom: '0.75em' }}>{children}</pre>,
-  ul: ({ children }) => <ul style={{ paddingLeft: '1.5rem', marginBottom: '0.75em', listStyleType: 'disc', color: '#cccccc', fontSize: '0.875rem' }}>{children}</ul>,
-  ol: ({ children }) => <ol style={{ paddingLeft: '1.5rem', marginBottom: '0.75em', listStyleType: 'decimal', color: '#cccccc', fontSize: '0.875rem' }}>{children}</ol>,
-  li: ({ children }) => <li style={{ marginBottom: '0.25em' }}>{children}</li>,
-  blockquote: ({ children }) => <blockquote style={{ borderLeft: '3px solid #4fa3e3', paddingLeft: '0.875rem', marginLeft: 0, marginBottom: '0.75em', color: '#858585', fontStyle: 'italic' }}>{children}</blockquote>,
   table: ({ children }) => <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '0.75em', fontSize: '0.8125rem' }}>{children}</table>,
   th: ({ children }) => <th style={{ background: '#2d2d2d', color: '#e8e8e8', fontWeight: 600, padding: '0.4rem 0.75rem', border: '1px solid #3c3c3c', textAlign: 'left' }}>{children}</th>,
   td: ({ children }) => <td style={{ padding: '0.4rem 0.75rem', border: '1px solid #3c3c3c', color: '#cccccc' }}>{children}</td>,

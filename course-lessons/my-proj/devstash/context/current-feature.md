@@ -1,13 +1,22 @@
-# Current Feature
+# Current Feature: Code Duplication & Config Fixes (LOW Severity)
 
 ## Status
-Not Started
+In Progress
 
 ## Goals
-<!-- What needs to be built -->
+- Extract `LANGUAGES` array from `NewItemDialog.tsx` and `ItemDrawer.tsx` into a shared constants module (e.g. `src/lib/languages.ts`)
+- Extract `CONTENT_TYPES`, `LANGUAGE_TYPES`, `CODE_EDITOR_TYPES`, `MARKDOWN_EDITOR_TYPES` constants from both files into the same shared module
+- Move `formatBytes` utility from `FileUpload.tsx` and `ItemDrawer.tsx` into `src/lib/utils.ts`
+- Extract shared `MD_COMPONENTS` base from `CodeEditor.tsx` and `MarkdownEditor.tsx` into `src/lib/markdown-components.tsx`; have `MarkdownEditor` extend it
+- Fix `stripe.ts` to throw at startup if `STRIPE_SECRET_KEY` is missing instead of using a placeholder string
+- Fix `resend.ts` to throw at startup if `RESEND_AI_KEY` is missing instead of passing `undefined` to the constructor
 
 ## Notes
-<!-- Additional context, constraints, or implementation details -->
+- Findings 12–17 from devstash/context/audit-report.md (LOW severity)
+- No schema changes required — all code-only fixes
+- Language constants in NewItemDialog and ItemDrawer must stay in sync after extraction
+- `MD_COMPONENTS` in MarkdownEditor is a superset of CodeEditor's version; extract the shared base only
+- Startup guards for stripe/resend should use `throw new Error(...)` pattern matching the Stripe recommendation in the report
 
 ## History
 <!-- Keep this updated. Earliest to Latest. Format: DD/MM/YYYY HH:MM -->

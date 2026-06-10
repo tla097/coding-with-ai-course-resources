@@ -35,38 +35,13 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { ICON_MAP } from '@/lib/icon-map'
+import { LANGUAGES, CONTENT_TYPES, LANGUAGE_TYPES, CODE_EDITOR_TYPES, MARKDOWN_EDITOR_TYPES } from '@/lib/languages'
+import { formatBytes } from '@/lib/utils'
 import CollectionPicker from '@/components/items/CollectionPicker'
 import AiTagSuggestions from '@/components/items/AiTagSuggestions'
 import type { ItemDetail } from '@/lib/db/items'
 import { updateItem, deleteItem, toggleItemFavorite, toggleItemPin } from '@/actions/items'
 import { generateAutoTags, generateDescription } from '@/actions/ai'
-
-const LANGUAGES = [
-  { value: 'plaintext', label: 'Plain text' },
-  { value: 'typescript', label: 'TypeScript' },
-  { value: 'javascript', label: 'JavaScript' },
-  { value: 'python', label: 'Python' },
-  { value: 'rust', label: 'Rust' },
-  { value: 'go', label: 'Go' },
-  { value: 'java', label: 'Java' },
-  { value: 'csharp', label: 'C#' },
-  { value: 'cpp', label: 'C++' },
-  { value: 'c', label: 'C' },
-  { value: 'bash', label: 'Bash / Shell' },
-  { value: 'powershell', label: 'PowerShell' },
-  { value: 'html', label: 'HTML' },
-  { value: 'css', label: 'CSS' },
-  { value: 'json', label: 'JSON' },
-  { value: 'yaml', label: 'YAML' },
-  { value: 'markdown', label: 'Markdown' },
-  { value: 'sql', label: 'SQL' },
-  { value: 'php', label: 'PHP' },
-  { value: 'ruby', label: 'Ruby' },
-  { value: 'swift', label: 'Swift' },
-  { value: 'kotlin', label: 'Kotlin' },
-  { value: 'dockerfile', label: 'Dockerfile' },
-  { value: 'graphql', label: 'GraphQL' },
-]
 
 interface ItemDetailResponse extends Omit<ItemDetail, 'createdAt' | 'updatedAt'> {
   createdAt: string
@@ -91,18 +66,8 @@ interface Props {
   isPro?: boolean
 }
 
-const CONTENT_TYPES = ['snippet', 'prompt', 'command', 'note']
-const LANGUAGE_TYPES = ['snippet', 'command']
-const CODE_EDITOR_TYPES = ['snippet', 'command']
-const MARKDOWN_EDITOR_TYPES = ['note', 'prompt']
 const URL_TYPES = ['link']
 const FILE_TYPES = ['file', 'image']
-
-function formatBytes(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
-}
 
 export default function ItemDrawer({ itemId, open, onOpenChange, collections, isPro }: Props) {
   const router = useRouter()

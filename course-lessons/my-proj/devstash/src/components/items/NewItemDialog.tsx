@@ -25,6 +25,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { ICON_MAP } from '@/lib/icon-map'
+import { LANGUAGES, CONTENT_TYPES, LANGUAGE_TYPES, CODE_EDITOR_TYPES, MARKDOWN_EDITOR_TYPES } from '@/lib/languages'
 import { createItem } from '@/actions/items'
 import { generateAutoTags, generateDescription } from '@/actions/ai'
 import CollectionPicker from '@/components/items/CollectionPicker'
@@ -32,38 +33,7 @@ import AiTagSuggestions from '@/components/items/AiTagSuggestions'
 import FileUpload, { type UploadResult } from '@/components/items/FileUpload'
 import type { SidebarItemType } from '@/lib/db/sidebar'
 
-const LANGUAGES = [
-  { value: 'plaintext', label: 'Plain text' },
-  { value: 'typescript', label: 'TypeScript' },
-  { value: 'javascript', label: 'JavaScript' },
-  { value: 'python', label: 'Python' },
-  { value: 'rust', label: 'Rust' },
-  { value: 'go', label: 'Go' },
-  { value: 'java', label: 'Java' },
-  { value: 'csharp', label: 'C#' },
-  { value: 'cpp', label: 'C++' },
-  { value: 'c', label: 'C' },
-  { value: 'bash', label: 'Bash / Shell' },
-  { value: 'powershell', label: 'PowerShell' },
-  { value: 'html', label: 'HTML' },
-  { value: 'css', label: 'CSS' },
-  { value: 'json', label: 'JSON' },
-  { value: 'yaml', label: 'YAML' },
-  { value: 'markdown', label: 'Markdown' },
-  { value: 'sql', label: 'SQL' },
-  { value: 'php', label: 'PHP' },
-  { value: 'ruby', label: 'Ruby' },
-  { value: 'swift', label: 'Swift' },
-  { value: 'kotlin', label: 'Kotlin' },
-  { value: 'dockerfile', label: 'Dockerfile' },
-  { value: 'graphql', label: 'GraphQL' },
-]
-
 const CREATABLE_TYPES = ['snippet', 'prompt', 'command', 'note', 'link', 'file', 'image']
-const CONTENT_TYPES = ['snippet', 'prompt', 'command', 'note']
-const LANGUAGE_TYPES = ['snippet', 'command']
-const CODE_EDITOR_TYPES = ['snippet', 'command']
-const MARKDOWN_EDITOR_TYPES = ['note', 'prompt']
 const FILE_UPLOAD_TYPES = ['file', 'image']
 
 interface Props {
