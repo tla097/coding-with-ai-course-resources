@@ -35,7 +35,7 @@ export default function TopBar({ onMenuToggle, itemTypes, collections, onSearchC
         <Search className="h-4 w-4 shrink-0" />
         <span className="flex-1 text-left">Search items...</span>
         <kbd className="pointer-events-none hidden h-5 select-none items-center gap-1 rounded border border-border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground sm:flex">
-          <span className="text-xs">⌘</span>K
+          <span className="text-xs">Ctl K</span>
         </kbd>
       </button>
       {/* Search icon — mobile only */}
