@@ -1,13 +1,22 @@
-# Current Feature
+# Current Feature: Refactor Hooks - Fix Missing Finally & Extract useAsyncAction
 
 ## Status
-Not Started
+In Progress
 
 ## Goals
-<!-- Add goals here -->
+- Fix missing `try/finally` in `useAiDescription` and `useAiTagSuggestions` so exceptions don't permanently freeze loading state
+- Extract a shared `useAsyncAction` hook to eliminate the repeated set-true/try/finally/set-false in-flight boolean pattern across all five hooks
+- Replace all five manual in-flight boolean patterns with `useAsyncAction`
+- Remove the duplicate favourite-toggle logic in `useItemDrawer` by delegating to the existing `useFavoriteToggle` hook
 
 ## Notes
-<!-- Add notes here -->
+Findings from the refactor-scanner on src/hooks/:
+
+**Bug (High):** `useAiDescription.ts:17-28` and `useAiTagSuggestions.ts:18-28` set a loading flag to `true` but have no `try/finally`, meaning any exception thrown by the AI call permanently freezes the button in loading state. All other hooks (`useFavoriteToggle`, `useItemDrawer`) correctly use `finally`.
+
+**Duplication (High):** The set-true → try → finally set-false in-flight boolean pattern appears in 5 hooks. Extract to `src/hooks/useAsyncAction.ts`.
+
+**Duplication (Medium):** `useItemDrawer.ts:43,57,202–218` re-implements the entire body of `useFavoriteToggle` inline (independent `isFavorite`, `favoriting` state + `handleToggleFavorite`). The dedicated hook already exists — `useItemDrawer` should delegate to it.
 
 ## History
 <!-- Keep this updated. Earliest to Latest. Format: DD/MM/YYYY HH:MM -->
