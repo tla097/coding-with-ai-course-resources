@@ -38,6 +38,28 @@ export interface ItemDetail {
   collections: Array<{ collection: { id: string; name: string } }>
 }
 
+const itemDetailSelect = {
+  id: true,
+  title: true,
+  description: true,
+  language: true,
+  contentType: true,
+  content: true,
+  url: true,
+  fileUrl: true,
+  fileName: true,
+  fileSize: true,
+  isFavorite: true,
+  isPinned: true,
+  createdAt: true,
+  updatedAt: true,
+  itemType: { select: { id: true, name: true, icon: true, color: true } },
+  tags: { select: { id: true, name: true } },
+  collections: {
+    select: { collection: { select: { id: true, name: true } } },
+  },
+} as const
+
 const itemSelect = {
   id: true,
   title: true,
@@ -95,27 +117,7 @@ export async function getItemsByCollection(userId: string, collectionId: string)
 export async function getItemById(id: string, userId: string): Promise<ItemDetail | null> {
   return prisma.item.findFirst({
     where: { id, userId },
-    select: {
-      id: true,
-      title: true,
-      description: true,
-      language: true,
-      contentType: true,
-      content: true,
-      url: true,
-      fileUrl: true,
-      fileName: true,
-      fileSize: true,
-      isFavorite: true,
-      isPinned: true,
-      createdAt: true,
-      updatedAt: true,
-      itemType: { select: { id: true, name: true, icon: true, color: true } },
-      tags: { select: { id: true, name: true } },
-      collections: {
-        select: { collection: { select: { id: true, name: true } } },
-      },
-    },
+    select: itemDetailSelect,
   })
 }
 
@@ -157,27 +159,7 @@ export async function updateItem(
           },
         },
       },
-      select: {
-        id: true,
-        title: true,
-        description: true,
-        language: true,
-        contentType: true,
-        content: true,
-        url: true,
-        fileUrl: true,
-        fileName: true,
-        fileSize: true,
-        isFavorite: true,
-        isPinned: true,
-        createdAt: true,
-        updatedAt: true,
-        itemType: { select: { id: true, name: true, icon: true, color: true } },
-        tags: { select: { id: true, name: true } },
-        collections: {
-          select: { collection: { select: { id: true, name: true } } },
-        },
-      },
+      select: itemDetailSelect,
     })
   } catch (err: unknown) {
     if ((err as { code?: string }).code === 'P2025') return null
@@ -227,27 +209,7 @@ export async function createItem(userId: string, data: CreateItemData): Promise<
         },
       },
     },
-    select: {
-      id: true,
-      title: true,
-      description: true,
-      language: true,
-      contentType: true,
-      content: true,
-      url: true,
-      fileUrl: true,
-      fileName: true,
-      fileSize: true,
-      isFavorite: true,
-      isPinned: true,
-      createdAt: true,
-      updatedAt: true,
-      itemType: { select: { id: true, name: true, icon: true, color: true } },
-      tags: { select: { id: true, name: true } },
-      collections: {
-        select: { collection: { select: { id: true, name: true } } },
-      },
-    },
+    select: itemDetailSelect,
   })
 }
 

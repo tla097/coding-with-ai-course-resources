@@ -27,10 +27,11 @@ import {
 import { ICON_MAP } from '@/lib/icon-map'
 import { LANGUAGES, CONTENT_TYPES, LANGUAGE_TYPES, CODE_EDITOR_TYPES, MARKDOWN_EDITOR_TYPES } from '@/lib/languages'
 import { createItem } from '@/actions/items'
-import { generateAutoTags, generateDescription } from '@/actions/ai'
 import CollectionPicker from '@/components/items/CollectionPicker'
-import AiTagSuggestions from '@/components/items/AiTagSuggestions'
+import TagsField from '@/components/items/TagsField'
 import FileUpload, { type UploadResult } from '@/components/items/FileUpload'
+import { useAiTagSuggestions } from '@/hooks/useAiTagSuggestions'
+import { useAiDescription } from '@/hooks/useAiDescription'
 import type { SidebarItemType } from '@/lib/db/sidebar'
 
 const CREATABLE_TYPES = ['snippet', 'prompt', 'command', 'note', 'link', 'file', 'image']
@@ -67,73 +68,39 @@ export default function NewItemDialog({ itemTypes, collections, isPro }: Props) 
   const [selectedTypeId, setSelectedTypeId] = useState<string | null>(null)
   const [form, setForm] = useState<FormState>(EMPTY_FORM)
   const [selectedCollectionIds, setSelectedCollectionIds] = useState<string[]>([])
-  const [tagSuggestions, setTagSuggestions] = useState<string[]>([])
-  const [suggestingTags, setSuggestingTags] = useState(false)
-  const [generatingDescription, setGeneratingDescription] = useState(false)
   const [uploadedFile, setUploadedFile] = useState<UploadResult | null>(null)
 
   const creatableTypes = itemTypes.filter(t => CREATABLE_TYPES.includes(t.name))
   const selectedType = creatableTypes.find(t => t.id === selectedTypeId) ?? null
+
+  const { suggestions: tagSuggestions, suggesting: suggestingTags, handleSuggest: handleSuggestTags, handleAccept: handleAcceptTag, handleDismiss: handleDismissTag, clearSuggestions } = useAiTagSuggestions({
+    title: form.title,
+    content: form.content,
+    itemType: selectedType?.name ?? '',
+    tags: form.tags,
+    enabled: !!selectedType,
+    onTagsChange: tags => setForm(f => ({ ...f, tags })),
+  })
+
+  const { generating: generatingDescription, handleGenerate: handleGenerateDescription, clearGenerating } = useAiDescription({
+    title: form.title,
+    content: form.content,
+    url: form.url,
+    itemType: selectedType?.name ?? '',
+    enabled: !!selectedType,
+    onDescription: description => setForm(f => ({ ...f, description })),
+  })
 
   function handleOpen() {
     const defaultType = creatableTypes[0] ?? null
     setSelectedTypeId(defaultType?.id ?? null)
     setForm(EMPTY_FORM)
     setSelectedCollectionIds([])
-    setTagSuggestions([])
+    clearSuggestions()
+    clearGenerating()
     setSaving(false)
-    setGeneratingDescription(false)
     setUploadedFile(null)
     setOpen(true)
-  }
-
-  async function handleGenerateDescription() {
-    if (!selectedType) return
-    setGeneratingDescription(true)
-    const result = await generateDescription({
-      title: form.title || 'Untitled',
-      content: form.content.slice(0, 2000),
-      url: form.url,
-      itemType: selectedType.name,
-    })
-    setGeneratingDescription(false)
-    if (!result.success) {
-      toast.error(result.error)
-      return
-    }
-    setForm(f => ({ ...f, description: result.data.description }))
-  }
-
-  async function handleSuggestTags() {
-    if (!selectedType) return
-    setSuggestingTags(true)
-    const result = await generateAutoTags({
-      title: form.title || 'Untitled',
-      content: form.content.slice(0, 2000),
-      itemType: selectedType.name,
-    })
-    setSuggestingTags(false)
-    if (!result.success) {
-      toast.error(result.error)
-      return
-    }
-    const existing = form.tags.split(',').map(t => t.trim()).filter(Boolean)
-    const fresh = result.data.tags.filter(t => !existing.includes(t))
-    setTagSuggestions(fresh)
-  }
-
-  function handleAcceptTag(tag: string) {
-    setTagSuggestions(prev => prev.filter(t => t !== tag))
-    setForm(f => {
-      const existing = f.tags.split(',').map(t => t.trim()).filter(Boolean)
-      if (existing.includes(tag)) return f
-      const updated = [...existing, tag].join(', ')
-      return { ...f, tags: updated }
-    })
-  }
-
-  function handleDismissTag(tag: string) {
-    setTagSuggestions(prev => prev.filter(t => t !== tag))
   }
 
   function handleClose(value: boolean) {
@@ -355,36 +322,17 @@ export default function NewItemDialog({ itemTypes, collections, isPro }: Props) 
               </div>
             )}
 
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="new-tags">Tags</Label>
-                {isPro && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="h-auto py-0.5 px-2 text-xs text-muted-foreground gap-1"
-                    onClick={handleSuggestTags}
-                    disabled={suggestingTags}
-                  >
-                    <Sparkles className="h-3 w-3" />
-                    {suggestingTags ? 'Suggesting…' : 'Suggest Tags'}
-                  </Button>
-                )}
-              </div>
-              <Input
-                id="new-tags"
-                value={form.tags}
-                onChange={e => setForm(f => ({ ...f, tags: e.target.value }))}
-                placeholder="react, typescript, hooks"
-              />
-              <p className="text-xs text-muted-foreground">Comma-separated</p>
-              <AiTagSuggestions
-                suggestions={tagSuggestions}
-                onAccept={handleAcceptTag}
-                onDismiss={handleDismissTag}
-              />
-            </div>
+            <TagsField
+              id="new-tags"
+              value={form.tags}
+              onChange={v => setForm(f => ({ ...f, tags: v }))}
+              isPro={isPro}
+              suggestions={tagSuggestions}
+              suggesting={suggestingTags}
+              onSuggest={handleSuggestTags}
+              onAccept={handleAcceptTag}
+              onDismiss={handleDismissTag}
+            />
 
             {collections.length > 0 && (
               <div className="space-y-1.5">
