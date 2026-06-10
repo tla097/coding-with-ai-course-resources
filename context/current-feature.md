@@ -1,23 +1,9 @@
-# Current Feature: Refactor Actions - Extract Shared Utilities
+# Current Feature
 
 ## Status
 
-In Progress
-
 ## Goals
-
-### High
-- Extract `requireAuth()` helper into `src/lib/actions/require-auth.ts` — eliminates 13 copy-pasted auth guards across `items.ts`, `collections.ts`, `profile.ts`, and `editor-preferences.ts`; also fixes inconsistent `false` vs `false as const` return types as a side effect
-- Extract `validateNewPassword(password, confirmPassword)` helper into `src/lib/actions/validate-password.ts` — password policy (match + 8-char minimum) currently has no single source of truth across `profile.ts` and `password-reset.ts`
-- Extract `formatRateLimitError(resetTimestampMs)` into `src/lib/rate-limit.ts` — same minute-calculation + message string duplicated twice within `password-reset.ts`
-
-### Medium
-- Extract `parseActionInput<T>(schema, input)` helper — Zod `safeParse` + `z.flattenError` response pattern repeated 4 times across `items.ts` (×2) and `collections.ts` (×2)
-- Extract private `callGemini(prompt, errorMsg)` helper inside `ai.ts` — `generateContent` → `response.text?.trim()` → empty-check scaffold repeated across all 4 AI action functions
-
 ## Notes
-
-Findings from refactor-scanner agent scan of `src/actions/`. The existing `requireProUser()` in `ai.ts` already follows the correct auth-helper pattern — `requireAuth()` should match that shape. New helpers live under `src/lib/actions/` (new directory) except `formatRateLimitError` which goes into the existing `src/lib/rate-limit.ts`. The `callGemini` helper stays private inside `ai.ts` (no new file needed).
 
 ## History
 
@@ -69,3 +55,4 @@ Findings from refactor-scanner agent scan of `src/actions/`. The existing `requi
 04/06/2026 16:40 - Completed Item Drawer Edit Mode: pencil button toggles inline edit form; title/description/tags for all types; content/language/URL shown per type; Save/Cancel replace action bar; updateItem server action (Zod v4 validated, ownership checked, { success, data, error } pattern); updateItem DB query (disconnect-all/connect-or-create tags); router.refresh() on save; 12 unit tests; merged to main
 04/06/2026 16:55 - Completed Item Delete: trash icon in drawer opens Shadcn AlertDialog confirmation; deleteItem server action (ownership checked, { success, error } pattern); deleteItem DB query; sonner toast on success/failure; drawer closes and router.refresh() after delete; 9 unit tests; merged to main
 08/06/2026 12:00 - Completed UI Accessibility and Quality Fixes: 36 issues addressed across auth pages, dashboard, items, layout, marketing, and profile; added EditNameForm component and updateName server action; getFavoriteCollectionCount DB query; CollectionCard stretched-link pattern; build passing; merged to main
+10/06/2026 15:45 - Completed Refactor - Extract Shared Action Helpers: requireAuth() (replaces 13 inline auth guards, fixes false as const inconsistency), validateNewPassword(), parseActionInput<T>(), formatRateLimitError() extracted to src/lib/actions/ and src/lib/rate-limit.ts; callGemini() private helper extracted in ai.ts; 13 new tests; 312 passing; merged to main
