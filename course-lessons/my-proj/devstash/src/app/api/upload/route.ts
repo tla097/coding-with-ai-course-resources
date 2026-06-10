@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import { auth } from '@/auth'
+import { requireApiAuth } from '@/lib/api-auth'
 import { createSupabaseServer, SUPABASE_BUCKET } from '@/lib/supabase/server'
 
 const ALLOWED_IMAGE_MIME = new Set([
@@ -14,10 +14,8 @@ const IMAGE_MAX_BYTES = 5 * 1024 * 1024
 const FILE_MAX_BYTES = 10 * 1024 * 1024
 
 export async function POST(request: NextRequest) {
-  const session = await auth()
-  if (!session?.user?.id) {
-    return Response.json({ error: 'Unauthorized' }, { status: 401 })
-  }
+  const { session, error } = await requireApiAuth()
+  if (error) return error
 
   let body: { fileName?: string; contentType?: string; fileSize?: number; itemType?: string }
   try {
@@ -54,12 +52,12 @@ export async function POST(request: NextRequest) {
   const storagePath = `${session.user.id}/${Date.now()}-${sanitized}`
 
   const supabase = createSupabaseServer()
-  const { data, error } = await supabase.storage
+  const { data, error: uploadError } = await supabase.storage
     .from(SUPABASE_BUCKET)
     .createSignedUploadUrl(storagePath)
 
-  if (error) {
-    return Response.json({ error: error.message }, { status: 500 })
+  if (uploadError) {
+    return Response.json({ error: uploadError.message }, { status: 500 })
   }
 
   return Response.json({ signedUrl: data.signedUrl, token: data.token, path: data.path })
