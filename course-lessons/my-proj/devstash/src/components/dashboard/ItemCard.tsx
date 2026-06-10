@@ -82,7 +82,7 @@ export default function ItemCard({ item, onClick }: ItemCardProps) {
             <button
               onClick={handleCopy}
               aria-label="Copy to clipboard"
-              className="flex h-8 w-8 items-center justify-center rounded transition-colors text-muted-foreground/40 hover:text-foreground opacity-0 group-hover:opacity-100"
+              className="flex h-8 w-8 items-center justify-center rounded transition-colors text-muted-foreground/40 hover:text-foreground opacity-0 group-hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               {copied ? <Check className="h-3.5 w-3.5 text-green-500" /> : <Copy className="h-3.5 w-3.5" />}
             </button>
@@ -90,7 +90,7 @@ export default function ItemCard({ item, onClick }: ItemCardProps) {
               onClick={handleToggleFavorite}
               disabled={favoriting}
               aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
-              className={`flex h-8 w-8 items-center justify-center rounded transition-colors ${isFavorite ? 'text-yellow-500' : 'text-muted-foreground/40 hover:text-yellow-500'}`}
+              className={`flex h-8 w-8 items-center justify-center rounded transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${isFavorite ? 'text-yellow-500' : 'text-muted-foreground/40 hover:text-yellow-500 opacity-0 group-hover:opacity-100 focus-visible:opacity-100'}`}
             >
               <Star className={`h-3.5 w-3.5 ${isFavorite ? 'fill-yellow-500' : ''}`} />
             </button>
