@@ -66,24 +66,24 @@ describe('getSearchData', () => {
     expect(item.itemType).toEqual({ name: 'snippet', icon: 'Code', color: '#3b82f6' })
   })
 
-  it('uses content as contentPreview when content exists', async () => {
+  it('returns null contentPreview for text items without a url', async () => {
     mockPrismaItem.mockResolvedValue([snippet] as never)
     mockPrismaCollection.mockResolvedValue([] as never)
 
     const result = await getSearchData('user-1')
 
-    expect(result.items[0].contentPreview).toBe(snippet.content)
+    expect(result.items[0].contentPreview).toBeNull()
   })
 
-  it('truncates contentPreview to 100 characters', async () => {
-    const longContent = 'a'.repeat(200)
-    mockPrismaItem.mockResolvedValue([{ ...snippet, content: longContent }] as never)
+  it('limits item results to 500 to avoid loading large text fields', async () => {
+    mockPrismaItem.mockResolvedValue([] as never)
     mockPrismaCollection.mockResolvedValue([] as never)
 
-    const result = await getSearchData('user-1')
+    await getSearchData('user-1')
 
-    expect(result.items[0].contentPreview).toHaveLength(100)
-    expect(result.items[0].contentPreview).toBe('a'.repeat(100))
+    expect(mockPrismaItem).toHaveBeenCalledWith(
+      expect.objectContaining({ take: 500 }),
+    )
   })
 
   it('falls back to url as contentPreview when content is null', async () => {

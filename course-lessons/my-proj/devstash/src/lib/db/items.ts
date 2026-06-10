@@ -134,53 +134,55 @@ export async function updateItem(
   userId: string,
   data: UpdateItemData,
 ): Promise<ItemDetail | null> {
-  const existing = await prisma.item.findFirst({ where: { id, userId }, select: { id: true } })
-  if (!existing) return null
-
-  return prisma.item.update({
-    where: { id },
-    data: {
-      title: data.title,
-      description: data.description,
-      content: data.content,
-      url: data.url,
-      language: data.language,
-      tags: {
-        set: [],
-        connectOrCreate: data.tags.map(name => ({
-          where: { name },
-          create: { name },
-        })),
-      },
-      collections: {
-        deleteMany: {},
-        createMany: {
-          data: data.collectionIds.map(collectionId => ({ collectionId })),
+  try {
+    return await prisma.item.update({
+      where: { id, userId },
+      data: {
+        title: data.title,
+        description: data.description,
+        content: data.content,
+        url: data.url,
+        language: data.language,
+        tags: {
+          set: [],
+          connectOrCreate: data.tags.map(name => ({
+            where: { name },
+            create: { name },
+          })),
+        },
+        collections: {
+          deleteMany: {},
+          createMany: {
+            data: data.collectionIds.map(collectionId => ({ collectionId })),
+          },
         },
       },
-    },
-    select: {
-      id: true,
-      title: true,
-      description: true,
-      language: true,
-      contentType: true,
-      content: true,
-      url: true,
-      fileUrl: true,
-      fileName: true,
-      fileSize: true,
-      isFavorite: true,
-      isPinned: true,
-      createdAt: true,
-      updatedAt: true,
-      itemType: { select: { id: true, name: true, icon: true, color: true } },
-      tags: { select: { id: true, name: true } },
-      collections: {
-        select: { collection: { select: { id: true, name: true } } },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        language: true,
+        contentType: true,
+        content: true,
+        url: true,
+        fileUrl: true,
+        fileName: true,
+        fileSize: true,
+        isFavorite: true,
+        isPinned: true,
+        createdAt: true,
+        updatedAt: true,
+        itemType: { select: { id: true, name: true, icon: true, color: true } },
+        tags: { select: { id: true, name: true } },
+        collections: {
+          select: { collection: { select: { id: true, name: true } } },
+        },
       },
-    },
-  })
+    })
+  } catch (err: unknown) {
+    if ((err as { code?: string }).code === 'P2025') return null
+    throw err
+  }
 }
 
 export interface CreateItemData {
@@ -296,7 +298,7 @@ export async function toggleItemFavorite(id: string, userId: string): Promise<bo
   const item = await prisma.item.findFirst({ where: { id, userId }, select: { isFavorite: true } })
   if (!item) return null
   const updated = await prisma.item.update({
-    where: { id },
+    where: { id, userId },
     data: { isFavorite: !item.isFavorite },
     select: { isFavorite: true },
   })
@@ -307,7 +309,7 @@ export async function toggleItemPin(id: string, userId: string): Promise<boolean
   const item = await prisma.item.findFirst({ where: { id, userId }, select: { isPinned: true } })
   if (!item) return null
   const updated = await prisma.item.update({
-    where: { id },
+    where: { id, userId },
     data: { isPinned: !item.isPinned },
     select: { isPinned: true },
   })

@@ -24,15 +24,16 @@ const snippetType = { id: 'type-snippet', name: 'snippet', icon: 'Code', color: 
 const promptType = { id: 'type-prompt', name: 'prompt', icon: 'Sparkles', color: '#8b5cf6' }
 
 function makeCollection(overrides: object = {}) {
-  return {
+  const base = {
     id: 'col-1',
     name: 'React Patterns',
     description: 'Useful React patterns',
     isFavorite: false,
     createdAt: new Date('2026-06-01'),
-    items: [],
+    items: [] as Array<{ item: { itemType: { id: string; name: string; icon: string; color: string } } }>,
     ...overrides,
   }
+  return { ...base, _count: { items: base.items.length } }
 }
 
 function makeCollectionItem(type = snippetType) {

@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
   })
 
   const baseUrl = new URL(req.url).origin
-  const verifyUrl = `${baseUrl}/verify-email?token=${token}`
+  const verifyUrl = `${baseUrl}/api/auth/verify-email?token=${token}`
 
   await sendVerificationEmail(email, user.name ?? 'there', verifyUrl)
 

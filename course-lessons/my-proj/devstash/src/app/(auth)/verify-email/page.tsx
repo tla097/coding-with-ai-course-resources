@@ -1,35 +1,20 @@
-import { prisma } from '@/lib/prisma'
-import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { buttonVariants } from '@/components/ui/button'
 import ResendVerificationForm from './ResendVerificationForm'
 
 interface Props {
-  searchParams: Promise<{ token?: string; pending?: string }>
+  searchParams: Promise<{ pending?: string; error?: string }>
 }
 
 export default async function VerifyEmailPage({ searchParams }: Props) {
-  const { token, pending } = await searchParams
+  const { pending, error } = await searchParams
 
-  if (token) {
-    const record = await prisma.verificationToken.findUnique({ where: { token } })
+  if (error === 'invalid') {
+    return <VerifyResult error="This verification link is invalid or has already been used." />
+  }
 
-    if (!record) {
-      return <VerifyResult error="This verification link is invalid or has already been used." />
-    }
-
-    if (record.expires < new Date()) {
-      await prisma.verificationToken.deleteMany({ where: { token } })
-      return <VerifyResult error="This verification link has expired. Please register again." />
-    }
-
-    await prisma.user.update({
-      where: { email: record.identifier },
-      data: { emailVerified: new Date() },
-    })
-    await prisma.verificationToken.deleteMany({ where: { token } })
-
-    redirect('/sign-in?verified=true')
+  if (error === 'expired') {
+    return <VerifyResult error="This verification link has expired. Please request a new one below." showResend />
   }
 
   return (
@@ -66,11 +51,12 @@ export default async function VerifyEmailPage({ searchParams }: Props) {
   )
 }
 
-function VerifyResult({ error }: { error: string }) {
+function VerifyResult({ error, showResend }: { error: string; showResend?: boolean }) {
   return (
     <div className="w-full max-w-sm space-y-4 p-6 text-center">
       <h1 className="text-2xl font-semibold">Verification failed</h1>
       <p className="text-sm text-muted-foreground">{error}</p>
+      {showResend && <ResendVerificationForm />}
       <Link href="/register" className={buttonVariants({ variant: 'outline', className: 'w-full' })}>
         Back to register
       </Link>

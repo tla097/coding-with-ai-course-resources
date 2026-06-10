@@ -23,10 +23,10 @@ export async function getSearchData(userId: string): Promise<SearchData> {
     prisma.item.findMany({
       where: { userId },
       orderBy: { createdAt: 'desc' },
+      take: 500,
       select: {
         id: true,
         title: true,
-        content: true,
         url: true,
         itemType: { select: { name: true, icon: true, color: true } },
       },
@@ -46,7 +46,7 @@ export async function getSearchData(userId: string): Promise<SearchData> {
     items: items.map(item => ({
       id: item.id,
       title: item.title,
-      contentPreview: item.content ? item.content.slice(0, 100) : item.url,
+      contentPreview: item.url ?? null,
       itemType: item.itemType,
     })),
     collections: collections.map(col => ({

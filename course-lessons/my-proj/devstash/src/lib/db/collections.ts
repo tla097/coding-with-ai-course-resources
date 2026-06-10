@@ -44,6 +44,7 @@ type CollectionWithItems = {
   description: string | null
   isFavorite: boolean
   createdAt: Date
+  _count: { items: number }
   items: Array<{
     item: { itemType: { id: string; name: string; icon: string; color: string } }
   }>
@@ -84,15 +85,16 @@ function mapCollectionStats(col: CollectionWithItems): CollectionWithStats {
     description: col.description,
     isFavorite: col.isFavorite,
     createdAt: col.createdAt,
-    itemCount: col.items.length,
+    itemCount: col._count.items,
     dominantType,
     types,
   }
 }
 
 const collectionInclude = {
+  _count: { select: { items: true } },
   items: {
-    include: {
+    select: {
       item: {
         select: {
           itemType: {
