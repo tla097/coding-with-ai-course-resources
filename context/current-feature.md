@@ -3,6 +3,7 @@
 ## Status
 
 ## Goals
+
 ## Notes
 
 ## History
@@ -56,3 +57,4 @@
 04/06/2026 16:55 - Completed Item Delete: trash icon in drawer opens Shadcn AlertDialog confirmation; deleteItem server action (ownership checked, { success, error } pattern); deleteItem DB query; sonner toast on success/failure; drawer closes and router.refresh() after delete; 9 unit tests; merged to main
 08/06/2026 12:00 - Completed UI Accessibility and Quality Fixes: 36 issues addressed across auth pages, dashboard, items, layout, marketing, and profile; added EditNameForm component and updateName server action; getFavoriteCollectionCount DB query; CollectionCard stretched-link pattern; build passing; merged to main
 10/06/2026 15:45 - Completed Refactor - Extract Shared Action Helpers: requireAuth() (replaces 13 inline auth guards, fixes false as const inconsistency), validateNewPassword(), parseActionInput<T>(), formatRateLimitError() extracted to src/lib/actions/ and src/lib/rate-limit.ts; callGemini() private helper extracted in ai.ts; 13 new tests; 312 passing; merged to main
+10/06/2026 16:30 - Completed Refactor - Extract Shared Component Utilities: useFavoriteToggle hook (3 components), redirectToCheckout/redirectToBillingPortal to stripe-client.ts (2 components), ItemDrawerEditForm collapsed into ItemFormFields thin wrapper (~140 lines removed), getActionErrorMessage utility (12 call sites), useDialogSubmit hook (4 dialogs), useKeyboardClick hook (3 cards), editor-constants.ts (2 editors), formatBytes extended for null (FileListRow private copy removed); 8 new tests; 320 passing; merged to main
