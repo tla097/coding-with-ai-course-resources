@@ -1,13 +1,21 @@
-# Current Feature
+# Current Feature: Refactor - Extract Shared Select, AI Hooks & TagsField
 
 ## Status
-Not Started
+In Progress
 
 ## Goals
-<!-- What needs to be built -->
+- Extract `itemDetailSelect` constant in `src/lib/db/items.ts` — the identical 14-field Prisma select object is repeated in `getItemById`, `updateItem`, and `createItem`; define it once at module level and reference it in all three
+- Extract `useAiTagSuggestions` hook (`src/hooks/useAiTagSuggestions.ts`) — encapsulates `tagSuggestions`, `suggestingTags`, `handleSuggestTags`, `handleAcceptTag`, `handleDismissTag` which are duplicated across `NewItemDialog.tsx` and `ItemDrawer.tsx`
+- Extract `useAiDescription` hook (`src/hooks/useAiDescription.ts`) — encapsulates `generatingDescription` and `handleGenerateDescription`, duplicated across both components
+- Extract `TagsField` component (`src/components/items/TagsField.tsx`) — identical label + input + helper text + `AiTagSuggestions` JSX block used in both `NewItemDialog.tsx` and `ItemDrawer.tsx`
+- All existing tests pass; build passes with no errors
 
 ## Notes
-<!-- Additional context, constraints, or implementation details -->
+- Finding #7: `src/lib/db/items.ts` — `itemDetail` select object repeated at ~lines 95–119, 160–180, and 228–250; should follow the same pattern as the existing `itemSelect` constant
+- Finding #2: `NewItemDialog.tsx` (lines 90–137) and `ItemDrawer.tsx` (lines 154–199) share near-identical AI + tag logic and JSX
+- Hooks live in `src/hooks/` — create the directory if it doesn't exist
+- `TagsField` takes: `tags` (string), `onTagsChange`, `tagSuggestions`, `onSuggestTags`, `onAcceptTag`, `onDismissTag`, `isPro`, `suggestingTags` — derive exact props from existing usage
+- No new functionality — pure extraction refactor; behaviour must be identical after
 
 ## History
 <!-- Keep this updated. Earliest to Latest. Format: DD/MM/YYYY HH:MM -->

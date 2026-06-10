@@ -38,10 +38,11 @@ import { ICON_MAP } from '@/lib/icon-map'
 import { LANGUAGES, CONTENT_TYPES, LANGUAGE_TYPES, CODE_EDITOR_TYPES, MARKDOWN_EDITOR_TYPES } from '@/lib/languages'
 import { formatBytes } from '@/lib/utils'
 import CollectionPicker from '@/components/items/CollectionPicker'
-import AiTagSuggestions from '@/components/items/AiTagSuggestions'
+import TagsField from '@/components/items/TagsField'
 import type { ItemDetail } from '@/lib/db/items'
 import { updateItem, deleteItem, toggleItemFavorite, toggleItemPin } from '@/actions/items'
-import { generateAutoTags, generateDescription } from '@/actions/ai'
+import { useAiTagSuggestions } from '@/hooks/useAiTagSuggestions'
+import { useAiDescription } from '@/hooks/useAiDescription'
 
 interface ItemDetailResponse extends Omit<ItemDetail, 'createdAt' | 'updatedAt'> {
   createdAt: string
@@ -89,9 +90,24 @@ export default function ItemDrawer({ itemId, open, onOpenChange, collections, is
   const [deleting, setDeleting] = useState(false)
   const [favoriting, setFavoriting] = useState(false)
   const [pinning, setPinning] = useState(false)
-  const [tagSuggestions, setTagSuggestions] = useState<string[]>([])
-  const [suggestingTags, setSuggestingTags] = useState(false)
-  const [generatingDescription, setGeneratingDescription] = useState(false)
+
+  const { suggestions: tagSuggestions, suggesting: suggestingTags, handleSuggest: handleSuggestTags, handleAccept: handleAcceptTag, handleDismiss: handleDismissTag, clearSuggestions } = useAiTagSuggestions({
+    title: editForm.title,
+    content: editForm.content,
+    itemType: item?.itemType.name ?? '',
+    tags: editForm.tags,
+    enabled: !!item,
+    onTagsChange: tags => setEditForm(f => ({ ...f, tags })),
+  })
+
+  const { generating: generatingDescription, handleGenerate: handleGenerateDescription, clearGenerating } = useAiDescription({
+    title: editForm.title || (item?.title ?? ''),
+    content: editForm.content,
+    url: editForm.url,
+    itemType: item?.itemType.name ?? '',
+    enabled: !!item,
+    onDescription: description => setEditForm(f => ({ ...f, description })),
+  })
 
   useEffect(() => {
     if (!itemId || !open) return
@@ -125,8 +141,8 @@ export default function ItemDrawer({ itemId, open, onOpenChange, collections, is
       tags: item.tags.map(t => t.name).join(', '),
       collectionIds: item.collections.map(c => c.collection.id),
     })
-    setTagSuggestions([])
-    setGeneratingDescription(false)
+    clearSuggestions()
+    clearGenerating()
     setIsEditing(true)
   }
 
@@ -141,62 +157,14 @@ export default function ItemDrawer({ itemId, open, onOpenChange, collections, is
       tags: item.tags.map(t => t.name).join(', '),
       collectionIds: item.collections.map(c => c.collection.id),
     })
-    setTagSuggestions([])
-    setGeneratingDescription(false)
+    clearSuggestions()
+    clearGenerating()
     setIsEditing(true)
   }
 
   function handleCancelEdit() {
-    setTagSuggestions([])
+    clearSuggestions()
     setIsEditing(false)
-  }
-
-  async function handleGenerateDescription() {
-    if (!item) return
-    setGeneratingDescription(true)
-    const result = await generateDescription({
-      title: editForm.title || item.title,
-      content: editForm.content.slice(0, 2000),
-      url: editForm.url,
-      itemType: item.itemType.name,
-    })
-    setGeneratingDescription(false)
-    if (!result.success) {
-      toast.error(result.error)
-      return
-    }
-    setEditForm(f => ({ ...f, description: result.data.description }))
-  }
-
-  async function handleSuggestTags() {
-    if (!item) return
-    setSuggestingTags(true)
-    const result = await generateAutoTags({
-      title: editForm.title || item.title,
-      content: editForm.content.slice(0, 2000),
-      itemType: item.itemType.name,
-    })
-    setSuggestingTags(false)
-    if (!result.success) {
-      toast.error(result.error)
-      return
-    }
-    const existing = editForm.tags.split(',').map(t => t.trim()).filter(Boolean)
-    const fresh = result.data.tags.filter(t => !existing.includes(t))
-    setTagSuggestions(fresh)
-  }
-
-  function handleAcceptTag(tag: string) {
-    setTagSuggestions(prev => prev.filter(t => t !== tag))
-    setEditForm(f => {
-      const existing = f.tags.split(',').map(t => t.trim()).filter(Boolean)
-      if (existing.includes(tag)) return f
-      return { ...f, tags: [...existing, tag].join(', ') }
-    })
-  }
-
-  function handleDismissTag(tag: string) {
-    setTagSuggestions(prev => prev.filter(t => t !== tag))
   }
 
   async function handleSave() {
@@ -546,36 +514,17 @@ export default function ItemDrawer({ itemId, open, onOpenChange, collections, is
                     </div>
                   )}
 
-                  <div className="space-y-1.5">
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="edit-tags">Tags</Label>
-                      {isPro && (
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          className="h-auto py-0.5 px-2 text-xs text-muted-foreground gap-1"
-                          onClick={handleSuggestTags}
-                          disabled={suggestingTags}
-                        >
-                          <Sparkles className="h-3 w-3" />
-                          {suggestingTags ? 'Suggesting…' : 'Suggest Tags'}
-                        </Button>
-                      )}
-                    </div>
-                    <Input
-                      id="edit-tags"
-                      value={editForm.tags}
-                      onChange={e => setEditForm(f => ({ ...f, tags: e.target.value }))}
-                      placeholder="react, typescript, hooks"
-                    />
-                    <p className="text-xs text-muted-foreground">Comma-separated</p>
-                    <AiTagSuggestions
-                      suggestions={tagSuggestions}
-                      onAccept={handleAcceptTag}
-                      onDismiss={handleDismissTag}
-                    />
-                  </div>
+                  <TagsField
+                    id="edit-tags"
+                    value={editForm.tags}
+                    onChange={v => setEditForm(f => ({ ...f, tags: v }))}
+                    isPro={isPro}
+                    suggestions={tagSuggestions}
+                    suggesting={suggestingTags}
+                    onSuggest={handleSuggestTags}
+                    onAccept={handleAcceptTag}
+                    onDismiss={handleDismissTag}
+                  />
 
                   {collections.length > 0 && (
                     <div className="space-y-1.5">
