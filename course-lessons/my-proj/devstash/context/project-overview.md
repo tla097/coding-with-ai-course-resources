@@ -59,8 +59,8 @@ Developers context-switch constantly because their knowledge lives everywhere:
 | **Database** | [Neon](https://neon.tech/) (serverless Postgres) |
 | **ORM** | [Prisma 7](https://www.prisma.io/docs) — migrations only, never `db push` |
 | **Auth** | [NextAuth v5](https://authjs.dev/) — email/password + GitHub OAuth |
-| **File Storage** | [Cloudflare R2](https://developers.cloudflare.com/r2/) |
-| **AI** | [OpenAI](https://platform.openai.com/docs) `gpt-4o-mini` model |
+| **File Storage** | [Supabase Storage](https://supabase.com/docs/guides/storage) |
+| **AI** | [Google GenAI](https://ai.google.dev/) `gemini-2.5-flash-lite` model |
 | **CSS** | [Tailwind CSS v4](https://tailwindcss.com/) + [shadcn/ui](https://ui.shadcn.com/) |
 | **Caching** | Redis (optional, evaluate when needed) |
 | **Rendering** | SSR pages with dynamic components; API routes for backend needs |
@@ -358,8 +358,8 @@ devstash/
 ├── lib/
 │   ├── prisma.ts                 # Prisma client singleton
 │   ├── auth.ts                   # NextAuth config
-│   ├── r2.ts                     # Cloudflare R2 client
-│   └── openai.ts                 # OpenAI client
+│   ├── supabase/                 # Supabase Storage client
+│   └── gemini.ts                 # Google GenAI client
 │
 ├── prisma/
 │   ├── schema.prisma
@@ -376,8 +376,8 @@ Browser → Next.js App Router
               │
               ├── Server Components  →  Prisma  →  Neon (Postgres)
               ├── API Routes         →  Prisma  →  Neon (Postgres)
-              │                      →  R2 (files)
-              │                      →  OpenAI (AI features)
+              │                      →  Supabase (files)
+              │                      →  Gemini (AI features)
               └── NextAuth           →  Neon (sessions/accounts)
 ```
 
@@ -501,14 +501,14 @@ Stripe fields on the `User` model: `stripeCustomerId`, `stripeSubscriptionId`.
 
 ## 11. AI Features
 
-All AI features are **Pro only** and powered by `gpt-4o-mini` via the OpenAI API.
+All AI features are **Pro only** and powered by `gemini-2.5-flash-lite` via the Google GenAI SDK.
 
-| Feature | Description | Endpoint |
+| Feature | Description | Implementation |
 |---|---|---|
-| **Auto-tag suggestions** | Suggest relevant tags based on item content | `POST /api/ai/tags` |
-| **AI Summary** | Short summary of the item's content | `POST /api/ai/summary` |
-| **Explain This Code** | Plain-English explanation of a snippet or command | `POST /api/ai/explain` |
-| **Prompt Optimizer** | Rewrite and improve an AI prompt | `POST /api/ai/optimize-prompt` |
+| **Auto-tag suggestions** | Suggest relevant tags based on item content | `generateAutoTags` server action |
+| **Description Generator** | Generate a description for an item | `generateDescription` server action |
+| **Explain This Code** | Plain-English explanation of a snippet or command | `explainCode` server action |
+| **Prompt Optimizer** | Rewrite and improve an AI prompt | `optimizePrompt` server action |
 
 ---
 
@@ -542,25 +542,32 @@ if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
 DATABASE_URL=
 
 # Auth
-NEXTAUTH_SECRET=
-NEXTAUTH_URL=
-GITHUB_CLIENT_ID=
-GITHUB_CLIENT_SECRET=
+AUTH_SECRET=
+AUTH_GITHUB_ID=
+AUTH_GITHUB_SECRET=
 
-# Cloudflare R2
-R2_ACCOUNT_ID=
-R2_ACCESS_KEY_ID=
-R2_SECRET_ACCESS_KEY=
-R2_BUCKET_NAME=
-R2_PUBLIC_URL=
+# Email (Resend)
+RESEND_AI_KEY=
+DISABLE_EMAIL_VERIFICATION=
 
-# OpenAI
-OPENAI_API_KEY=
+# Rate Limiting (Upstash)
+UPSTASH_REDIS_REST_URL=
+UPSTASH_REDIS_REST_TOKEN=
+
+# Supabase Storage
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
+SUPABASE_SECRET_KEY=
+
+# Google GenAI
+GEMINI_API_KEY=
 
 # Stripe
 STRIPE_SECRET_KEY=
 STRIPE_WEBHOOK_SECRET=
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
+NEXT_PUBLIC_STRIPE_PRICE_ID_MONTHLY=
+NEXT_PUBLIC_STRIPE_PRICE_ID_YEARLY=
 ```
 
 ### Free Tier Enforcement
@@ -575,11 +582,11 @@ if (!user.isPro && itemCount >= 50) {
 }
 ```
 
-### File Uploads (R2)
+### File Uploads (Supabase)
 
-- Generate a presigned PUT URL server-side
-- Client uploads directly to R2
-- Store the resulting public URL in `item.fileUrl`
+- Generate a signed upload URL server-side via Supabase Storage
+- Client uploads directly to Supabase
+- Store the resulting URL in `item.fileUrl`
 - Only allow `file` and `image` item types for Pro users
 
 ---

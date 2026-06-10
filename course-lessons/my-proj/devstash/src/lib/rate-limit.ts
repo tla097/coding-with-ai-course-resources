@@ -29,8 +29,20 @@ export async function checkRateLimit(
 }
 
 export function getIpFromHeaders(headers: { get(name: string): string | null }): string {
+  // cf-connecting-ip / x-real-ip are set by the proxy and cannot be spoofed by clients
+  const cfIp = headers.get('cf-connecting-ip')
+  if (cfIp) return cfIp.trim()
+
+  const realIp = headers.get('x-real-ip')
+  if (realIp) return realIp.trim()
+
+  // Use the rightmost value — appended by our own reverse proxy, not the client
   const forwarded = headers.get('x-forwarded-for')
-  if (forwarded) return forwarded.split(',')[0].trim()
+  if (forwarded) {
+    const ips = forwarded.split(',')
+    return ips[ips.length - 1].trim()
+  }
+
   return '127.0.0.1'
 }
 

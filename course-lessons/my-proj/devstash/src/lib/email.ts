@@ -1,5 +1,14 @@
 import { resend } from './resend'
 
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
 export async function sendPasswordResetEmail(email: string, resetUrl: string) {
   const { error } = await resend.emails.send({
     from: 'DevStash <onboarding@resend.dev>',
@@ -44,7 +53,7 @@ export async function sendVerificationEmail(
     subject: 'Verify your email address',
     html: `
       <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:32px 24px">
-        <h2 style="margin-bottom:8px">Welcome to DevStash, ${name}!</h2>
+        <h2 style="margin-bottom:8px">Welcome to DevStash, ${escapeHtml(name)}!</h2>
         <p style="color:#6b7280;margin-bottom:24px">
           Click the button below to verify your email address. The link expires in 24&nbsp;hours.
         </p>
