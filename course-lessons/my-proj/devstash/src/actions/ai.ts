@@ -7,6 +7,19 @@ import { checkRateLimit } from '@/lib/rate-limit'
 
 const MAX_CONTENT_LENGTH = 2000
 
+type ProUserResult = { ok: true; userId: string } | { ok: false; error: string }
+
+async function requireProUser(): Promise<ProUserResult> {
+  const session = await auth()
+  if (!session?.user?.id) return { ok: false, error: 'Not authenticated.' }
+  if (!session.user.isPro) return { ok: false, error: 'Pro plan required.' }
+  return { ok: true, userId: session.user.id }
+}
+
+function sanitiseContent(raw: string): string {
+  return raw.trim().slice(0, MAX_CONTENT_LENGTH).replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '')
+}
+
 const generateAutoTagsSchema = z.object({
   title: z.string().trim().min(1).max(200),
   content: z.string().trim().max(50000).optional().default(''),
@@ -36,21 +49,17 @@ export type ExplainCodeInput = z.input<typeof explainCodeSchema>
 export type OptimizePromptInput = z.input<typeof optimizePromptSchema>
 
 export async function generateDescription(data: GenerateDescriptionInput) {
-  const session = await auth()
-  if (!session?.user?.id) return { success: false as const, error: 'Not authenticated.' }
-  if (!session.user.isPro) return { success: false as const, error: 'Pro plan required.' }
+  const authResult = await requireProUser()
+  if (!authResult.ok) return { success: false as const, error: authResult.error }
 
   const parsed = generateDescriptionSchema.safeParse(data)
   if (!parsed.success) return { success: false as const, error: 'Invalid input.' }
 
-  const limit = await checkRateLimit(`ai:description:${session.user.id}`, 5, '1 m')
+  const limit = await checkRateLimit(`ai:description:${authResult.userId}`, 5, '1 m')
   if (!limit.success) return { success: false as const, error: 'Rate limit reached. Try again later.' }
 
   const { title, content, url, itemType } = parsed.data
-  const sanitizedContent = (content || url)
-    .trim()
-    .slice(0, MAX_CONTENT_LENGTH)
-    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '')
+  const sanitizedContent = sanitiseContent(content || url)
 
   try {
     const response = await gemini.models.generateContent({
@@ -72,21 +81,17 @@ Return ONLY the description text, no extra formatting or explanation.`,
 }
 
 export async function explainCode(data: ExplainCodeInput) {
-  const session = await auth()
-  if (!session?.user?.id) return { success: false as const, error: 'Not authenticated.' }
-  if (!session.user.isPro) return { success: false as const, error: 'Pro plan required.' }
+  const authResult = await requireProUser()
+  if (!authResult.ok) return { success: false as const, error: authResult.error }
 
   const parsed = explainCodeSchema.safeParse(data)
   if (!parsed.success) return { success: false as const, error: 'Invalid input.' }
 
-  const limit = await checkRateLimit(`ai:explain:${session.user.id}`, 5, '1 m')
+  const limit = await checkRateLimit(`ai:explain:${authResult.userId}`, 5, '1 m')
   if (!limit.success) return { success: false as const, error: 'Rate limit reached. Try again later.' }
 
   const { content, itemType, language } = parsed.data
-  const sanitizedContent = content
-    .trim()
-    .slice(0, MAX_CONTENT_LENGTH)
-    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '')
+  const sanitizedContent = sanitiseContent(content)
 
   try {
     const response = await gemini.models.generateContent({
@@ -108,21 +113,17 @@ Return a clear explanation in markdown format.`,
 }
 
 export async function optimizePrompt(data: OptimizePromptInput) {
-  const session = await auth()
-  if (!session?.user?.id) return { success: false as const, error: 'Not authenticated.' }
-  if (!session.user.isPro) return { success: false as const, error: 'Pro plan required.' }
+  const authResult = await requireProUser()
+  if (!authResult.ok) return { success: false as const, error: authResult.error }
 
   const parsed = optimizePromptSchema.safeParse(data)
   if (!parsed.success) return { success: false as const, error: 'Invalid input.' }
 
-  const limit = await checkRateLimit(`ai:optimize:${session.user.id}`, 5, '1 m')
+  const limit = await checkRateLimit(`ai:optimize:${authResult.userId}`, 5, '1 m')
   if (!limit.success) return { success: false as const, error: 'Rate limit reached. Try again later.' }
 
   const { content } = parsed.data
-  const sanitizedContent = content
-    .trim()
-    .slice(0, MAX_CONTENT_LENGTH)
-    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '')
+  const sanitizedContent = sanitiseContent(content)
 
   try {
     const response = await gemini.models.generateContent({
@@ -145,21 +146,17 @@ Return ONLY the improved prompt text, no explanation or commentary.`,
 }
 
 export async function generateAutoTags(data: GenerateAutoTagsInput) {
-  const session = await auth()
-  if (!session?.user?.id) return { success: false as const, error: 'Not authenticated.' }
-  if (!session.user.isPro) return { success: false as const, error: 'Pro plan required.' }
+  const authResult = await requireProUser()
+  if (!authResult.ok) return { success: false as const, error: authResult.error }
 
   const parsed = generateAutoTagsSchema.safeParse(data)
   if (!parsed.success) return { success: false as const, error: 'Invalid input.' }
 
-  const limit = await checkRateLimit(`ai:tags:${session.user.id}`, 5, '1 m')
+  const limit = await checkRateLimit(`ai:tags:${authResult.userId}`, 5, '1 m')
   if (!limit.success) return { success: false as const, error: 'Rate limit reached. Try again later.' }
 
   const { title, content, itemType } = parsed.data
-  const sanitizedContent = content
-    .trim()
-    .slice(0, MAX_CONTENT_LENGTH)
-    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '')
+  const sanitizedContent = sanitiseContent(content)
 
   try {
     const response = await gemini.models.generateContent({

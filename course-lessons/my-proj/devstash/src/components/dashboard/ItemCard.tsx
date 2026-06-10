@@ -7,6 +7,7 @@ import { toast } from 'sonner'
 import type { ItemWithType } from '@/lib/db/items'
 import { ICON_MAP } from '@/lib/icon-map'
 import { toggleItemFavorite } from '@/actions/items'
+import { useCopyToClipboard } from '@/hooks/useCopyToClipboard'
 
 interface ItemCardProps {
   item: ItemWithType
@@ -18,7 +19,7 @@ export default function ItemCard({ item, onClick }: ItemCardProps) {
   const Icon = ICON_MAP[item.itemType.icon] ?? null
   const [isFavorite, setIsFavorite] = useState(item.isFavorite)
   const [favoriting, setFavoriting] = useState(false)
-  const [copied, setCopied] = useState(false)
+  const { copied, copy } = useCopyToClipboard({ resetMs: 1000, message: 'Copied!' })
 
   useEffect(() => {
     setIsFavorite(item.isFavorite)
@@ -29,13 +30,10 @@ export default function ItemCard({ item, onClick }: ItemCardProps) {
     day: 'numeric',
   })
 
-  async function handleCopy(e: React.MouseEvent) {
+  function handleCopy(e: React.MouseEvent) {
     e.stopPropagation()
     const text = item.contentType === 'URL' ? (item.url ?? item.title) : (item.content ?? item.title)
-    await navigator.clipboard.writeText(text)
-    toast.success('Copied!')
-    setCopied(true)
-    setTimeout(() => setCopied(false), 1000)
+    copy(text)
   }
 
   async function handleToggleFavorite(e: React.MouseEvent) {

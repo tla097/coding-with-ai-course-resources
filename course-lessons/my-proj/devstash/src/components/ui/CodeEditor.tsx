@@ -2,13 +2,17 @@
 
 import dynamic from 'next/dynamic'
 import { useState, useMemo, useEffect } from 'react'
-import { Copy, Check, Sparkles, Loader2, Crown } from 'lucide-react'
+import { Copy, Check } from 'lucide-react'
 import { toast } from 'sonner'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { useEditorPreferences } from '@/contexts/EditorPreferencesContext'
 import { explainCode } from '@/actions/ai'
 import { BASE_MD_COMPONENTS } from '@/lib/markdown-components'
+import { useCopyToClipboard } from '@/hooks/useCopyToClipboard'
+import { EditorToolbar } from '@/components/ui/EditorToolbar'
+import { EditorTabButton } from '@/components/ui/EditorTabButton'
+import { ProAiButton } from '@/components/ui/ProAiButton'
 import type Monaco from 'monaco-editor'
 import type { Components } from 'react-markdown'
 
@@ -82,7 +86,7 @@ const LINE_HEIGHT = 19
 const PADDING = 24
 
 export default function CodeEditor({ value, onChange, language, readOnly = false, isPro, itemType }: Props) {
-  const [copied, setCopied] = useState(false)
+  const { copied, copy } = useCopyToClipboard()
   const [activeTab, setActiveTab] = useState<'code' | 'explain'>('code')
   const [explanation, setExplanation] = useState<string | null>(null)
   const [explaining, setExplaining] = useState(false)
@@ -97,14 +101,6 @@ export default function CodeEditor({ value, onChange, language, readOnly = false
     const lines = value ? value.split('\n').length : 1
     return Math.min(Math.max(lines * LINE_HEIGHT + PADDING, MIN_HEIGHT), MAX_HEIGHT)
   }, [value])
-
-  function handleCopy() {
-    navigator.clipboard.writeText(value).then(() => {
-      setCopied(true)
-      toast.success('Copied to clipboard')
-      setTimeout(() => setCopied(false), 2000)
-    })
-  }
 
   async function handleExplain() {
     if (!value) return
@@ -128,84 +124,46 @@ export default function CodeEditor({ value, onChange, language, readOnly = false
 
   return (
     <div className="rounded-lg border border-[#3c3c3c] overflow-hidden">
-      {/* macOS-style title bar */}
-      <div className="flex items-center justify-between px-3 py-2 bg-[#2d2d2d] border-b border-[#3c3c3c]">
-        <div className="flex items-center gap-1.5">
-          {explanation ? (
+      <EditorToolbar
+        leftSlot={
+          explanation ? (
             <>
-              <button
-                type="button"
-                onClick={() => setActiveTab('code')}
-                className={`text-[11px] px-2 py-0.5 rounded transition-colors ${
-                  activeTab === 'code'
-                    ? 'bg-[#3c3c3c] text-[#cccccc]'
-                    : 'text-[#858585] hover:text-[#cccccc]'
-                }`}
-              >
-                Code
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTab('explain')}
-                className={`text-[11px] px-2 py-0.5 rounded transition-colors ${
-                  activeTab === 'explain'
-                    ? 'bg-[#3c3c3c] text-[#cccccc]'
-                    : 'text-[#858585] hover:text-[#cccccc]'
-                }`}
-              >
-                Explain
-              </button>
+              <EditorTabButton active={activeTab === 'code'} onClick={() => setActiveTab('code')}>Code</EditorTabButton>
+              <EditorTabButton active={activeTab === 'explain'} onClick={() => setActiveTab('explain')}>Explain</EditorTabButton>
             </>
           ) : (
-            <div className="flex items-center gap-1.5">
+            <>
               <div className="h-3 w-3 rounded-full bg-[#ff5f57]" />
               <div className="h-3 w-3 rounded-full bg-[#febc2e]" />
               <div className="h-3 w-3 rounded-full bg-[#28c840]" />
-            </div>
-          )}
-        </div>
-        <div className="flex items-center gap-2.5">
-          {language && (
-            <span className="text-[11px] text-[#858585] font-mono">{language}</span>
-          )}
-          {showExplainControls && (
-            isPro ? (
-              <button
-                type="button"
+            </>
+          )
+        }
+        rightSlot={
+          <>
+            {language && <span className="text-[11px] text-[#858585] font-mono">{language}</span>}
+            {showExplainControls && (
+              <ProAiButton
+                isPro={isPro ?? false}
+                loading={explaining}
                 onClick={handleExplain}
-                disabled={explaining}
-                className="flex items-center gap-1 text-[11px] text-[#858585] hover:text-[#cccccc] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                label="Explain"
+                loadingLabel="Explaining…"
                 title="Explain this code with AI"
-              >
-                {explaining
-                  ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                  : <Sparkles className="h-3.5 w-3.5" />
-                }
-                {explaining ? 'Explaining…' : 'Explain'}
-              </button>
-            ) : (
-              <button
-                type="button"
-                disabled
-                className="flex items-center gap-1 text-[11px] text-[#858585] opacity-50 cursor-not-allowed"
-                title="AI features require Pro subscription"
-              >
-                <Crown className="h-3.5 w-3.5" />
-                Explain
-              </button>
-            )
-          )}
-          <button
-            type="button"
-            onClick={handleCopy}
-            className="flex items-center gap-1 text-[11px] text-[#858585] hover:text-[#cccccc] transition-colors"
-            title="Copy to clipboard"
-          >
-            {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
-            {copied ? 'Copied' : 'Copy'}
-          </button>
-        </div>
-      </div>
+              />
+            )}
+            <button
+              type="button"
+              onClick={() => copy(value)}
+              className="flex items-center gap-1 text-[11px] text-[#858585] hover:text-[#cccccc] transition-colors"
+              title="Copy to clipboard"
+            >
+              {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+              {copied ? 'Copied' : 'Copy'}
+            </button>
+          </>
+        }
+      />
 
       {/* Explain tab */}
       {activeTab === 'explain' && explanation && (

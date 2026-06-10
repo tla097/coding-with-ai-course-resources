@@ -3,11 +3,15 @@
 import { useState, useMemo, useEffect } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-import { Copy, Check, Sparkles, Loader2, Crown } from 'lucide-react'
+import { Copy, Check } from 'lucide-react'
 import { toast } from 'sonner'
 import type { Components } from 'react-markdown'
 import { BASE_MD_COMPONENTS } from '@/lib/markdown-components'
 import { optimizePrompt } from '@/actions/ai'
+import { useCopyToClipboard } from '@/hooks/useCopyToClipboard'
+import { EditorToolbar } from '@/components/ui/EditorToolbar'
+import { EditorTabButton } from '@/components/ui/EditorTabButton'
+import { ProAiButton } from '@/components/ui/ProAiButton'
 
 interface Props {
   value: string
@@ -42,7 +46,7 @@ export default function MarkdownEditor({ value, onChange, readOnly = false, isPr
   const [activeTab, setActiveTab] = useState<'original' | 'optimized'>('original')
   const [optimized, setOptimized] = useState<string | null>(null)
   const [optimizing, setOptimizing] = useState(false)
-  const [copied, setCopied] = useState(false)
+  const { copied, copy } = useCopyToClipboard()
 
   useEffect(() => {
     setOptimized(null)
@@ -54,15 +58,6 @@ export default function MarkdownEditor({ value, onChange, readOnly = false, isPr
     const estimated = lines * 22 + 24
     return Math.min(Math.max(estimated, MIN_HEIGHT), MAX_HEIGHT)
   }, [value])
-
-  function handleCopy() {
-    const text = activeTab === 'optimized' && optimized ? optimized : value
-    navigator.clipboard.writeText(text).then(() => {
-      setCopied(true)
-      toast.success('Copied to clipboard')
-      setTimeout(() => setCopied(false), 2000)
-    })
-  }
 
   async function handleOptimize() {
     if (!value) return
@@ -82,113 +77,59 @@ export default function MarkdownEditor({ value, onChange, readOnly = false, isPr
 
   return (
     <div className="rounded-lg border border-[#3c3c3c] overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center justify-between px-3 py-2 bg-[#2d2d2d] border-b border-[#3c3c3c]">
-        <div className="flex items-center gap-1.5">
-          {!readOnly && (
-            <>
-              <button
-                type="button"
-                onClick={() => setTab('write')}
-                className={`text-[11px] px-2 py-0.5 rounded transition-colors ${
-                  tab === 'write'
-                    ? 'bg-[#3c3c3c] text-[#cccccc]'
-                    : 'text-[#858585] hover:text-[#cccccc]'
-                }`}
-              >
-                Write
-              </button>
-              <button
-                type="button"
-                onClick={() => setTab('preview')}
-                className={`text-[11px] px-2 py-0.5 rounded transition-colors ${
-                  tab === 'preview'
-                    ? 'bg-[#3c3c3c] text-[#cccccc]'
-                    : 'text-[#858585] hover:text-[#cccccc]'
-                }`}
-              >
-                Preview
-              </button>
-            </>
-          )}
-          {readOnly && optimized ? (
-            <>
-              <button
-                type="button"
-                onClick={() => setActiveTab('original')}
-                className={`text-[11px] px-2 py-0.5 rounded transition-colors ${
-                  activeTab === 'original'
-                    ? 'bg-[#3c3c3c] text-[#cccccc]'
-                    : 'text-[#858585] hover:text-[#cccccc]'
-                }`}
-              >
-                Original
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTab('optimized')}
-                className={`text-[11px] px-2 py-0.5 rounded transition-colors ${
-                  activeTab === 'optimized'
-                    ? 'bg-[#3c3c3c] text-[#cccccc]'
-                    : 'text-[#858585] hover:text-[#cccccc]'
-                }`}
-              >
-                Optimized
-              </button>
-            </>
-          ) : readOnly ? (
-            <span className="text-[11px] text-[#858585]">Preview</span>
-          ) : null}
-        </div>
-        <div className="flex items-center gap-2.5">
-          {showOptimizeControls && (
-            isPro ? (
-              <button
-                type="button"
+      <EditorToolbar
+        leftSlot={
+          <>
+            {!readOnly && (
+              <>
+                <EditorTabButton active={tab === 'write'} onClick={() => setTab('write')}>Write</EditorTabButton>
+                <EditorTabButton active={tab === 'preview'} onClick={() => setTab('preview')}>Preview</EditorTabButton>
+              </>
+            )}
+            {readOnly && optimized ? (
+              <>
+                <EditorTabButton active={activeTab === 'original'} onClick={() => setActiveTab('original')}>Original</EditorTabButton>
+                <EditorTabButton active={activeTab === 'optimized'} onClick={() => setActiveTab('optimized')}>Optimized</EditorTabButton>
+              </>
+            ) : readOnly ? (
+              <span className="text-[11px] text-[#858585]">Preview</span>
+            ) : null}
+          </>
+        }
+        rightSlot={
+          <>
+            {showOptimizeControls && (
+              <ProAiButton
+                isPro={isPro ?? false}
+                loading={optimizing}
                 onClick={handleOptimize}
-                disabled={optimizing}
-                className="flex items-center gap-1 text-[11px] text-[#858585] hover:text-[#cccccc] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                label="Optimize"
+                loadingLabel="Optimizing…"
                 title="Optimize this prompt with AI"
-              >
-                {optimizing
-                  ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                  : <Sparkles className="h-3.5 w-3.5" />
-                }
-                {optimizing ? 'Optimizing…' : 'Optimize'}
-              </button>
-            ) : (
+              />
+            )}
+            {activeTab === 'optimized' && optimized && onUseOptimized && (
               <button
                 type="button"
-                disabled
-                className="flex items-center gap-1 text-[11px] text-[#858585] opacity-50 cursor-not-allowed"
-                title="AI features require Pro subscription"
+                onClick={() => onUseOptimized(optimized)}
+                className="flex items-center gap-1 text-[11px] text-[#858585] hover:text-[#cccccc] transition-colors"
+                title="Use the optimized prompt"
               >
-                <Crown className="h-3.5 w-3.5" />
-                Optimize
+                Use this
               </button>
-            )
-          )}
-          {activeTab === 'optimized' && optimized && onUseOptimized && (
+            )}
             <button
               type="button"
-              onClick={() => onUseOptimized(optimized)}
+              onClick={() => copy(activeTab === 'optimized' && optimized ? optimized : value)}
               className="flex items-center gap-1 text-[11px] text-[#858585] hover:text-[#cccccc] transition-colors"
-              title="Use the optimized prompt"
+              title="Copy to clipboard"
             >
-              Use this
+              {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+              {copied ? 'Copied' : 'Copy'}
             </button>
-          )}
-          <button
-            type="button"
-            onClick={handleCopy}
-            className="flex items-center gap-1 text-[11px] text-[#858585] hover:text-[#cccccc] transition-colors"
-            title="Copy to clipboard"
-          >
-            {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
-            {copied ? 'Copied' : 'Copy'}
-          </button>
-        </div>
-      </div>
+          </>
+        }
+      />
 
       {/* Write tab */}
       {!readOnly && tab === 'write' && (
