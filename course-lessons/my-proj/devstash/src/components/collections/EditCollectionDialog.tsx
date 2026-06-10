@@ -15,6 +15,8 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { updateCollection } from '@/actions/collections'
+import { getActionErrorMessage } from '@/lib/actions/action-error'
+import { useDialogSubmit } from '@/hooks/useDialogSubmit'
 
 interface EditCollectionDialogProps {
   open: boolean
@@ -28,18 +30,18 @@ export default function EditCollectionDialog({
   collection,
 }: EditCollectionDialogProps) {
   const router = useRouter()
-  const [saving, setSaving] = useState(false)
   const [name, setName] = useState(collection.name)
   const [description, setDescription] = useState(collection.description ?? '')
+  const { inProgress: saving, setInProgress: setSaving, guardedOpenChange } = useDialogSubmit()
 
   function handleOpenChange(value: boolean) {
-    if (!saving) {
-      if (!value) {
+    guardedOpenChange(value, v => {
+      if (!v) {
         setName(collection.name)
         setDescription(collection.description ?? '')
       }
-      onOpenChange(value)
-    }
+      onOpenChange(v)
+    })
   }
 
   const canSubmit = name.trim().length > 0
@@ -56,11 +58,7 @@ export default function EditCollectionDialog({
     setSaving(false)
 
     if (!result.success) {
-      const msg =
-        typeof result.error === 'string'
-          ? result.error
-          : 'Validation failed. Please check your inputs.'
-      toast.error(msg)
+      toast.error(getActionErrorMessage(result.error, 'Validation failed. Please check your inputs.'))
       return
     }
 

@@ -33,4 +33,12 @@ describe('formatBytes', () => {
     expect(formatBytes(5 * 1024 * 1024)).toBe('5.0 MB')
     expect(formatBytes(1.5 * 1024 * 1024)).toBe('1.5 MB')
   })
+
+  it('returns default fallback for null', () => {
+    expect(formatBytes(null)).toBe('—')
+  })
+
+  it('returns custom fallback for null', () => {
+    expect(formatBytes(null, 'N/A')).toBe('N/A')
+  })
 })

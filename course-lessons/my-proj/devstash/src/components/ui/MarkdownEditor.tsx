@@ -12,6 +12,7 @@ import { useCopyToClipboard } from '@/hooks/useCopyToClipboard'
 import { EditorToolbar } from '@/components/ui/EditorToolbar'
 import { EditorTabButton } from '@/components/ui/EditorTabButton'
 import { ProAiButton } from '@/components/ui/ProAiButton'
+import { EDITOR_MIN_HEIGHT as MIN_HEIGHT, EDITOR_MAX_HEIGHT as MAX_HEIGHT } from '@/components/ui/editor-constants'
 
 interface Props {
   value: string
@@ -21,9 +22,6 @@ interface Props {
   itemType?: string
   onUseOptimized?: (text: string) => void
 }
-
-const MIN_HEIGHT = 120
-const MAX_HEIGHT = 400
 
 const MD_COMPONENTS: Components = {
   ...BASE_MD_COMPONENTS,

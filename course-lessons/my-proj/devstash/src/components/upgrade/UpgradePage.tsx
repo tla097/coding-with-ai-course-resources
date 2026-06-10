@@ -1,10 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { BillingToggle } from '@/components/shared/BillingToggle'
 import { PricingCard } from '@/components/shared/PricingCard'
+import { redirectToCheckout } from '@/lib/stripe-client'
 
 export default function UpgradePage() {
   const [yearly, setYearly] = useState(false)
@@ -13,19 +13,7 @@ export default function UpgradePage() {
   async function handleUpgrade(priceId: string) {
     setLoading(true)
     try {
-      const res = await fetch('/api/stripe/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ priceId }),
-      })
-      const data = await res.json()
-      if (data.url) {
-        window.location.href = data.url
-      } else {
-        toast.error('Failed to start checkout')
-      }
-    } catch {
-      toast.error('Something went wrong')
+      await redirectToCheckout(priceId)
     } finally {
       setLoading(false)
     }

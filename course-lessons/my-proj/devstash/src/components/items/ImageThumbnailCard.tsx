@@ -1,6 +1,7 @@
 'use client'
 
 import type { ItemWithType } from '@/lib/db/items'
+import { useKeyboardClick } from '@/hooks/useKeyboardClick'
 
 interface Props {
   item: ItemWithType
@@ -8,15 +9,14 @@ interface Props {
 }
 
 export default function ImageThumbnailCard({ item, onClick }: Props) {
+  const handleKeyDown = useKeyboardClick(onClick)
   return (
     <div
       role="button"
       tabIndex={0}
       className="group cursor-pointer overflow-hidden rounded-lg border border-border bg-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       onClick={onClick}
-      onKeyDown={e => {
-        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick?.() }
-      }}
+      onKeyDown={handleKeyDown}
     >
       <div className="aspect-video overflow-hidden bg-muted">
         {item.fileUrl ? (

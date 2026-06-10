@@ -16,6 +16,8 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { createCollection } from '@/actions/collections'
+import { getActionErrorMessage } from '@/lib/actions/action-error'
+import { useDialogSubmit } from '@/hooks/useDialogSubmit'
 
 interface FormState {
   name: string
@@ -27,17 +29,16 @@ const EMPTY_FORM: FormState = { name: '', description: '' }
 export default function NewCollectionDialog() {
   const router = useRouter()
   const [open, setOpen] = useState(false)
-  const [saving, setSaving] = useState(false)
   const [form, setForm] = useState<FormState>(EMPTY_FORM)
+  const { inProgress: saving, setInProgress: setSaving, guardedOpenChange } = useDialogSubmit()
 
   function handleOpen() {
     setForm(EMPTY_FORM)
-    setSaving(false)
     setOpen(true)
   }
 
   function handleClose(value: boolean) {
-    if (!saving) setOpen(value)
+    guardedOpenChange(value, setOpen)
   }
 
   const canSubmit = form.name.trim().length > 0
@@ -54,11 +55,7 @@ export default function NewCollectionDialog() {
     setSaving(false)
 
     if (!result.success) {
-      const msg =
-        typeof result.error === 'string'
-          ? result.error
-          : 'Validation failed. Please check your inputs.'
-      toast.error(msg)
+      toast.error(getActionErrorMessage(result.error, 'Validation failed. Please check your inputs.'))
       return
     }
 

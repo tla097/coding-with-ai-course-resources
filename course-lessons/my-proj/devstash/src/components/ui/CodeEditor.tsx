@@ -13,6 +13,7 @@ import { useCopyToClipboard } from '@/hooks/useCopyToClipboard'
 import { EditorToolbar } from '@/components/ui/EditorToolbar'
 import { EditorTabButton } from '@/components/ui/EditorTabButton'
 import { ProAiButton } from '@/components/ui/ProAiButton'
+import { EDITOR_MIN_HEIGHT as MIN_HEIGHT, EDITOR_MAX_HEIGHT as MAX_HEIGHT } from '@/components/ui/editor-constants'
 import type Monaco from 'monaco-editor'
 import type { Components } from 'react-markdown'
 
@@ -80,8 +81,6 @@ interface Props {
   itemType?: string
 }
 
-const MIN_HEIGHT = 120
-const MAX_HEIGHT = 400
 const LINE_HEIGHT = 19
 const PADDING = 24
 
