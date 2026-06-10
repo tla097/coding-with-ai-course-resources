@@ -1,7 +1,7 @@
 import NextAuth from "next-auth"
 import { NextResponse } from "next/server"
 import authConfig from "./auth.config"
-import { checkRateLimit, getIpFromHeaders } from "./lib/rate-limit"
+import { checkRateLimit, getIpFromHeaders, formatRateLimitError } from "./lib/rate-limit"
 
 const { auth } = NextAuth(authConfig)
 
@@ -20,8 +20,7 @@ export const proxy = auth(async function proxy(req) {
     const limit = await checkRateLimit(`login:${ip}:${email}`, 5, '15 m')
     if (!limit.success) {
       const retryAfterSecs = Math.ceil(Math.max(0, limit.reset - Date.now()) / 1000)
-      const minutes = Math.max(1, Math.ceil(retryAfterSecs / 60))
-      const message = `Too many attempts. Please try again in ${minutes} minute${minutes !== 1 ? 's' : ''}.`
+      const message = formatRateLimitError(limit.reset)
       // next-auth/react's signIn() parses data.url — encode the error message there so result.error is set correctly
       const errorUrl = `${req.nextUrl.origin}/sign-in?error=${encodeURIComponent(message)}`
       return NextResponse.json(

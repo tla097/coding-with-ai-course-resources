@@ -1,11 +1,6 @@
 import { GoogleGenAI } from '@google/genai'
+import { singleton } from '@/lib/singleton'
 
-const globalForGemini = globalThis as unknown as { gemini: GoogleGenAI }
-
-export const gemini =
-  globalForGemini.gemini ??
-  new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! })
-
-if (process.env.NODE_ENV !== 'production') globalForGemini.gemini = gemini
+export const gemini = singleton('gemini', () => new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! }))
 
 export const AI_MODEL = 'gemini-2.5-flash-lite'
