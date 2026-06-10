@@ -1,50 +1,13 @@
-# Current Feature: Security Fixes — HIGH Severity (Audit Findings 1–5)
+# Current Feature
 
 ## Status
-In Progress
+Not Started
 
 ## Goals
-- Fix JWT `isPro` re-queried on every session read — only fetch from DB at sign-in, not on every `jwt()` call
-- Fix Stripe webhook: cross-check `session.customer` against stored `stripeCustomerId` before granting Pro
-- Fix rate limiting: use the rightmost `x-forwarded-for` IP (proxy-appended) instead of the leftmost (user-controlled)
-- Fix `deleteAccount`: require password re-entry on the server before executing the delete (credentials users), or require email confirmation text for OAuth users
-- Fix HTML injection in email templates: escape `name` before interpolating into HTML strings
+<!-- What needs to be built -->
 
 ## Notes
-These are the 5 HIGH severity findings from the 10/06/2026 codebase security audit.
-
-### Finding 1 — JWT isPro re-fetched on every request
-- File: `src/auth.ts`, `jwt` callback
-- Current code queries `prisma.user.findUnique` unconditionally on every `jwt()` invocation
-- Fix: wrap the DB fetch in `if (user) { ... }` so it only runs at sign-in
-- For subscription changes (Stripe webhook), use `unstable_update` to force a token refresh
-
-### Finding 2 — Stripe webhook userId cross-check
-- File: `src/app/api/webhooks/stripe/route.ts` ~line 31
-- `checkout.session.completed` trusts `metadata.userId` to upgrade a user without verifying the Stripe customer matches
-- Fix: after finding the user by `metadata.userId`, assert `event.data.object.customer === user.stripeCustomerId` before calling `prisma.user.update`
-- On first checkout (stripeCustomerId is null), skip the check and proceed — the handler already sets `stripeCustomerId` at this point
-
-### Finding 3 — x-forwarded-for spoofable
-- File: `src/lib/rate-limit.ts`, `getIpFromHeaders`
-- Current code: `forwarded.split(',')[0].trim()` — leftmost value is user-controlled
-- Fix: use the rightmost value — `ips[ips.length - 1]` — which is appended by the actual reverse proxy
-- Also check for `cf-connecting-ip` or `x-real-ip` as higher-priority trusted headers if available
-
-### Finding 4 — deleteAccount no server-side re-auth
-- File: `src/actions/profile.ts`, `deleteAccount` server action
-- File: `src/components/settings/DeleteAccountButton.tsx` (formerly profile)
-- Current: only checks session exists, no password or confirmation value verified server-side
-- Fix for credentials users: accept a `password` param, verify with `bcrypt.compare` before deleting
-- Fix for OAuth users: accept a `confirmText` param and require it to equal the user's email address
-- The confirmation dialog UI already exists — extend it to collect the confirmation value and pass it to the action
-
-### Finding 5 — HTML injection in email templates
-- File: `src/lib/email.ts`
-- `name` is interpolated raw into HTML in `sendVerificationEmail` (and likely other email functions)
-- Fix: add a small `escapeHtml(str)` helper that replaces `&`, `<`, `>`, `"`, `'` with HTML entities
-- Apply to all user-provided values interpolated into HTML email bodies (`name`, any other fields)
-- No external library needed — a single 5-line function is sufficient
+<!-- Additional context, constraints, or implementation details -->
 
 ## History
 <!-- Keep this updated. Earliest to Latest. Format: DD/MM/YYYY HH:MM -->
@@ -125,3 +88,4 @@ These are the 5 HIGH severity findings from the 10/06/2026 codebase security aud
 09/06/2026 15:55 - Completed Image Gallery View: ImageThumbnailCard component (aspect-video, object-cover, group-hover:scale-105 zoom), image-gallery variant added to ItemsWithDrawer, /items/images uses gallery layout; fileUrl added to ItemWithType and itemSelect; images served via /api/download proxy; merged to main
 09/06/2026 16:35 - Completed File List View: FileListRow component (file icon by extension, title, filename, size, date, download button), file-list variant added to ItemsWithDrawer, /items/files uses list layout; fileName/fileSize added to ItemWithType and itemSelect; FileUpload fix: transparent z-10 input + pointer-events-none content so file picker opens reliably inside base-ui Dialog; merged to main
 09/06/2026 16:50 - Completed Quick Copy Button on Item Cards: Copy/Check icons from lucide-react, copy button fades in on card hover (group-hover:opacity-100), copies content for TEXT items / url for URL items / title fallback for FILE items, 1-second Check flash on success, sonner toast ("Copied!"), stops propagation; content field added to ItemWithType and itemSelect; favorites.ts select updated to match; merged to main
+10/06/2026 10:00 - Completed Security Fixes HIGH Severity: JWT isPro DB fetch moved to sign-in only, Stripe webhook customer cross-check added, rate limiting fixed to use rightmost x-forwarded-for IP, deleteAccount requires server-side password/email confirmation, email HTML injection prevented via escapeHtml(); 277 tests passing; merged to main
