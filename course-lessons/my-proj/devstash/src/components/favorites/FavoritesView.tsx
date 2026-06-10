@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import { useSortState } from '@/hooks/useSortState'
 import Link from 'next/link'
 import { Folder, ChevronUp, ChevronDown } from 'lucide-react'
 import ItemDrawer from '@/components/items/ItemDrawer'
@@ -63,30 +64,8 @@ export default function FavoritesView({ items, collections, collectionList, isPr
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null)
   const [drawerOpen, setDrawerOpen] = useState(false)
 
-  const [itemSortKey, setItemSortKey] = useState<ItemSortKey>('date')
-  const [itemSortDir, setItemSortDir] = useState<SortDir>('desc')
-  const [colSortKey, setColSortKey] = useState<CollectionSortKey>('date')
-  const [colSortDir, setColSortDir] = useState<SortDir>('desc')
-
-  function handleItemSort(key: string) {
-    const k = key as ItemSortKey
-    if (k === itemSortKey) {
-      setItemSortDir(d => (d === 'asc' ? 'desc' : 'asc'))
-    } else {
-      setItemSortKey(k)
-      setItemSortDir(k === 'date' ? 'desc' : 'asc')
-    }
-  }
-
-  function handleColSort(key: string) {
-    const k = key as CollectionSortKey
-    if (k === colSortKey) {
-      setColSortDir(d => (d === 'asc' ? 'desc' : 'asc'))
-    } else {
-      setColSortKey(k)
-      setColSortDir(k === 'date' ? 'desc' : 'asc')
-    }
-  }
+  const { key: itemSortKey, dir: itemSortDir, toggle: handleItemSort } = useSortState<ItemSortKey>('date', 'desc')
+  const { key: colSortKey, dir: colSortDir, toggle: handleColSort } = useSortState<CollectionSortKey>('date', 'desc')
 
   const sortedItems = useMemo(() => {
     return [...items].sort((a, b) => {
