@@ -1,13 +1,28 @@
-# Current Feature
+# Current Feature: UI Accessibility & Layout Fixes
 
 ## Status
-Not Started
+In Progress
 
 ## Goals
-<!-- What needs to be built -->
+- Add `focus-visible:opacity-100` to ItemCard copy/favorite buttons so they are visible when keyboard-focused (currently `opacity-0` in DOM, keyboard inaccessible)
+- Hide "New Collection" and "New Item" button text labels on mobile (icon + `sr-only` text only below `sm`), fix overflow at 375px
+- Default sidebar to closed on mobile (below `md` breakpoint) regardless of persisted `sidebar-open` value
+- Fix "Ctl K" typo in TopBar search bar — change to "Ctrl K"
+- Fix "View all collections" sidebar link contrast — remove or reduce the `opacity-60` so it passes WCAG AA at 12px
+- Increase PRO badge font size from 10px to at least 12px
+- Add `max-w-5xl mx-auto` wrapper to Favorites page content so it doesn't stretch full-width on wide screens
 
 ## Notes
-<!-- Additional context, constraints, or implementation details -->
+All issues confirmed via Playwright live browser inspection (10/06/2026).
+
+Priority order matches Goals list above — keyboard/accessibility issues first, then mobile layout, then visual polish.
+
+Files affected:
+- `src/components/dashboard/ItemCard.tsx` — opacity-0 button fix
+- `src/components/layout/TopBar.tsx` — mobile button labels + "Ctl K" typo
+- `src/components/layout/DashboardShell.tsx` or `Sidebar.tsx` — mobile sidebar default
+- `src/components/layout/Sidebar.tsx` — PRO badge size + "View all collections" contrast
+- `src/app/(dashboard)/favorites/page.tsx` — max-width wrapper
 
 ## History
 <!-- Keep this updated. Earliest to Latest. Format: DD/MM/YYYY HH:MM -->

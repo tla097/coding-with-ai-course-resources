@@ -24,7 +24,7 @@ export default async function FavoritesPage() {
   const total = items.length + collections.length
 
   return (
-    <div className="mx-auto w-full max-w-3xl space-y-6">
+    <div className="mx-auto w-full max-w-5xl space-y-6">
       <div className="flex items-center gap-3">
         <div className="flex h-9 w-9 items-center justify-center rounded-md bg-yellow-500/10">
           <Star className="h-5 w-5 text-yellow-500" />

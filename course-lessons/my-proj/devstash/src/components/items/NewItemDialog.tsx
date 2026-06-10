@@ -143,7 +143,7 @@ export default function NewItemDialog({ itemTypes, collections, isPro }: Props) 
     <>
       <Button size="sm" onClick={handleOpen}>
         <Plus className="h-4 w-4" />
-        New Item
+        <span className="sr-only sm:not-sr-only">New Item</span>
       </Button>
 
       <Dialog open={open} onOpenChange={handleClose}>

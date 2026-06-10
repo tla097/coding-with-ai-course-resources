@@ -29,7 +29,7 @@ interface Props {
 }
 
 export default function DashboardShell({ children, sidebarData, searchData, user, editorPreferences, isPro }: Props) {
-  const [sidebarOpen, setSidebarOpen] = usePersistentBoolean('sidebar-open', true)
+  const [sidebarOpen, setSidebarOpen] = usePersistentBoolean('sidebar-open', true, { closeOnMobileBreakpoint: 768 })
   const [paletteOpen, setPaletteOpen] = useState(false)
   const [drawerItemId, setDrawerItemId] = useState<string | null>(null)
   const [drawerOpen, setDrawerOpen] = useState(false)

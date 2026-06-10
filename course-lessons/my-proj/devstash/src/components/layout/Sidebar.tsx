@@ -90,7 +90,7 @@ export default function Sidebar({ isOpen, onClose, sidebarData, user }: SidebarP
                         {Icon && <Icon className="h-4 w-4 shrink-0" style={{ color: type.color }} />}
                         <span className="capitalize">{type.name}s</span>
                         {(type.name === 'file' || type.name === 'image') && (
-                          <Badge variant="secondary" className="h-4 px-1 text-[10px] font-semibold tracking-wider">PRO</Badge>
+                          <Badge variant="secondary" className="h-4 px-1 text-xs font-semibold tracking-wider">PRO</Badge>
                         )}
                       </span>
                       <span className="text-xs tabular-nums">{type.count}</span>
@@ -154,7 +154,7 @@ export default function Sidebar({ isOpen, onClose, sidebarData, user }: SidebarP
               {/* View all collections link */}
               <Link
                 href="/collections"
-                className="mt-2 flex items-center rounded-md px-2 py-1.5 text-xs text-muted-foreground/60 hover:text-muted-foreground transition-colors"
+                className="mt-2 flex items-center rounded-md px-2 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
               >
                 View all collections
               </Link>

@@ -71,7 +71,7 @@ export default function NewCollectionDialog() {
     <>
       <Button variant="outline" size="sm" onClick={handleOpen}>
         <FolderPlus className="h-4 w-4" />
-        New Collection
+        <span className="sr-only sm:not-sr-only">New Collection</span>
       </Button>
 
       <Dialog open={open} onOpenChange={handleClose}>
