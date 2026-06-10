@@ -1,13 +1,35 @@
-# Current Feature
+# Current Feature: Refactor — High Impact Component Splits
 
 ## Status
-Not Started
+In Progress
 
 ## Goals
-<!-- What needs to be built -->
+- Extract `useItemDrawer` hook, `ItemDrawerReadView`, `ItemDrawerEditForm`, `ItemDrawerActionBar`, and move `DrawerSkeleton` out of `ItemDrawer.tsx` (currently 786 lines doing five jobs)
+- Extract `ItemFormFields` component from `NewItemDialog.tsx` to separate form field rendering from dialog state/submission logic
+- Extract `HeroSection`, `FeaturesSection`, `AiFeaturesSection`, `CtaSection`, and `MarketingFooter` components out of `app/page.tsx` (currently 346 inline lines)
 
 ## Notes
-<!-- Additional context, constraints, or implementation details -->
+Source: `devstash/context/refactoring-opportunities.md` — HIGH impact items 1, 3, 4 (item 2 is already complete ✅)
+
+### 1. `ItemDrawer.tsx` (src/components/items/ItemDrawer.tsx)
+Extract:
+- `useItemDrawer` hook (`src/hooks/useItemDrawer.ts`) — all state + 9 handler functions (lines 74–305)
+- `ItemDrawerReadView` (`src/components/items/ItemDrawerReadView.tsx`) — read-mode JSX (lines 591–742)
+- `ItemDrawerEditForm` (`src/components/items/ItemDrawerEditForm.tsx`) — edit-mode JSX (lines 449–590)
+- `ItemDrawerActionBar` (`src/components/items/ItemDrawerActionBar.tsx`) — button bar (lines 353–445)
+- Move `DrawerSkeleton` to its own file or a shared skeletons file
+
+### 3. `NewItemDialog.tsx` (src/components/items/NewItemDialog.tsx)
+Extract:
+- `ItemFormFields` (`src/components/items/ItemFormFields.tsx`) — accepts form state + AI callbacks, renders all conditional fields (title, description, language, content, URL, file upload, tags, collections)
+
+### 4. `app/page.tsx` (src/app/page.tsx, 346 lines)
+Extract:
+- `HeroSection` (`src/components/marketing/HeroSection.tsx`) — lines 21–45
+- `FeaturesSection` (`src/components/marketing/FeaturesSection.tsx`) — lines 52–121; move `features` array to a constants file
+- `AiFeaturesSection` (`src/components/marketing/AiFeaturesSection.tsx`) — lines 123–280; inline code mockup (lines 166–278) could itself become `AiCodeMockup`
+- `CtaSection` (`src/components/marketing/CtaSection.tsx`) — lines 285–297
+- `MarketingFooter` (`src/components/marketing/Footer.tsx`) — lines 299–344
 
 ## History
 <!-- Keep this updated. Earliest to Latest. Format: DD/MM/YYYY HH:MM -->
