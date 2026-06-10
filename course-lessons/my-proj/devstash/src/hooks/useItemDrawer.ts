@@ -7,6 +7,8 @@ import { ICON_MAP } from '@/lib/icon-map'
 import { CONTENT_TYPES, LANGUAGE_TYPES, CODE_EDITOR_TYPES, MARKDOWN_EDITOR_TYPES } from '@/lib/languages'
 import { updateItem, deleteItem, toggleItemFavorite, toggleItemPin } from '@/actions/items'
 import { getActionErrorMessage } from '@/lib/actions/action-error'
+import { useAsyncAction } from '@/hooks/useAsyncAction'
+import { useFavoriteToggle } from '@/hooks/useFavoriteToggle'
 import { useAiTagSuggestions } from '@/hooks/useAiTagSuggestions'
 import { useAiDescription } from '@/hooks/useAiDescription'
 import type { ItemDetail } from '@/lib/db/items'
@@ -40,7 +42,6 @@ export function useItemDrawer({ itemId, open, onOpenChange }: Options) {
   const router = useRouter()
   const [item, setItem] = useState<ItemDetailResponse | null>(null)
   const [loading, setLoading] = useState(false)
-  const [isFavorite, setIsFavorite] = useState(false)
   const [isPinned, setIsPinned] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [editForm, setEditForm] = useState<EditForm>({
@@ -52,10 +53,68 @@ export function useItemDrawer({ itemId, open, onOpenChange }: Options) {
     tags: '',
     collectionIds: [],
   })
-  const [saving, setSaving] = useState(false)
-  const [deleting, setDeleting] = useState(false)
-  const [favoriting, setFavoriting] = useState(false)
-  const [pinning, setPinning] = useState(false)
+
+  const { isFavorite, setIsFavorite, favoriting, toggle: handleToggleFavorite } =
+    useFavoriteToggle(false, toggleItemFavorite, itemId ?? '')
+
+  const { run: handleSave, inFlight: saving } = useAsyncAction(async () => {
+    if (!item || !itemId) return
+    const tags = editForm.tags
+      .split(',')
+      .map(t => t.trim())
+      .filter(Boolean)
+
+    const result = await updateItem(itemId, {
+      title: editForm.title,
+      description: editForm.description || null,
+      content: editForm.content || null,
+      url: editForm.url || null,
+      language: editForm.language === 'plaintext' ? null : editForm.language || null,
+      tags,
+      collectionIds: editForm.collectionIds,
+    })
+
+    if (!result.success) {
+      toast.error(getActionErrorMessage(result.error, 'Validation failed. Please check your inputs.'))
+      return
+    }
+
+    const updated = result.data
+    setItem({
+      ...updated,
+      createdAt: new Date(updated.createdAt).toISOString(),
+      updatedAt: new Date(updated.updatedAt).toISOString(),
+    })
+    setIsEditing(false)
+    toast.success('Item updated')
+    router.refresh()
+  })
+
+  const { run: handleDelete, inFlight: deleting } = useAsyncAction(async () => {
+    if (!itemId) return
+    const result = await deleteItem(itemId)
+    if (!result.success) {
+      toast.error(getActionErrorMessage(result.error, 'Failed to delete item.'))
+      return
+    }
+    toast.success('Item deleted')
+    onOpenChange(false)
+    router.refresh()
+  })
+
+  const { run: handleTogglePin, inFlight: pinning } = useAsyncAction(async () => {
+    if (!itemId) return
+    const optimistic = !isPinned
+    setIsPinned(optimistic)
+    const result = await toggleItemPin(itemId)
+    if (!result.success) {
+      setIsPinned(!optimistic)
+      toast.error(getActionErrorMessage(result.error, 'Failed to update pin.'))
+      return
+    }
+    toast.success(optimistic ? 'Item pinned' : 'Item unpinned')
+    router.refresh()
+  })
 
   const {
     suggestions: tagSuggestions,
@@ -105,7 +164,7 @@ export function useItemDrawer({ itemId, open, onOpenChange }: Options) {
       })
       .catch(() => toast.error('Failed to load item'))
       .finally(() => setLoading(false))
-  }, [itemId, open])
+  }, [itemId, open, setIsFavorite])
 
   function handleEditStart() {
     if (!item) return
@@ -142,98 +201,6 @@ export function useItemDrawer({ itemId, open, onOpenChange }: Options) {
   function handleCancelEdit() {
     clearSuggestions()
     setIsEditing(false)
-  }
-
-  async function handleSave() {
-    if (!item || !itemId) return
-    setSaving(true)
-    try {
-      const tags = editForm.tags
-        .split(',')
-        .map(t => t.trim())
-        .filter(Boolean)
-
-      const result = await updateItem(itemId, {
-        title: editForm.title,
-        description: editForm.description || null,
-        content: editForm.content || null,
-        url: editForm.url || null,
-        language: editForm.language === 'plaintext' ? null : editForm.language || null,
-        tags,
-        collectionIds: editForm.collectionIds,
-      })
-
-      if (!result.success) {
-        toast.error(getActionErrorMessage(result.error, 'Validation failed. Please check your inputs.'))
-        return
-      }
-
-      const updated = result.data
-      setItem({
-        ...updated,
-        createdAt: new Date(updated.createdAt).toISOString(),
-        updatedAt: new Date(updated.updatedAt).toISOString(),
-      })
-      setIsEditing(false)
-      toast.success('Item updated')
-      router.refresh()
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  async function handleDelete() {
-    if (!itemId) return
-    setDeleting(true)
-    try {
-      const result = await deleteItem(itemId)
-      if (!result.success) {
-        toast.error(getActionErrorMessage(result.error, 'Failed to delete item.'))
-        return
-      }
-      toast.success('Item deleted')
-      onOpenChange(false)
-      router.refresh()
-    } finally {
-      setDeleting(false)
-    }
-  }
-
-  async function handleToggleFavorite() {
-    if (!itemId) return
-    const optimistic = !isFavorite
-    setIsFavorite(optimistic)
-    setFavoriting(true)
-    try {
-      const result = await toggleItemFavorite(itemId)
-      if (!result.success) {
-        setIsFavorite(!optimistic)
-        toast.error(getActionErrorMessage(result.error, 'Failed to update favorite.'))
-        return
-      }
-      router.refresh()
-    } finally {
-      setFavoriting(false)
-    }
-  }
-
-  async function handleTogglePin() {
-    if (!itemId) return
-    const optimistic = !isPinned
-    setIsPinned(optimistic)
-    setPinning(true)
-    try {
-      const result = await toggleItemPin(itemId)
-      if (!result.success) {
-        setIsPinned(!optimistic)
-        toast.error(getActionErrorMessage(result.error, 'Failed to update pin.'))
-        return
-      }
-      toast.success(optimistic ? 'Item pinned' : 'Item unpinned')
-      router.refresh()
-    } finally {
-      setPinning(false)
-    }
   }
 
   function handleCopy() {

@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { generateAutoTags } from '@/actions/ai'
+import { useAsyncAction } from '@/hooks/useAsyncAction'
 
 interface Options {
   title: string
@@ -15,17 +16,14 @@ interface Options {
 
 export function useAiTagSuggestions({ title, content, itemType, tags, enabled, onTagsChange }: Options) {
   const [suggestions, setSuggestions] = useState<string[]>([])
-  const [suggesting, setSuggesting] = useState(false)
 
-  async function handleSuggest() {
+  const { run: handleSuggest, inFlight: suggesting } = useAsyncAction(async () => {
     if (!enabled) return
-    setSuggesting(true)
     const result = await generateAutoTags({
       title: title || 'Untitled',
       content: content.slice(0, 2000),
       itemType,
     })
-    setSuggesting(false)
     if (!result.success) {
       toast.error(result.error)
       return
@@ -33,7 +31,7 @@ export function useAiTagSuggestions({ title, content, itemType, tags, enabled, o
     const existing = tags.split(',').map(t => t.trim()).filter(Boolean)
     const fresh = result.data.tags.filter(t => !existing.includes(t))
     setSuggestions(fresh)
-  }
+  })
 
   function handleAccept(tag: string) {
     setSuggestions(prev => prev.filter(t => t !== tag))
