@@ -1,7 +1,8 @@
 'use server'
 
 import { z } from 'zod'
-import { auth } from '@/auth'
+import { requireAuth } from '@/lib/actions/require-auth'
+import { parseActionInput } from '@/lib/actions/parse-action-input'
 import { checkItemLimit } from '@/lib/usage-limits'
 import {
   createItem as dbCreateItem,
@@ -58,26 +59,24 @@ const createItemSchema = z.object({
 export type CreateItemInput = z.input<typeof createItemSchema>
 
 export async function createItem(data: CreateItemInput) {
-  const session = await auth()
-  if (!session?.user?.id) return { success: false as const, error: 'Not authenticated.' }
+  const authResult = await requireAuth()
+  if (!authResult.ok) return { success: false as const, error: authResult.error }
 
-  const parsed = createItemSchema.safeParse(data)
-  if (!parsed.success) {
-    return { success: false as const, error: z.flattenError(parsed.error).fieldErrors }
-  }
+  const parseResult = parseActionInput(createItemSchema, data)
+  if (!parseResult.ok) return { success: false as const, error: parseResult.fieldErrors }
 
-  const limitCheck = await checkItemLimit(session.user.id, session.user.isPro)
+  const limitCheck = await checkItemLimit(authResult.userId, authResult.isPro)
   if (!limitCheck.allowed) {
     return { success: false as const, error: limitCheck.error, limitReached: limitCheck.limitReached }
   }
 
-  const { title, description, content, url, language, tags, collectionIds, itemTypeId, itemTypeName, fileUrl, fileName, fileSize } = parsed.data
+  const { title, description, content, url, language, tags, collectionIds, itemTypeId, itemTypeName, fileUrl, fileName, fileSize } = parseResult.data
   const contentType: 'TEXT' | 'URL' | 'FILE' =
     itemTypeName === 'link' ? 'URL' :
     (itemTypeName === 'file' || itemTypeName === 'image') ? 'FILE' : 'TEXT'
 
   try {
-    const created = await dbCreateItem(session.user.id, {
+    const created = await dbCreateItem(authResult.userId, {
       title, description, content, url, language, tags, collectionIds, itemTypeId, contentType,
       fileUrl, fileName, fileSize,
     })
@@ -90,16 +89,14 @@ export async function createItem(data: CreateItemInput) {
 export type UpdateItemInput = z.input<typeof updateItemSchema>
 
 export async function updateItem(itemId: string, data: UpdateItemInput) {
-  const session = await auth()
-  if (!session?.user?.id) return { success: false as const, error: 'Not authenticated.' }
+  const authResult = await requireAuth()
+  if (!authResult.ok) return { success: false as const, error: authResult.error }
 
-  const parsed = updateItemSchema.safeParse(data)
-  if (!parsed.success) {
-    return { success: false as const, error: z.flattenError(parsed.error).fieldErrors }
-  }
+  const parseResult = parseActionInput(updateItemSchema, data)
+  if (!parseResult.ok) return { success: false as const, error: parseResult.fieldErrors }
 
   try {
-    const updated = await dbUpdateItem(itemId, session.user.id, parsed.data)
+    const updated = await dbUpdateItem(itemId, authResult.userId, parseResult.data)
     if (!updated) return { success: false as const, error: 'Item not found.' }
     return { success: true as const, data: updated }
   } catch {
@@ -108,11 +105,11 @@ export async function updateItem(itemId: string, data: UpdateItemInput) {
 }
 
 export async function deleteItem(itemId: string) {
-  const session = await auth()
-  if (!session?.user?.id) return { success: false as const, error: 'Not authenticated.' }
+  const authResult = await requireAuth()
+  if (!authResult.ok) return { success: false as const, error: authResult.error }
 
   try {
-    const deleted = await dbDeleteItem(itemId, session.user.id)
+    const deleted = await dbDeleteItem(itemId, authResult.userId)
     if (!deleted) return { success: false as const, error: 'Item not found.' }
 
     if (deleted.fileUrl) {
@@ -127,11 +124,11 @@ export async function deleteItem(itemId: string) {
 }
 
 export async function toggleItemFavorite(itemId: string) {
-  const session = await auth()
-  if (!session?.user?.id) return { success: false as const, error: 'Not authenticated.' }
+  const authResult = await requireAuth()
+  if (!authResult.ok) return { success: false as const, error: authResult.error }
 
   try {
-    const isFavorite = await dbToggleItemFavorite(itemId, session.user.id)
+    const isFavorite = await dbToggleItemFavorite(itemId, authResult.userId)
     if (isFavorite === null) return { success: false as const, error: 'Item not found.' }
     return { success: true as const, data: { isFavorite } }
   } catch {
@@ -140,11 +137,11 @@ export async function toggleItemFavorite(itemId: string) {
 }
 
 export async function toggleItemPin(itemId: string) {
-  const session = await auth()
-  if (!session?.user?.id) return { success: false as const, error: 'Not authenticated.' }
+  const authResult = await requireAuth()
+  if (!authResult.ok) return { success: false as const, error: authResult.error }
 
   try {
-    const isPinned = await dbToggleItemPin(itemId, session.user.id)
+    const isPinned = await dbToggleItemPin(itemId, authResult.userId)
     if (isPinned === null) return { success: false as const, error: 'Item not found.' }
     return { success: true as const, data: { isPinned } }
   } catch {

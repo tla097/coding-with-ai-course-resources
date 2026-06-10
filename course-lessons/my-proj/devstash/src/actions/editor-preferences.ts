@@ -2,6 +2,7 @@
 
 import { z } from 'zod'
 import { auth } from '@/auth'
+import { requireAuth } from '@/lib/actions/require-auth'
 import { prisma } from '@/lib/prisma'
 import { DEFAULT_EDITOR_PREFERENCES } from '@/types/editor-preferences'
 
@@ -14,14 +15,14 @@ const schema = z.object({
 })
 
 export async function updateEditorPreferences(input: unknown) {
-  const session = await auth()
-  if (!session?.user?.id) return { success: false, error: 'Not authenticated.' }
+  const authResult = await requireAuth()
+  if (!authResult.ok) return { success: false as const, error: authResult.error }
 
   const parsed = schema.safeParse(input)
-  if (!parsed.success) return { success: false, error: 'Invalid preferences.' }
+  if (!parsed.success) return { success: false as const, error: 'Invalid preferences.' }
 
   await prisma.user.update({
-    where: { id: session.user.id },
+    where: { id: authResult.userId },
     data: { editorPreferences: parsed.data },
   })
 

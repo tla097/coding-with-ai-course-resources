@@ -1,7 +1,8 @@
 'use server'
 
 import { z } from 'zod'
-import { auth } from '@/auth'
+import { requireAuth } from '@/lib/actions/require-auth'
+import { parseActionInput } from '@/lib/actions/parse-action-input'
 import { checkCollectionLimit } from '@/lib/usage-limits'
 import {
   createCollection as dbCreateCollection,
@@ -18,21 +19,19 @@ const createCollectionSchema = z.object({
 export type CreateCollectionInput = z.input<typeof createCollectionSchema>
 
 export async function createCollection(data: CreateCollectionInput) {
-  const session = await auth()
-  if (!session?.user?.id) return { success: false as const, error: 'Not authenticated.' }
+  const authResult = await requireAuth()
+  if (!authResult.ok) return { success: false as const, error: authResult.error }
 
-  const parsed = createCollectionSchema.safeParse(data)
-  if (!parsed.success) {
-    return { success: false as const, error: z.flattenError(parsed.error).fieldErrors }
-  }
+  const parseResult = parseActionInput(createCollectionSchema, data)
+  if (!parseResult.ok) return { success: false as const, error: parseResult.fieldErrors }
 
-  const limitCheck = await checkCollectionLimit(session.user.id, session.user.isPro)
+  const limitCheck = await checkCollectionLimit(authResult.userId, authResult.isPro)
   if (!limitCheck.allowed) {
     return { success: false as const, error: limitCheck.error, limitReached: limitCheck.limitReached }
   }
 
   try {
-    const created = await dbCreateCollection(session.user.id, parsed.data)
+    const created = await dbCreateCollection(authResult.userId, parseResult.data)
     return { success: true as const, data: created }
   } catch {
     return { success: false as const, error: 'Failed to create collection.' }
@@ -47,16 +46,14 @@ const updateCollectionSchema = z.object({
 export type UpdateCollectionInput = z.input<typeof updateCollectionSchema>
 
 export async function updateCollection(id: string, data: UpdateCollectionInput) {
-  const session = await auth()
-  if (!session?.user?.id) return { success: false as const, error: 'Not authenticated.' }
+  const authResult = await requireAuth()
+  if (!authResult.ok) return { success: false as const, error: authResult.error }
 
-  const parsed = updateCollectionSchema.safeParse(data)
-  if (!parsed.success) {
-    return { success: false as const, error: z.flattenError(parsed.error).fieldErrors }
-  }
+  const parseResult = parseActionInput(updateCollectionSchema, data)
+  if (!parseResult.ok) return { success: false as const, error: parseResult.fieldErrors }
 
   try {
-    const updated = await dbUpdateCollection(id, session.user.id, parsed.data)
+    const updated = await dbUpdateCollection(id, authResult.userId, parseResult.data)
     return { success: true as const, data: updated }
   } catch {
     return { success: false as const, error: 'Failed to update collection.' }
@@ -64,11 +61,11 @@ export async function updateCollection(id: string, data: UpdateCollectionInput) 
 }
 
 export async function deleteCollection(id: string) {
-  const session = await auth()
-  if (!session?.user?.id) return { success: false as const, error: 'Not authenticated.' }
+  const authResult = await requireAuth()
+  if (!authResult.ok) return { success: false as const, error: authResult.error }
 
   try {
-    await dbDeleteCollection(id, session.user.id)
+    await dbDeleteCollection(id, authResult.userId)
     return { success: true as const }
   } catch {
     return { success: false as const, error: 'Failed to delete collection.' }
@@ -76,11 +73,11 @@ export async function deleteCollection(id: string) {
 }
 
 export async function toggleCollectionFavorite(id: string) {
-  const session = await auth()
-  if (!session?.user?.id) return { success: false as const, error: 'Not authenticated.' }
+  const authResult = await requireAuth()
+  if (!authResult.ok) return { success: false as const, error: authResult.error }
 
   try {
-    const isFavorite = await dbToggleCollectionFavorite(id, session.user.id)
+    const isFavorite = await dbToggleCollectionFavorite(id, authResult.userId)
     if (isFavorite === null) return { success: false as const, error: 'Collection not found.' }
     return { success: true as const, data: { isFavorite } }
   } catch {

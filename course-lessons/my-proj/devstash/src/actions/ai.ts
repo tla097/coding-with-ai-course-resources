@@ -20,6 +20,20 @@ function sanitiseContent(raw: string): string {
   return raw.trim().slice(0, MAX_CONTENT_LENGTH).replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '')
 }
 
+async function callGemini(
+  prompt: string,
+  errorMsg: string,
+): Promise<{ ok: true; text: string } | { ok: false; error: string }> {
+  try {
+    const response = await gemini.models.generateContent({ model: AI_MODEL, contents: prompt })
+    const text = response.text?.trim() ?? ''
+    if (!text) return { ok: false, error: errorMsg }
+    return { ok: true, text }
+  } catch {
+    return { ok: false, error: errorMsg }
+  }
+}
+
 const generateAutoTagsSchema = z.object({
   title: z.string().trim().min(1).max(200),
   content: z.string().trim().max(50000).optional().default(''),
@@ -61,23 +75,16 @@ export async function generateDescription(data: GenerateDescriptionInput) {
   const { title, content, url, itemType } = parsed.data
   const sanitizedContent = sanitiseContent(content || url)
 
-  try {
-    const response = await gemini.models.generateContent({
-      model: AI_MODEL,
-      contents: `Write a concise 1-2 sentence description for this ${itemType} item.
+  const result = await callGemini(
+    `Write a concise 1-2 sentence description for this ${itemType} item.
 Title: ${title}
 ${sanitizedContent ? `Content: ${sanitizedContent}` : ''}
 
 Return ONLY the description text, no extra formatting or explanation.`,
-    })
-
-    const description = response.text?.trim() ?? ''
-    if (!description) return { success: false as const, error: 'Failed to generate description.' }
-
-    return { success: true as const, data: { description } }
-  } catch {
-    return { success: false as const, error: 'Failed to generate description.' }
-  }
+    'Failed to generate description.',
+  )
+  if (!result.ok) return { success: false as const, error: result.error }
+  return { success: true as const, data: { description: result.text } }
 }
 
 export async function explainCode(data: ExplainCodeInput) {
@@ -93,23 +100,16 @@ export async function explainCode(data: ExplainCodeInput) {
   const { content, itemType, language } = parsed.data
   const sanitizedContent = sanitiseContent(content)
 
-  try {
-    const response = await gemini.models.generateContent({
-      model: AI_MODEL,
-      contents: `Explain this ${language ? `${language} ` : ''}${itemType} in plain English. Be concise (~200-300 words). Cover what it does and any key concepts or patterns used.
+  const result = await callGemini(
+    `Explain this ${language ? `${language} ` : ''}${itemType} in plain English. Be concise (~200-300 words). Cover what it does and any key concepts or patterns used.
 
 ${sanitizedContent}
 
 Return a clear explanation in markdown format.`,
-    })
-
-    const explanation = response.text?.trim() ?? ''
-    if (!explanation) return { success: false as const, error: 'Failed to generate explanation.' }
-
-    return { success: true as const, data: { explanation } }
-  } catch {
-    return { success: false as const, error: 'Failed to generate explanation.' }
-  }
+    'Failed to generate explanation.',
+  )
+  if (!result.ok) return { success: false as const, error: result.error }
+  return { success: true as const, data: { explanation: result.text } }
 }
 
 export async function optimizePrompt(data: OptimizePromptInput) {
@@ -125,24 +125,17 @@ export async function optimizePrompt(data: OptimizePromptInput) {
   const { content } = parsed.data
   const sanitizedContent = sanitiseContent(content)
 
-  try {
-    const response = await gemini.models.generateContent({
-      model: AI_MODEL,
-      contents: `You are a prompt engineering expert. Analyze the following AI prompt and improve it for clarity, specificity, and effectiveness. If the prompt is already well-written, return it with only minor improvements.
+  const result = await callGemini(
+    `You are a prompt engineering expert. Analyze the following AI prompt and improve it for clarity, specificity, and effectiveness. If the prompt is already well-written, return it with only minor improvements.
 
 Original prompt:
 ${sanitizedContent}
 
 Return ONLY the improved prompt text, no explanation or commentary.`,
-    })
-
-    const optimized = response.text?.trim() ?? ''
-    if (!optimized) return { success: false as const, error: 'Failed to optimize prompt.' }
-
-    return { success: true as const, data: { optimized } }
-  } catch {
-    return { success: false as const, error: 'Failed to optimize prompt.' }
-  }
+    'Failed to optimize prompt.',
+  )
+  if (!result.ok) return { success: false as const, error: result.error }
+  return { success: true as const, data: { optimized: result.text } }
 }
 
 export async function generateAutoTags(data: GenerateAutoTagsInput) {
@@ -158,22 +151,20 @@ export async function generateAutoTags(data: GenerateAutoTagsInput) {
   const { title, content, itemType } = parsed.data
   const sanitizedContent = sanitiseContent(content)
 
-  try {
-    const response = await gemini.models.generateContent({
-      model: AI_MODEL,
-      contents: `Suggest 3-5 short, relevant tags for this ${itemType} item.
+  const result = await callGemini(
+    `Suggest 3-5 short, relevant tags for this ${itemType} item.
 Title: ${title}
 Content: ${sanitizedContent}
 
 Return ONLY a JSON array of lowercase tag strings, no explanation. Example: ["react","hooks","typescript"]`,
-    })
+    'Failed to generate tags.',
+  )
+  if (!result.ok) return { success: false as const, error: result.error }
 
-    const raw = response.text?.trim() ?? '[]'
-    const cleaned = raw.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '').trim()
+  try {
+    const cleaned = result.text.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '').trim()
     const tags: string[] = JSON.parse(cleaned)
-
     if (!Array.isArray(tags)) return { success: false as const, error: 'Failed to parse tags.' }
-
     return {
       success: true as const,
       data: { tags: tags.filter(t => typeof t === 'string' && t.trim().length > 0).slice(0, 5) },
