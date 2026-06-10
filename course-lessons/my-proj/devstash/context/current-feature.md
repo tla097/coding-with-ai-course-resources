@@ -1,22 +1,13 @@
-# Current Feature: Code Duplication & Config Fixes (LOW Severity)
+# Current Feature
 
 ## Status
-In Progress
+Not Started
 
 ## Goals
-- Extract `LANGUAGES` array from `NewItemDialog.tsx` and `ItemDrawer.tsx` into a shared constants module (e.g. `src/lib/languages.ts`)
-- Extract `CONTENT_TYPES`, `LANGUAGE_TYPES`, `CODE_EDITOR_TYPES`, `MARKDOWN_EDITOR_TYPES` constants from both files into the same shared module
-- Move `formatBytes` utility from `FileUpload.tsx` and `ItemDrawer.tsx` into `src/lib/utils.ts`
-- Extract shared `MD_COMPONENTS` base from `CodeEditor.tsx` and `MarkdownEditor.tsx` into `src/lib/markdown-components.tsx`; have `MarkdownEditor` extend it
-- Fix `stripe.ts` to throw at startup if `STRIPE_SECRET_KEY` is missing instead of using a placeholder string
-- Fix `resend.ts` to throw at startup if `RESEND_AI_KEY` is missing instead of passing `undefined` to the constructor
+<!-- What needs to be built -->
 
 ## Notes
-- Findings 12–17 from devstash/context/audit-report.md (LOW severity)
-- No schema changes required — all code-only fixes
-- Language constants in NewItemDialog and ItemDrawer must stay in sync after extraction
-- `MD_COMPONENTS` in MarkdownEditor is a superset of CodeEditor's version; extract the shared base only
-- Startup guards for stripe/resend should use `throw new Error(...)` pattern matching the Stripe recommendation in the report
+<!-- Additional context, constraints, or implementation details -->
 
 ## History
 <!-- Keep this updated. Earliest to Latest. Format: DD/MM/YYYY HH:MM -->
@@ -99,3 +90,4 @@ In Progress
 09/06/2026 16:50 - Completed Quick Copy Button on Item Cards: Copy/Check icons from lucide-react, copy button fades in on card hover (group-hover:opacity-100), copies content for TEXT items / url for URL items / title fallback for FILE items, 1-second Check flash on success, sonner toast ("Copied!"), stops propagation; content field added to ItemWithType and itemSelect; favorites.ts select updated to match; merged to main
 10/06/2026 10:00 - Completed Security Fixes HIGH Severity: JWT isPro DB fetch moved to sign-in only, Stripe webhook customer cross-check added, rate limiting fixed to use rightmost x-forwarded-for IP, deleteAccount requires server-side password/email confirmation, email HTML injection prevented via escapeHtml(); 277 tests passing; merged to main
 10/06/2026 10:25 - Completed Security & Performance Fixes MEDIUM Severity: emailVerified enforced in credentials authorize, TOCTOU collapsed in updateItem/toggleItemFavorite/toggleItemPin to single where:{id,userId} update, verify-email DB writes moved to GET route handler, getSearchData capped at 500 items with content field dropped, collections _count for itemCount, sidebar deep join replaced with lean collection query + separate itemCollection color query; 296 tests passing; merged to main
+10/06/2026 10:45 - Completed Code Duplication & Config Fixes LOW Severity: LANGUAGES array and item type constants extracted to src/lib/languages.ts, formatBytes moved to src/lib/utils.ts, BASE_MD_COMPONENTS shared base extracted to src/lib/markdown-components.tsx, stripe.ts and resend.ts throw at runtime when key is missing; 299 tests passing; merged to main
