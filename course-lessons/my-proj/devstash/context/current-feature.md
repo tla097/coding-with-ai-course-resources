@@ -1,28 +1,13 @@
-# Current Feature: UI Accessibility & Layout Fixes
+# Current Feature
 
 ## Status
-In Progress
+Not Started
 
 ## Goals
-- Add `focus-visible:opacity-100` to ItemCard copy/favorite buttons so they are visible when keyboard-focused (currently `opacity-0` in DOM, keyboard inaccessible)
-- Hide "New Collection" and "New Item" button text labels on mobile (icon + `sr-only` text only below `sm`), fix overflow at 375px
-- Default sidebar to closed on mobile (below `md` breakpoint) regardless of persisted `sidebar-open` value
-- Fix "Ctl K" typo in TopBar search bar — change to "Ctrl K"
-- Fix "View all collections" sidebar link contrast — remove or reduce the `opacity-60` so it passes WCAG AA at 12px
-- Increase PRO badge font size from 10px to at least 12px
-- Add `max-w-5xl mx-auto` wrapper to Favorites page content so it doesn't stretch full-width on wide screens
+<!-- Add goals here -->
 
 ## Notes
-All issues confirmed via Playwright live browser inspection (10/06/2026).
-
-Priority order matches Goals list above — keyboard/accessibility issues first, then mobile layout, then visual polish.
-
-Files affected:
-- `src/components/dashboard/ItemCard.tsx` — opacity-0 button fix
-- `src/components/layout/TopBar.tsx` — mobile button labels + "Ctl K" typo
-- `src/components/layout/DashboardShell.tsx` or `Sidebar.tsx` — mobile sidebar default
-- `src/components/layout/Sidebar.tsx` — PRO badge size + "View all collections" contrast
-- `src/app/(dashboard)/favorites/page.tsx` — max-width wrapper
+<!-- Add notes here -->
 
 ## History
 <!-- Keep this updated. Earliest to Latest. Format: DD/MM/YYYY HH:MM -->
@@ -110,3 +95,4 @@ Files affected:
 10/06/2026 11:20 - Completed Refactor - High Impact Component Splits: ItemDrawer.tsx (736 lines) split into useItemDrawer hook + DrawerSkeleton + ItemDrawerActionBar + ItemDrawerEditForm + ItemDrawerReadView; NewItemDialog form fields extracted into ItemFormFields component; app/page.tsx (346 lines) split into HeroSection + FeaturesSection + AiFeaturesSection (with AiCodeMockup) + CtaSection + MarketingFooter; 299 tests passing; merged to main
 10/06/2026 11:35 - Completed Refactor - Medium Impact Code Duplication: useCopyToClipboard hook + EditorToolbar + EditorTabButton + ProAiButton extracted from CodeEditor and MarkdownEditor (ItemCard also updated); PricingCard + BillingToggle shared components created, FREE_FEATURES/PRO_FEATURES moved to constants, UpgradePage and PricingSection updated; requireProUser + sanitiseContent internal helpers extracted in ai.ts; 299 tests passing; merged to main
 10/06/2026 14:25 - Completed Refactor - Low Impact Hook Extractions: useParticleAnimation (+ drawParticle helper) extracted from HeroVisual.tsx; useSortState<K> generic hook extracted from FavoritesView.tsx replacing duplicated sort handlers; usePersistentBoolean and useKeyboardShortcut extracted from DashboardShell.tsx; 299 tests passing; merged to main
+10/06/2026 15:05 - Completed UI Accessibility & Layout Fixes: focus-visible:opacity-100 + ring on ItemCard copy/favorite buttons; "Ctl K" typo fixed to "Ctrl K" in TopBar; New Item/New Collection button text hidden on mobile (sr-only sm:not-sr-only); sidebar defaults closed on mobile via usePersistentBoolean closeOnMobileBreakpoint option; "View all collections" contrast improved (opacity-60 removed); PRO badge font size increased from 10px to 12px; Favorites page widened to max-w-5xl; 299 tests passing; merged to main
