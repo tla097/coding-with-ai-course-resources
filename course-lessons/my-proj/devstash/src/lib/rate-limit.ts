@@ -46,6 +46,11 @@ export function getIpFromHeaders(headers: { get(name: string): string | null }):
   return '127.0.0.1'
 }
 
+export function formatRateLimitError(reset: number): string {
+  const minutes = Math.max(1, Math.ceil(Math.max(0, reset - Date.now()) / 60000))
+  return `Too many attempts. Please try again in ${minutes} minute${minutes !== 1 ? 's' : ''}.`
+}
+
 export function rateLimitResponse(reset: number): Response {
   const now = Date.now()
   const retryAfterMs = Math.max(0, reset - now)

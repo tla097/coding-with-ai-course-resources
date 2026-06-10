@@ -5,7 +5,8 @@ import bcrypt from 'bcryptjs'
 import { prisma } from '@/lib/prisma'
 import { sendPasswordResetEmail } from '@/lib/email'
 import { headers } from 'next/headers'
-import { checkRateLimit, getIpFromHeaders } from '@/lib/rate-limit'
+import { checkRateLimit, formatRateLimitError, getIpFromHeaders } from '@/lib/rate-limit'
+import { validateNewPassword } from '@/lib/actions/validate-password'
 
 const IDENTIFIER_PREFIX = 'password-reset:'
 
@@ -14,8 +15,7 @@ export async function requestPasswordReset(email: string) {
   const ip = getIpFromHeaders(headersList)
   const limit = await checkRateLimit(`forgot-password:${ip}`, 3, '1 h')
   if (!limit.success) {
-    const minutes = Math.max(1, Math.ceil(Math.max(0, limit.reset - Date.now()) / 60000))
-    return { success: false, error: `Too many attempts. Please try again in ${minutes} minute${minutes !== 1 ? 's' : ''}.` }
+    return { success: false, error: formatRateLimitError(limit.reset) }
   }
 
   const user = await prisma.user.findUnique({ where: { email } })
@@ -51,21 +51,15 @@ export async function resetPassword(token: string, password: string, confirmPass
   const ip = getIpFromHeaders(headersList)
   const limit = await checkRateLimit(`reset-password:${ip}`, 5, '15 m')
   if (!limit.success) {
-    const minutes = Math.max(1, Math.ceil(Math.max(0, limit.reset - Date.now()) / 60000))
-    return { success: false, error: `Too many attempts. Please try again in ${minutes} minute${minutes !== 1 ? 's' : ''}.` }
+    return { success: false, error: formatRateLimitError(limit.reset) }
   }
 
   if (!token) {
     return { success: false, error: 'Invalid or missing token.' }
   }
 
-  if (password !== confirmPassword) {
-    return { success: false, error: 'Passwords do not match.' }
-  }
-
-  if (password.length < 8) {
-    return { success: false, error: 'Password must be at least 8 characters.' }
-  }
+  const pwValidation = validateNewPassword(password, confirmPassword)
+  if (!pwValidation.ok) return { success: false, error: pwValidation.error }
 
   const record = await prisma.verificationToken.findUnique({ where: { token } })
 

@@ -1,19 +1,20 @@
 'use server'
 
 import bcrypt from 'bcryptjs'
-import { auth } from '@/auth'
+import { requireAuth } from '@/lib/actions/require-auth'
+import { validateNewPassword } from '@/lib/actions/validate-password'
 import { prisma } from '@/lib/prisma'
 
 export async function updateName(name: string) {
-  const session = await auth()
-  if (!session?.user?.id) return { success: false, error: 'Not authenticated.' }
+  const authResult = await requireAuth()
+  if (!authResult.ok) return { success: false as const, error: authResult.error }
 
   const trimmed = name.trim()
-  if (!trimmed) return { success: false, error: 'Name cannot be empty.' }
-  if (trimmed.length > 100) return { success: false, error: 'Name too long.' }
+  if (!trimmed) return { success: false as const, error: 'Name cannot be empty.' }
+  if (trimmed.length > 100) return { success: false as const, error: 'Name too long.' }
 
   await prisma.user.update({
-    where: { id: session.user.id },
+    where: { id: authResult.userId },
     data: { name: trimmed },
   })
 
@@ -25,33 +26,29 @@ export async function changePassword(
   newPassword: string,
   confirmPassword: string,
 ) {
-  const session = await auth()
-  if (!session?.user?.id) return { success: false, error: 'Not authenticated.' }
+  const authResult = await requireAuth()
+  if (!authResult.ok) return { success: false as const, error: authResult.error }
 
-  if (newPassword !== confirmPassword) {
-    return { success: false, error: 'Passwords do not match.' }
-  }
-  if (newPassword.length < 8) {
-    return { success: false, error: 'Password must be at least 8 characters.' }
-  }
+  const pwValidation = validateNewPassword(newPassword, confirmPassword)
+  if (!pwValidation.ok) return { success: false as const, error: pwValidation.error }
 
   const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
+    where: { id: authResult.userId },
     select: { password: true },
   })
 
   if (!user?.password) {
-    return { success: false, error: 'Password change is not available for this account.' }
+    return { success: false as const, error: 'Password change is not available for this account.' }
   }
 
   const valid = await bcrypt.compare(currentPassword, user.password)
   if (!valid) {
-    return { success: false, error: 'Current password is incorrect.' }
+    return { success: false as const, error: 'Current password is incorrect.' }
   }
 
   const hashed = await bcrypt.hash(newPassword, 12)
   await prisma.user.update({
-    where: { id: session.user.id },
+    where: { id: authResult.userId },
     data: { password: hashed },
   })
 
@@ -59,27 +56,27 @@ export async function changePassword(
 }
 
 export async function deleteAccount(confirmation: string) {
-  const session = await auth()
-  if (!session?.user?.id) return { success: false, error: 'Not authenticated.' }
+  const authResult = await requireAuth()
+  if (!authResult.ok) return { success: false as const, error: authResult.error }
 
   const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
+    where: { id: authResult.userId },
     select: { email: true, password: true },
   })
-  if (!user) return { success: false, error: 'User not found.' }
+  if (!user) return { success: false as const, error: 'User not found.' }
 
   if (user.password) {
     // Credentials user — verify current password
     const valid = await bcrypt.compare(confirmation, user.password)
-    if (!valid) return { success: false, error: 'Incorrect password.' }
+    if (!valid) return { success: false as const, error: 'Incorrect password.' }
   } else {
     // OAuth user — require typing their email address
     if (confirmation.trim().toLowerCase() !== user.email?.toLowerCase()) {
-      return { success: false, error: 'Email address does not match.' }
+      return { success: false as const, error: 'Email address does not match.' }
     }
   }
 
-  await prisma.user.delete({ where: { id: session.user.id } })
+  await prisma.user.delete({ where: { id: authResult.userId } })
 
   return { success: true }
 }
