@@ -48,7 +48,7 @@ export async function sendVerificationEmail(
   verifyUrl: string,
 ) {
   const { error } = await resend.emails.send({
-    from: 'DevStash <onboarding@resend.dev>',
+    from: 'DevStash <noreply@thomas-armstrong.co.uk>',
     to: email,
     subject: 'Verify your email address',
     html: `
