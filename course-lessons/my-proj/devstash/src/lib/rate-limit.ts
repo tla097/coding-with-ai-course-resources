@@ -10,7 +10,6 @@ export async function checkRateLimit(
 ): Promise<{ success: boolean; remaining: number; reset: number }> {
   try {
     if (
-      process.env.DISABLE_RATE_LIMITING === 'true' ||
       !process.env.UPSTASH_REDIS_REST_URL ||
       !process.env.UPSTASH_REDIS_REST_TOKEN
     ) {
