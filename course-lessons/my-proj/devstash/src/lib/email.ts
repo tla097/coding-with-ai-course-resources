@@ -11,7 +11,7 @@ function escapeHtml(str: string): string {
 
 export async function sendPasswordResetEmail(email: string, resetUrl: string) {
   const { error } = await resend.emails.send({
-    from: 'DevStash <onboarding@resend.dev>',
+    from: 'DevStash <noreply@thomas-armstrong.co.uk>',
     to: email,
     subject: 'Reset your password',
     html: `
