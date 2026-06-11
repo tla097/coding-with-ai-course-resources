@@ -1,22 +1,13 @@
-# Current Feature: Refactor Hooks - Fix Missing Finally & Extract useAsyncAction
+# Current Feature
 
 ## Status
-In Progress
+Not Started
 
 ## Goals
-- Fix missing `try/finally` in `useAiDescription` and `useAiTagSuggestions` so exceptions don't permanently freeze loading state
-- Extract a shared `useAsyncAction` hook to eliminate the repeated set-true/try/finally/set-false in-flight boolean pattern across all five hooks
-- Replace all five manual in-flight boolean patterns with `useAsyncAction`
-- Remove the duplicate favourite-toggle logic in `useItemDrawer` by delegating to the existing `useFavoriteToggle` hook
+<!-- Add goals here -->
 
 ## Notes
-Findings from the refactor-scanner on src/hooks/:
-
-**Bug (High):** `useAiDescription.ts:17-28` and `useAiTagSuggestions.ts:18-28` set a loading flag to `true` but have no `try/finally`, meaning any exception thrown by the AI call permanently freezes the button in loading state. All other hooks (`useFavoriteToggle`, `useItemDrawer`) correctly use `finally`.
-
-**Duplication (High):** The set-true → try → finally set-false in-flight boolean pattern appears in 5 hooks. Extract to `src/hooks/useAsyncAction.ts`.
-
-**Duplication (Medium):** `useItemDrawer.ts:43,57,202–218` re-implements the entire body of `useFavoriteToggle` inline (independent `isFavorite`, `favoriting` state + `handleToggleFavorite`). The dedicated hook already exists — `useItemDrawer` should delegate to it.
+<!-- Add notes here -->
 
 ## History
 <!-- Keep this updated. Earliest to Latest. Format: DD/MM/YYYY HH:MM -->
@@ -106,3 +97,4 @@ Findings from the refactor-scanner on src/hooks/:
 10/06/2026 14:25 - Completed Refactor - Low Impact Hook Extractions: useParticleAnimation (+ drawParticle helper) extracted from HeroVisual.tsx; useSortState<K> generic hook extracted from FavoritesView.tsx replacing duplicated sort handlers; usePersistentBoolean and useKeyboardShortcut extracted from DashboardShell.tsx; 299 tests passing; merged to main
 10/06/2026 15:05 - Completed UI Accessibility & Layout Fixes: focus-visible:opacity-100 + ring on ItemCard copy/favorite buttons; "Ctl K" typo fixed to "Ctrl K" in TopBar; New Item/New Collection button text hidden on mobile (sr-only sm:not-sr-only); sidebar defaults closed on mobile via usePersistentBoolean closeOnMobileBreakpoint option; "View all collections" contrast improved (opacity-60 removed); PRO badge font size increased from 10px to 12px; Favorites page widened to max-w-5xl; 299 tests passing; merged to main
 10/06/2026 17:05 - Completed Refactor - Extract Shared Auth & Component Utilities: GithubIcon SVG extracted to src/components/ui/GithubIcon.tsx (removed from sign-in and register pages); issueVerificationToken() extracted to src/lib/auth-tokens.ts (used in register and resend-verification routes); requireApiAuth() extracted to src/lib/api-auth.ts (used across 5 API routes); 12 unit tests added; 337 tests passing; merged to main
+10/06/2026 17:25 - Completed Refactor - Extract useAsyncAction, Fix Missing try/finally in AI Hooks: useAsyncAction hook created (src/hooks/useAsyncAction.ts) with try/finally and useRef for stale-closure safety; fixed missing try/finally bug in useAiDescription and useAiTagSuggestions; replaced all manual in-flight boolean patterns with useAsyncAction across 5 hooks; removed duplicate favourite-toggle logic from useItemDrawer (delegates to useFavoriteToggle); 337 tests passing; merged to main
