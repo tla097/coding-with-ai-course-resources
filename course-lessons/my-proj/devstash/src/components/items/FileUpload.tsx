@@ -62,7 +62,7 @@ export default function FileUpload({ itemType, uploaded, onUploadComplete, onCle
     setProgress(0)
 
     try {
-      const res = await fetch('/api/upload', {
+      const res = await fetch('/devstash/api/upload', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -4,7 +4,7 @@ import { toast } from 'sonner'
 
 export async function redirectToCheckout(priceId: string): Promise<void> {
   try {
-    const res = await fetch('/api/stripe/checkout', {
+    const res = await fetch('/devstash/api/stripe/checkout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ priceId }),
@@ -22,7 +22,7 @@ export async function redirectToCheckout(priceId: string): Promise<void> {
 
 export async function redirectToBillingPortal(): Promise<void> {
   try {
-    const res = await fetch('/api/stripe/portal', { method: 'POST' })
+    const res = await fetch('/devstash/api/stripe/portal', { method: 'POST' })
     const data = await res.json()
     if (data.url) {
       window.location.href = data.url

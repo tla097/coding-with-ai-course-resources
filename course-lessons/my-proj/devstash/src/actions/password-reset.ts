@@ -39,7 +39,7 @@ export async function requestPasswordReset(email: string) {
 
   const host = headersList.get('host') ?? 'localhost:3000'
   const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http'
-  const resetUrl = `${protocol}://${host}/reset-password?token=${token}`
+  const resetUrl = `${protocol}://${host}/devstash/reset-password?token=${token}`
 
   await sendPasswordResetEmail(email, resetUrl)
 

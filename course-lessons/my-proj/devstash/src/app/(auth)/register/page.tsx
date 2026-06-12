@@ -36,7 +36,7 @@ export default function RegisterPage() {
 
     setLoading(true)
 
-    const res = await fetch('/api/auth/register', {
+    const res = await fetch('/devstash/api/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, email, password, confirmPassword }),

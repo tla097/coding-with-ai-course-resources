@@ -6,18 +6,18 @@ export async function GET(request: NextRequest) {
   const token = request.nextUrl.searchParams.get('token')
 
   if (!token) {
-    redirect('/verify-email')
+    redirect('/devstash/verify-email')
   }
 
   const record = await prisma.verificationToken.findUnique({ where: { token } })
 
   if (!record) {
-    redirect('/verify-email?error=invalid')
+    redirect('/devstash/verify-email?error=invalid')
   }
 
   if (record.expires < new Date()) {
     await prisma.verificationToken.deleteMany({ where: { token } })
-    redirect('/verify-email?error=expired')
+    redirect('/devstash/verify-email?error=expired')
   }
 
   await prisma.user.update({
@@ -26,5 +26,5 @@ export async function GET(request: NextRequest) {
   })
   await prisma.verificationToken.deleteMany({ where: { token } })
 
-  redirect('/sign-in?verified=true')
+  redirect('/devstash/sign-in?verified=true')
 }

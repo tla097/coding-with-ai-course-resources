@@ -16,6 +16,6 @@ export async function issueVerificationToken(
   await prisma.verificationToken.create({
     data: { identifier: email, token, expires },
   })
-  const verifyUrl = `${baseUrl}/api/auth/verify-email?token=${token}`
+  const verifyUrl = `${baseUrl}/devstash/api/auth/verify-email?token=${token}`
   await sendVerificationEmail(email, name, verifyUrl)
 }

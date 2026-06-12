@@ -17,7 +17,7 @@ export default function ResendVerificationForm() {
     setLoading(true)
 
     try {
-      const res = await fetch('/api/auth/resend-verification', {
+      const res = await fetch('/devstash/api/auth/resend-verification', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),

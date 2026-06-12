@@ -152,7 +152,7 @@ export function useItemDrawer({ itemId, open, onOpenChange }: Options) {
     setItem(null)
     setIsEditing(false)
 
-    fetch(`/api/items/${itemId}`)
+    fetch(`/devstash/api/items/${itemId}`)
       .then(r => {
         if (!r.ok) throw new Error('Failed to fetch')
         return r.json()
