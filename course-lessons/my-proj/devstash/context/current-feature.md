@@ -1,44 +1,11 @@
-# Current Feature: Fix NextAuth basePath for /devstash
+# Current Feature
 
 ## Status
-In Progress
+Not Started
 
 ## Goals
-- Sign-in and auth error redirects resolve to the correct URL (`/devstash/api/auth/...`) instead of bare `/api/auth/...`
-- `src/auth.ts` has `basePath: '/devstash/api/auth'` in the NextAuth config
-- `src/auth.config.ts` has `basePath: '/devstash/api/auth'` in the edge config
-- Build passes with no errors
 
 ## Notes
-NextAuth v5 does NOT auto-read `basePath` from `next.config.ts`. It needs its own `basePath` option.
-Without this, NextAuth constructs all internal redirect URLs (error page, OAuth callbacks) without the `/devstash` prefix,
-causing `https://thomas-armstrong.co.uk/api/auth/error` (404) instead of `.../devstash/api/auth/error`.
-
-**Files to change:**
-
-`src/auth.ts` — add `basePath` to NextAuth config object:
-```ts
-export const { auth, handlers, signIn, signOut } = NextAuth({
-  basePath: '/devstash/api/auth',
-  adapter: PrismaAdapter(prisma),
-  // ...rest unchanged
-})
-```
-
-`src/auth.config.ts` — add `basePath` to edge config object:
-```ts
-export default {
-  basePath: '/devstash/api/auth',
-  providers: [...],
-  pages: {
-    signIn: '/devstash/sign-in',
-  },
-} satisfies NextAuthConfig
-```
-
-**Remaining external changes (outside codebase, not part of this fix):**
-- GitHub OAuth callback URL → `https://thomas-armstrong.co.uk/devstash/api/auth/callback/github`
-- Stripe webhook endpoint → `https://thomas-armstrong.co.uk/devstash/api/webhooks/stripe`
 
 ## History
 <!-- Keep this updated. Earliest to Latest. Format: DD/MM/YYYY HH:MM -->
@@ -130,3 +97,5 @@ export default {
 10/06/2026 17:05 - Completed Refactor - Extract Shared Auth & Component Utilities: GithubIcon SVG extracted to src/components/ui/GithubIcon.tsx (removed from sign-in and register pages); issueVerificationToken() extracted to src/lib/auth-tokens.ts (used in register and resend-verification routes); requireApiAuth() extracted to src/lib/api-auth.ts (used across 5 API routes); 12 unit tests added; 337 tests passing; merged to main
 10/06/2026 17:25 - Completed Refactor - Extract useAsyncAction, Fix Missing try/finally in AI Hooks: useAsyncAction hook created (src/hooks/useAsyncAction.ts) with try/finally and useRef for stale-closure safety; fixed missing try/finally bug in useAiDescription and useAiTagSuggestions; replaced all manual in-flight boolean patterns with useAsyncAction across 5 hooks; removed duplicate favourite-toggle logic from useItemDrawer (delegates to useFavoriteToggle); 337 tests passing; merged to main
 12/06/2026 10:55 - Completed Add /devstash Base Path: basePath '/devstash' added to next.config.ts; proxy.ts redirects updated to use req.nextUrl.basePath dynamically; auth.config.ts signIn page set to full /devstash/sign-in path; AUTH_URL set in .env and .env.production; external GitHub OAuth callback and Stripe webhook URL updates noted; merged to main
+12/06/2026 14:00 - Completed Fix NextAuth basePath for /devstash: auth.ts + auth.config.ts basePath set to '/devstash/api/auth'; route handler patches URL to re-add /devstash (Next.js strips it before handlers see it); SessionProvider basePath="/devstash/api/auth" added via src/components/providers.tsx; AUTH_URL changed to site root only; signOut/signIn callbackUrls hardcoded with /devstash prefix (next-auth/react does not auto-apply basePath); signIn callback added to auth.ts to set emailVerified for OAuth users; merged to main
+12/06/2026 12:15 - Completed Fix client-side fetch URLs and email links for /devstash basePath: 6 fetch() calls prefixed with /devstash (register page, resend-verification form, stripe-client checkout/portal, FileUpload, useItemDrawer); verification email URL in auth-tokens.ts prefixed; password reset email URL in password-reset.ts prefixed; verify-email route handler redirect() calls prefixed (redirect() in Route Handlers does not auto-apply basePath unlike Server Components)
