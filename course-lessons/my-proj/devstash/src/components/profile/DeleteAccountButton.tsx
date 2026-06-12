@@ -35,7 +35,7 @@ export default function DeleteAccountButton({ hasPassword }: Props) {
       return
     }
 
-    await signOut({ callbackUrl: '/sign-in' })
+    await signOut({ callbackUrl: '/devstash/sign-in' })
   }
 
   return (

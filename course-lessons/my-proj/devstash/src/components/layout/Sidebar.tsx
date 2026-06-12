@@ -182,7 +182,7 @@ export default function Sidebar({ isOpen, onClose, sidebarData, user }: SidebarP
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   variant="destructive"
-                  onClick={() => signOut({ callbackUrl: '/sign-in' })}
+                  onClick={() => signOut({ callbackUrl: '/devstash/sign-in' })}
                 >
                   Sign out
                 </DropdownMenuItem>

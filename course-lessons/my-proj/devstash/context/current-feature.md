@@ -1,13 +1,44 @@
-# Current Feature
+# Current Feature: Fix NextAuth basePath for /devstash
 
 ## Status
-Not Started
+In Progress
 
 ## Goals
-<!-- Add goals here -->
+- Sign-in and auth error redirects resolve to the correct URL (`/devstash/api/auth/...`) instead of bare `/api/auth/...`
+- `src/auth.ts` has `basePath: '/devstash/api/auth'` in the NextAuth config
+- `src/auth.config.ts` has `basePath: '/devstash/api/auth'` in the edge config
+- Build passes with no errors
 
 ## Notes
-<!-- Add notes here -->
+NextAuth v5 does NOT auto-read `basePath` from `next.config.ts`. It needs its own `basePath` option.
+Without this, NextAuth constructs all internal redirect URLs (error page, OAuth callbacks) without the `/devstash` prefix,
+causing `https://thomas-armstrong.co.uk/api/auth/error` (404) instead of `.../devstash/api/auth/error`.
+
+**Files to change:**
+
+`src/auth.ts` — add `basePath` to NextAuth config object:
+```ts
+export const { auth, handlers, signIn, signOut } = NextAuth({
+  basePath: '/devstash/api/auth',
+  adapter: PrismaAdapter(prisma),
+  // ...rest unchanged
+})
+```
+
+`src/auth.config.ts` — add `basePath` to edge config object:
+```ts
+export default {
+  basePath: '/devstash/api/auth',
+  providers: [...],
+  pages: {
+    signIn: '/devstash/sign-in',
+  },
+} satisfies NextAuthConfig
+```
+
+**Remaining external changes (outside codebase, not part of this fix):**
+- GitHub OAuth callback URL → `https://thomas-armstrong.co.uk/devstash/api/auth/callback/github`
+- Stripe webhook endpoint → `https://thomas-armstrong.co.uk/devstash/api/webhooks/stripe`
 
 ## History
 <!-- Keep this updated. Earliest to Latest. Format: DD/MM/YYYY HH:MM -->

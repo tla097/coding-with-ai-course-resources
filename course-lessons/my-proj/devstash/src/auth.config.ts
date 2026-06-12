@@ -3,6 +3,7 @@ import Credentials from "next-auth/providers/credentials"
 import type { NextAuthConfig } from "next-auth"
 
 export default {
+  basePath: '/devstash/api/auth',
   providers: [
     GitHub,
     Credentials({ authorize: () => null }),

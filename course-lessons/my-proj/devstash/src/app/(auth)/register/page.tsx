@@ -72,7 +72,7 @@ export default function RegisterPage() {
       <Button
         variant="outline"
         className="w-full"
-        onClick={() => signIn('github', { callbackUrl: '/dashboard' })}
+        onClick={() => signIn('github', { callbackUrl: '/devstash/dashboard' })}
       >
         <GithubIcon className="mr-2 h-4 w-4" />
         Sign up with GitHub
