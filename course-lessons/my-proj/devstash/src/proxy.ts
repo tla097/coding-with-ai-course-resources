@@ -22,7 +22,7 @@ export const proxy = auth(async function proxy(req) {
       const retryAfterSecs = Math.ceil(Math.max(0, limit.reset - Date.now()) / 1000)
       const message = formatRateLimitError(limit.reset)
       // next-auth/react's signIn() parses data.url — encode the error message there so result.error is set correctly
-      const errorUrl = `${req.nextUrl.origin}/sign-in?error=${encodeURIComponent(message)}`
+      const errorUrl = `${req.nextUrl.origin}${req.nextUrl.basePath}/sign-in?error=${encodeURIComponent(message)}`
       return NextResponse.json(
         { url: errorUrl },
         { status: 429, headers: { 'Retry-After': String(retryAfterSecs) } },
@@ -38,7 +38,7 @@ export const proxy = auth(async function proxy(req) {
     req.nextUrl.pathname === "/favorites"
 
   if (isProtected && !isLoggedIn) {
-    return NextResponse.redirect(new URL("/sign-in", req.nextUrl))
+    return NextResponse.redirect(new URL(`${req.nextUrl.basePath}/sign-in`, req.nextUrl.origin))
   }
 })
 

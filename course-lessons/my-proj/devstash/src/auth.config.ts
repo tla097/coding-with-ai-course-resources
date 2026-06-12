@@ -8,6 +8,6 @@ export default {
     Credentials({ authorize: () => null }),
   ],
   pages: {
-    signIn: '/sign-in',
+    signIn: '/devstash/sign-in',
   },
 } satisfies NextAuthConfig
