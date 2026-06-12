@@ -1,13 +1,25 @@
-# Current Feature
+# Current Feature: Add /devstash Base Path
 
 ## Status
-Not Started
+In Progress
 
 ## Goals
-<!-- Add goals here -->
+- App is fully accessible via `thomas-armstrong.co.uk/devstash` (proxied through Vercel)
+- All styling (CSS/JS assets) loads correctly under the `/devstash` prefix
+- Auth works: unauthenticated users are redirected to `/devstash/sign-in`, authenticated users land on `/devstash/dashboard`
+- GitHub OAuth callback resolves correctly under the new base path
+- Stripe webhook endpoint URL updated to include the base path
+- Rate limit error redirects land on the correct sign-in URL
 
 ## Notes
-<!-- Add notes here -->
+- The Vercel proxy at `thomas-armstrong.co.uk` rewrites `/devstash/:path*` → `https://devstash-mu-five.vercel.app/:path*`
+- Next.js `basePath: '/devstash'` in `next.config.ts` is the core change — handles all `<Link>`, `useRouter`, assets, and API routes automatically
+- Middleware (`proxy.ts`) receives `req.nextUrl.pathname` WITHOUT the basePath prefix (Next.js strips it) — so `isProtected` checks and `config.matcher` do NOT need changing
+- Only the two manual redirect constructions in `proxy.ts` need updating to include `req.nextUrl.basePath`
+- `auth.config.ts` `pages.signIn` must be the full path `/devstash/sign-in` since NextAuth v5 does not auto-prepend basePath to custom pages
+- `AUTH_URL` env var must be set to `https://thomas-armstrong.co.uk/devstash` for OAuth callbacks to resolve correctly
+- GitHub OAuth app callback URL must be updated externally (not a code change)
+- Stripe webhook endpoint URL must be updated externally in the Stripe dashboard
 
 ## History
 <!-- Keep this updated. Earliest to Latest. Format: DD/MM/YYYY HH:MM -->
